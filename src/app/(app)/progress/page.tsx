@@ -11,44 +11,27 @@ export default async function ProgressPage() {
 
   if (!user) redirect("/login");
 
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  const { data: streak } = await supabase
-    .from("user_streaks")
-    .select("*")
-    .eq("user_id", user.id)
-    .single();
-
-  const { data: skills } = await supabase
-    .from("skills")
-    .select("*")
-    .order("sort_order");
-
-  const { data: completions } = await supabase
-    .from("lesson_completions")
-    .select("lesson_id")
-    .eq("user_id", user.id);
+  const [
+    { data: profile },
+    { data: streak },
+    { data: skills },
+    { data: completions },
+    { data: lessons },
+    { data: achievements },
+    { data: allAchievementDefs },
+    { count: totalSessions },
+  ] = await Promise.all([
+    supabase.from("user_profiles").select("*").eq("id", user.id).single(),
+    supabase.from("user_streaks").select("*").eq("user_id", user.id).single(),
+    supabase.from("skills").select("*").order("sort_order"),
+    supabase.from("lesson_completions").select("lesson_id").eq("user_id", user.id),
+    supabase.from("lessons").select("id, skill_id, path_order, title").order("path_order"),
+    supabase.from("user_achievements").select("*, achievement_definitions(*)").eq("user_id", user.id),
+    supabase.from("achievement_definitions").select("*").order("sort_order"),
+    supabase.from("training_sessions").select("id", { count: "exact" }).eq("user_id", user.id),
+  ]);
 
   const completedIds = new Set(completions?.map((c) => c.lesson_id) ?? []);
-
-  const { data: lessons } = await supabase
-    .from("lessons")
-    .select("id, skill_id, path_order, title")
-    .order("path_order");
-
-  const { data: achievements } = await supabase
-    .from("user_achievements")
-    .select("*, achievement_definitions(*)")
-    .eq("user_id", user.id);
-
-  const { data: allAchievementDefs } = await supabase
-    .from("achievement_definitions")
-    .select("*")
-    .order("sort_order");
 
   const skillProgress = (skills ?? []).map((skill) => {
     const skillLessons = (lessons ?? []).filter(
@@ -64,19 +47,11 @@ export default async function ProgressPage() {
     achievements?.filter((a) => a.unlocked_at).map((a) => a.achievement_def_id) ?? []
   );
 
-  const totalSessions =
-    (
-      await supabase
-        .from("training_sessions")
-        .select("id", { count: "exact" })
-        .eq("user_id", user.id)
-    ).count ?? 0;
-
   const stats = [
     { label: "Total XP", value: profile?.total_xp ?? 0, Icon: BoltIcon, color: "text-xp" },
     { label: "Level", value: profile?.current_level ?? 1, Icon: StarIcon, color: "text-accent-500" },
     { label: "Best Streak", value: streak?.longest_streak ?? 0, Icon: FlameIcon, color: "text-streak" },
-    { label: "Sessions", value: totalSessions, Icon: CheckIcon, color: "text-primary-600" },
+    { label: "Sessions", value: totalSessions ?? 0, Icon: CheckIcon, color: "text-primary-600" },
   ];
 
   return (

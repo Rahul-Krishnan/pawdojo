@@ -16,52 +16,34 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const { data: profile } = await supabase
-    .from("user_profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  const { data: dog } = await supabase
-    .from("dogs")
-    .select("*")
-    .eq("user_id", user.id)
-    .single();
+  // Run all independent queries in parallel
+  const [
+    { data: profile },
+    { data: dog },
+    { data: streak },
+    { data: completions },
+    { data: lessons },
+    { data: recentSessions },
+  ] = await Promise.all([
+    supabase.from("user_profiles").select("*").eq("id", user.id).single(),
+    supabase.from("dogs").select("*").eq("user_id", user.id).single(),
+    supabase.from("user_streaks").select("*").eq("user_id", user.id).single(),
+    supabase.from("lesson_completions").select("lesson_id").eq("user_id", user.id),
+    supabase.from("lessons").select("*, skills(name, key)").order("path_order", { ascending: true }),
+    supabase.from("training_sessions").select("*, skills(name)").eq("user_id", user.id).order("logged_at", { ascending: false }).limit(5),
+  ]);
 
   if (!dog) {
     redirect("/onboarding");
   }
 
-  const { data: streak } = await supabase
-    .from("user_streaks")
-    .select("*")
-    .eq("user_id", user.id)
-    .single();
-
-  const { data: completions } = await supabase
-    .from("lesson_completions")
-    .select("lesson_id")
-    .eq("user_id", user.id);
-
   const completedLessonIds = new Set(
     completions?.map((completion) => completion.lesson_id) ?? []
   );
 
-  const { data: lessons } = await supabase
-    .from("lessons")
-    .select("*, skills(name, key)")
-    .order("path_order", { ascending: true });
-
   const nextLesson = lessons?.find(
     (lesson) => !completedLessonIds.has(lesson.id)
   );
-
-  const { data: recentSessions } = await supabase
-    .from("training_sessions")
-    .select("*, skills(name)")
-    .eq("user_id", user.id)
-    .order("logged_at", { ascending: false })
-    .limit(5);
 
   return (
     <div className="px-4 pt-6">
