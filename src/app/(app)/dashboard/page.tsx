@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { XpDisplay } from "@/components/dashboard/xp-display";
 import { TodayLessonCard } from "@/components/dashboard/today-lesson-card";
@@ -109,6 +110,47 @@ export default async function DashboardPage() {
             Keep logging sessions to maintain your streak.
           </p>
         </div>
+      )}
+
+      {completedLessonIds.size > 0 && (
+        <section className="mt-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-400">
+              Completed Lessons
+            </h2>
+            <Link
+              href="/progress"
+              className="text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors"
+            >
+              View All
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {lessons
+              ?.filter((lesson) => completedLessonIds.has(lesson.id))
+              .slice(0, 4)
+              .map((lesson) => (
+                <Link
+                  key={lesson.id}
+                  href={`/lesson/${lesson.id}`}
+                  className="flex items-center justify-between rounded-xl bg-white dark:bg-dark-elevated border border-gray-100 dark:border-dark-border px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-dark-border"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <CheckIcon size={16} className="text-primary-500 shrink-0" />
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                        {lesson.title}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {(lesson.skills as unknown as { name: string })?.name}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-medium text-accent-500">Practice</span>
+                </Link>
+              ))}
+          </div>
+        </section>
       )}
 
       {recentSessions && recentSessions.length > 0 && (

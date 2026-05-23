@@ -23,6 +23,23 @@ export async function logSession(formData: {
     return { error: "Not authenticated" };
   }
 
+  // Validate inputs
+  if (!formData.lessonId || !formData.skillId) {
+    return { error: "Missing lesson or skill" };
+  }
+  if (typeof formData.rating !== "number" || formData.rating < 1 || formData.rating > 5) {
+    return { error: "Rating must be between 1 and 5" };
+  }
+  if (formData.reps !== null && (typeof formData.reps !== "number" || formData.reps < 0)) {
+    return { error: "Invalid reps value" };
+  }
+  if (formData.durationMin !== null && (typeof formData.durationMin !== "number" || formData.durationMin < 0)) {
+    return { error: "Invalid duration value" };
+  }
+  if (formData.notes && formData.notes.length > 1000) {
+    return { error: "Notes too long (max 1000 characters)" };
+  }
+
   const { data: dog } = await supabase
     .from("dogs")
     .select("id")
@@ -51,7 +68,8 @@ export async function logSession(formData: {
     .single();
 
   if (sessionError) {
-    return { error: sessionError.message };
+    console.error("Failed to create training session:", sessionError.message);
+    return { error: "Failed to log session. Please try again." };
   }
 
   // Only create lesson completion on first time (not retake)

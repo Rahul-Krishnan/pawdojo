@@ -10,6 +10,7 @@ export function AuthForm() {
   const [password, setPassword] = useState("");
   const [isSignUp, setIsSignUp] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -32,7 +33,7 @@ export function AuthForm() {
     }
 
     if (isSignUp) {
-      setError("Check your email for a confirmation link.");
+      setInfo("Check your email for a confirmation link.");
       setLoading(false);
       return;
     }
@@ -73,6 +74,15 @@ export function AuthForm() {
           className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600"
         >
           {error}
+        </motion.p>
+      )}
+      {info && (
+        <motion.p
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-lg bg-primary-50 px-3 py-2 text-sm text-primary-700"
+        >
+          {info}
         </motion.p>
       )}
       <motion.button

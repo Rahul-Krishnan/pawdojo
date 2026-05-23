@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { PawIcon, UserIcon } from "@/components/icons";
 import { SettingsPanel } from "@/components/profile/settings-panel";
+import { SignOutButton } from "@/components/profile/sign-out-button";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -61,6 +62,10 @@ export default async function ProfilePage() {
       </div>
 
       <SettingsPanel />
+
+      <div className="mt-6">
+        <SignOutButton />
+      </div>
     </div>
   );
 }

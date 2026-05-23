@@ -1,6 +1,8 @@
 // Lightweight sound system using Web Audio API
 // Generates sounds procedurally, no audio files needed
 
+import { hapticTap, hapticSuccess, hapticHeavy, hapticError } from "@/lib/haptics";
+
 let audioContext: AudioContext | null = null;
 let muted = false;
 
@@ -47,12 +49,14 @@ function playTone(
 // Tap sound: short, subtle click
 export function playTap() {
   playTone(800, 0.05, "sine", 0.08);
+  hapticTap();
 }
 
 // Success: ascending two-note chime (like Duolingo's correct answer)
 export function playSuccess() {
   playTone(523, 0.15, "sine", 0.12); // C5
   playTone(659, 0.2, "sine", 0.12, 0.1); // E5
+  hapticSuccess();
 }
 
 // XP earned: bright coin-like ding
@@ -74,6 +78,7 @@ export function playBadgeUnlock() {
   playTone(659, 0.15, "sine", 0.12, 0.12); // E5
   playTone(784, 0.15, "sine", 0.12, 0.24); // G5
   playTone(1047, 0.3, "sine", 0.15, 0.36); // C6
+  hapticHeavy();
 }
 
 // Level up: dramatic ascending scale
@@ -82,10 +87,12 @@ export function playLevelUp() {
   notes.forEach((freq, i) => {
     playTone(freq, 0.12, "sine", 0.1, i * 0.08);
   });
+  hapticHeavy();
 }
 
 // Error/reset: descending two-note
 export function playError() {
   playTone(440, 0.15, "sine", 0.08); // A4
   playTone(330, 0.2, "sine", 0.08, 0.12); // E4
+  hapticError();
 }

@@ -2,6 +2,7 @@
 
 import { create } from "zustand";
 import { setMuted } from "@/lib/sounds";
+import { setHapticEnabled } from "@/lib/haptics";
 
 type Theme = "light" | "dark" | "system";
 
@@ -30,6 +31,7 @@ export const useUIStore = create<UIStore>((set) => ({
     set((state) => {
       const next = !state.soundEnabled;
       setMuted(!next);
+      setHapticEnabled(next);
       if (typeof window !== "undefined") {
         localStorage.setItem("goodboy-sound", JSON.stringify(next));
       }

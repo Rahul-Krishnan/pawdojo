@@ -135,4 +135,109 @@ test.describe("Goodboy app", () => {
     const activeLink = nav.locator('[aria-current="page"]');
     await expect(activeLink).toBeVisible();
   });
+
+  test("progress page shows clickable lesson links under skills", async ({
+    page,
+  }) => {
+    await page.goto("/login");
+    await page.fill('input[type="email"]', "rk2211@gmail.com");
+    await page.fill('input[type="password"]', "iamnotafool99");
+    await page.click('button[type="submit"]');
+    await page.waitForURL("**/dashboard");
+
+    await page.goto("/progress");
+
+    // Each skill section should contain lesson links
+    const lessonLinks = page.locator('a[href^="/lesson/"]');
+    const count = await lessonLinks.count();
+    expect(count).toBeGreaterThan(0);
+
+    // Click a lesson link and verify it navigates
+    await lessonLinks.first().click();
+    await page.waitForURL("**/lesson/**");
+    await expect(page.locator("h1")).toBeVisible();
+  });
+
+  test("dashboard shows completed lessons section with links", async ({
+    page,
+  }) => {
+    await page.goto("/login");
+    await page.fill('input[type="email"]', "rk2211@gmail.com");
+    await page.fill('input[type="password"]', "iamnotafool99");
+    await page.click('button[type="submit"]');
+    await page.waitForURL("**/dashboard");
+
+    // If there are completed lessons, verify the section exists
+    const completedSection = page.locator('text="Completed Lessons"');
+    if (await completedSection.isVisible()) {
+      // Should have a "View All" link to progress
+      await expect(page.locator('a[href="/progress"]:has-text("View All")')).toBeVisible();
+
+      // Completed lesson links should navigate to lesson pages
+      const completedLinks = page.locator('section:has-text("Completed Lessons") a[href^="/lesson/"]');
+      if ((await completedLinks.count()) > 0) {
+        await completedLinks.first().click();
+        await page.waitForURL("**/lesson/**");
+        // Should show "Practice Again" button for completed lesson
+        await expect(
+          page.locator('button:has-text("Practice Again")')
+        ).toBeVisible();
+      }
+    }
+  });
+
+  test("profile page shows sign out button", async ({ page }) => {
+    await page.goto("/login");
+    await page.fill('input[type="email"]', "rk2211@gmail.com");
+    await page.fill('input[type="password"]', "iamnotafool99");
+    await page.click('button[type="submit"]');
+    await page.waitForURL("**/dashboard");
+
+    await page.goto("/profile");
+
+    // Should show sign out button
+    await expect(page.locator('button:has-text("Sign Out")')).toBeVisible();
+  });
+
+  test("unauthenticated access to protected pages redirects to login", async ({
+    page,
+  }) => {
+    // Test all protected routes
+    const protectedRoutes = ["/dashboard", "/progress", "/practice", "/profile"];
+    for (const route of protectedRoutes) {
+      await page.goto(route);
+      await page.waitForURL("**/login");
+      expect(page.url()).toContain("/login");
+    }
+  });
+
+  test("invalid lesson ID shows 404", async ({ page }) => {
+    await page.goto("/login");
+    await page.fill('input[type="email"]', "rk2211@gmail.com");
+    await page.fill('input[type="password"]', "iamnotafool99");
+    await page.click('button[type="submit"]');
+    await page.waitForURL("**/dashboard");
+
+    const response = await page.goto("/lesson/00000000-0000-0000-0000-000000000000");
+    // Should show 404
+    expect(response?.status()).toBe(404);
+  });
+
+  test("lesson back button navigates to dashboard", async ({ page }) => {
+    await page.goto("/login");
+    await page.fill('input[type="email"]', "rk2211@gmail.com");
+    await page.fill('input[type="password"]', "iamnotafool99");
+    await page.click('button[type="submit"]');
+    await page.waitForURL("**/dashboard");
+
+    const lessonLink = page.locator('a[href^="/lesson/"]');
+    if ((await lessonLink.count()) > 0) {
+      await lessonLink.first().click();
+      await page.waitForURL("**/lesson/**");
+
+      // Click back button
+      await page.click('a[aria-label="Back to dashboard"]');
+      await page.waitForURL("**/dashboard");
+    }
+  });
 });

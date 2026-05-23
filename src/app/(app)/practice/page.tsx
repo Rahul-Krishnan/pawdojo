@@ -41,6 +41,22 @@ export default async function PracticePage() {
     }
   }
 
+  // Fetch lessons so we can link practice cards to actual lesson pages
+  const { data: allLessons } = await supabase
+    .from("lessons")
+    .select("id, skill_id, path_order, title")
+    .order("path_order");
+
+  const lessonsBySkill = new Map<string, { id: string; title: string }[]>();
+  for (const lesson of allLessons ?? []) {
+    const existing = lessonsBySkill.get(lesson.skill_id);
+    if (existing) {
+      existing.push({ id: lesson.id, title: lesson.title });
+    } else {
+      lessonsBySkill.set(lesson.skill_id, [{ id: lesson.id, title: lesson.title }]);
+    }
+  }
+
   const practiceSkills = Array.from(skillMap.entries())
     .filter(([, data]) => {
       const avg =
@@ -81,10 +97,15 @@ export default async function PracticePage() {
           {practiceSkills.map(([skillId, data]) => {
             const avg =
               data.ratings.reduce((s, r) => s + r, 0) / data.ratings.length;
+            const skillLessons = lessonsBySkill.get(skillId) ?? [];
+            const firstLessonHref = skillLessons[0]
+              ? `/lesson/${skillLessons[0].id}`
+              : "/progress";
             return (
-              <div
+              <Link
                 key={skillId}
-                className="flex items-center justify-between rounded-2xl border border-accent-200 bg-gradient-to-r from-accent-50 to-accent-100/50 p-4"
+                href={firstLessonHref}
+                className="flex items-center justify-between rounded-2xl border border-accent-200 bg-gradient-to-r from-accent-50 to-accent-100/50 p-4 transition-colors hover:from-accent-100 hover:to-accent-200/50"
               >
                 <div>
                   <p className="font-semibold text-gray-800">{data.name}</p>
@@ -107,7 +128,7 @@ export default async function PracticePage() {
                   </div>
                 </div>
                 <RepeatIcon size={22} className="text-accent-500" />
-              </div>
+              </Link>
             );
           })}
         </div>

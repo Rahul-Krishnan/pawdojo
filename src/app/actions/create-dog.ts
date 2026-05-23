@@ -18,6 +18,20 @@ export async function createDog(formData: {
     return { error: "Not authenticated" };
   }
 
+  // Validate inputs
+  if (!formData.name || formData.name.trim().length === 0) {
+    return { error: "Dog name is required" };
+  }
+  if (formData.name.length > 50) {
+    return { error: "Dog name too long (max 50 characters)" };
+  }
+  if (formData.breed && formData.breed.length > 100) {
+    return { error: "Breed name too long (max 100 characters)" };
+  }
+  if (formData.ageMonths !== null && (formData.ageMonths < 0 || formData.ageMonths > 360)) {
+    return { error: "Invalid age" };
+  }
+
   const admin = createAdminClient();
 
   const { error } = await admin.from("dogs").insert({
@@ -28,7 +42,8 @@ export async function createDog(formData: {
   });
 
   if (error) {
-    return { error: error.message };
+    console.error("Failed to create dog:", error.message);
+    return { error: "Something went wrong. Please try again." };
   }
 
   redirect("/dashboard");

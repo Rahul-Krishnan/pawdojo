@@ -38,6 +38,7 @@ export function SessionLogForm({
   const [durationMin, setDurationMin] = useState<number | null>(5);
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{
     xpAwarded: number;
     achievementsUnlocked: string[];
@@ -57,6 +58,12 @@ export function SessionLogForm({
       notes,
       isRetake,
     });
+
+    if (response.error) {
+      setError(response.error);
+      setLoading(false);
+      return;
+    }
 
     if (response.success) {
       playSuccess();
@@ -221,6 +228,12 @@ export function SessionLogForm({
           placeholder="Any observations about your dog's progress..."
         />
       </div>
+
+      {error && (
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+          {error}
+        </p>
+      )}
 
       <div className="flex gap-3 pt-1">
         <button

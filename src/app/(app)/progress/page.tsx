@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { BoltIcon, FlameIcon, StarIcon, TrophyIcon, LockIcon, CheckIcon } from "@/components/icons";
 
 export default async function ProgressPage() {
@@ -36,7 +37,7 @@ export default async function ProgressPage() {
 
   const { data: lessons } = await supabase
     .from("lessons")
-    .select("id, skill_id, path_order")
+    .select("id, skill_id, path_order, title")
     .order("path_order");
 
   const { data: achievements } = await supabase
@@ -56,7 +57,7 @@ export default async function ProgressPage() {
     const done = skillLessons.filter((lesson) =>
       completedIds.has(lesson.id)
     ).length;
-    return { ...skill, total: skillLessons.length, done };
+    return { ...skill, total: skillLessons.length, done, lessons: skillLessons };
   });
 
   const unlockedIds = new Set(
@@ -138,6 +139,26 @@ export default async function ProgressPage() {
                     style={{ width: `${percent}%` }}
                   />
                 </div>
+                <div className="mt-3 space-y-1">
+                  {skill.lessons.map((lesson: { id: string; title: string; skill_id: string; path_order: number }) => {
+                    const isDone = completedIds.has(lesson.id);
+                    return (
+                      <Link
+                        key={lesson.id}
+                        href={`/lesson/${lesson.id}`}
+                        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-gray-100"
+                      >
+                        <CheckIcon
+                          size={14}
+                          className={isDone ? "text-primary-500 shrink-0" : "text-gray-200 shrink-0"}
+                        />
+                        <span className={isDone ? "text-gray-600" : "text-gray-800 font-medium"}>
+                          {lesson.title}
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </div>
               </div>
             );
           })}
@@ -148,26 +169,33 @@ export default async function ProgressPage() {
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400">
           Badges
         </h2>
-        <div className="grid grid-cols-3 gap-2.5">
+        <div className="grid grid-cols-2 gap-2.5">
           {(allAchievementDefs ?? []).map((def) => {
             const isUnlocked = unlockedIds.has(def.id);
             return (
               <div
                 key={def.id}
-                className={`rounded-2xl p-3 text-center border transition-all ${
+                className={`rounded-2xl p-3.5 border transition-all ${
                   isUnlocked
-                    ? "border-accent-200 bg-gradient-to-br from-accent-50 to-accent-100"
-                    : "border-gray-100 bg-gray-50 opacity-40"
+                    ? "border-accent-200 dark:border-accent-700/40 bg-gradient-to-br from-accent-50 to-accent-100 dark:from-accent-900/30 dark:to-accent-800/20"
+                    : "border-gray-100 dark:border-dark-border bg-gray-50 dark:bg-dark-elevated opacity-50"
                 }`}
               >
-                {isUnlocked ? (
-                  <TrophyIcon size={28} className="mx-auto text-accent-500" />
-                ) : (
-                  <LockIcon size={28} className="mx-auto text-gray-300" />
-                )}
-                <p className="mt-1.5 text-[10px] font-semibold text-gray-600 leading-tight">
-                  {def.name}
-                </p>
+                <div className="flex items-start gap-2.5">
+                  {isUnlocked ? (
+                    <TrophyIcon size={22} className="mt-0.5 shrink-0 text-accent-500" />
+                  ) : (
+                    <LockIcon size={22} className="mt-0.5 shrink-0 text-gray-300 dark:text-gray-500" />
+                  )}
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 leading-tight">
+                      {def.name}
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-gray-500 dark:text-gray-400 leading-snug">
+                      {def.description}
+                    </p>
+                  </div>
+                </div>
               </div>
             );
           })}

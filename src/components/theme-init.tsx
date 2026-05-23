@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useUIStore } from "@/stores/ui-store";
 import { setMuted } from "@/lib/sounds";
+import { setHapticEnabled } from "@/lib/haptics";
 
 export function ThemeInit() {
   const { theme, soundEnabled } = useUIStore();
@@ -22,6 +23,7 @@ export function ThemeInit() {
 
   useEffect(() => {
     setMuted(!soundEnabled);
+    setHapticEnabled(soundEnabled);
   }, [soundEnabled]);
 
   return null;
