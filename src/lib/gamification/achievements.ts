@@ -3,6 +3,8 @@
 export type AchievementDef = {
   id: string;
   key: string;
+  name: string;
+  description: string;
   conditionType: string;
   conditionValue: Record<string, unknown>;
   xpReward: number;

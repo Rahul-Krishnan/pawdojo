@@ -35,27 +35,27 @@ export function LessonContent({
     >
       <Link
         href="/dashboard"
-        className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-primary-700 transition-colors"
+        className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary-700 dark:hover:text-primary-400 transition-colors"
         aria-label="Back to dashboard"
       >
         <ArrowLeftIcon size={16} />
         Back
       </Link>
 
-      <p className="text-xs font-semibold uppercase tracking-widest text-primary-600">
+      <p className="text-xs font-semibold uppercase tracking-widest text-primary-600 dark:text-primary-400">
         {skillName}
       </p>
-      <h1 className="mt-1 text-2xl font-bold text-gray-900">{title}</h1>
+      <h1 className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-50">{title}</h1>
 
       {isCompleted && (
-        <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700">
+        <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary-100 dark:bg-primary-900/40 px-3 py-1 text-xs font-semibold text-primary-700 dark:text-primary-300">
           <CheckIcon size={14} />
           Completed
         </span>
       )}
 
       <article
-        className="prose prose-sm mt-6 max-w-none prose-headings:font-heading prose-headings:text-gray-900 prose-h2:text-lg prose-h3:text-base prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700"
+        className="prose prose-sm mt-6 max-w-none prose-headings:font-heading prose-headings:text-gray-900 dark:prose-headings:text-gray-100 prose-h2:text-lg prose-h3:text-base prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-strong:text-gray-900 dark:prose-strong:text-gray-100 prose-li:text-gray-700 dark:prose-li:text-gray-300"
         role="article"
         aria-label={`Lesson: ${title}`}
       >

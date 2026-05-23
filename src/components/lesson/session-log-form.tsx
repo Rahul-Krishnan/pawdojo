@@ -3,9 +3,10 @@
 import { useState } from "react";
 import { logSession } from "@/app/actions/log-session";
 import { useRouter } from "next/navigation";
-import { motion } from "motion/react";
-import { StarIcon, CheckIcon, TrophyIcon } from "@/components/icons";
+import { motion, AnimatePresence } from "motion/react";
+import { StarIcon, CheckIcon } from "@/components/icons";
 import { playTap, playSuccess, playXpEarned, playBadgeUnlock } from "@/lib/sounds";
+import { AchievementPopup } from "./achievement-popup";
 
 const ratingLabels = ["Rough", "Tricky", "OK", "Good", "Nailed it"];
 const ratingColors = [
@@ -43,6 +44,7 @@ export function SessionLogForm({
     xpAwarded: number;
     achievementsUnlocked: string[];
   } | null>(null);
+  const [showAchievements, setShowAchievements] = useState(false);
   const router = useRouter();
 
   async function handleSubmit(event: React.FormEvent) {
@@ -70,76 +72,82 @@ export function SessionLogForm({
       if (response.xpAwarded && response.xpAwarded > 0) {
         setTimeout(() => playXpEarned(), 400);
       }
-      if (response.achievementsUnlocked && response.achievementsUnlocked.length > 0) {
+      const unlocked = response.achievementsUnlocked ?? [];
+      if (unlocked.length > 0) {
         setTimeout(() => playBadgeUnlock(), 800);
       }
       setResult({
         xpAwarded: response.xpAwarded ?? 0,
-        achievementsUnlocked: response.achievementsUnlocked ?? [],
+        achievementsUnlocked: unlocked,
       });
-      setTimeout(() => {
-        router.push("/dashboard");
-        router.refresh();
-      }, 2500);
+      if (unlocked.length > 0) {
+        setTimeout(() => setShowAchievements(true), 1200);
+      } else {
+        setTimeout(() => {
+          router.push("/dashboard");
+          router.refresh();
+        }, 2500);
+      }
     }
 
     setLoading(false);
   }
 
+  function handleAchievementsDone() {
+    setShowAchievements(false);
+    router.push("/dashboard");
+    router.refresh();
+  }
+
   if (result) {
     return (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-        className="rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 p-8 text-center border border-primary-200/50"
-      >
+      <>
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 15 }}
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          className="rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 p-8 text-center border border-primary-200/50 dark:border-primary-700/30"
         >
-          <CheckIcon size={48} className="mx-auto text-primary-600" />
-        </motion.div>
-        <motion.p
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="mt-3 text-xl font-bold font-heading text-gray-900"
-        >
-          Session logged!
-        </motion.p>
-        {result.xpAwarded > 0 && (
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 15 }}
+          >
+            <CheckIcon size={48} className="mx-auto text-primary-600 dark:text-primary-400" />
+          </motion.div>
           <motion.p
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
-            className="mt-2 text-lg font-semibold text-xp"
+            transition={{ delay: 0.3 }}
+            className="mt-3 text-xl font-bold font-heading text-gray-900 dark:text-gray-50"
           >
-            +{result.xpAwarded} XP
+            Session logged!
           </motion.p>
+          {result.xpAwarded > 0 && (
+            <motion.p
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45 }}
+              className="mt-2 text-lg font-semibold text-xp"
+            >
+              +{result.xpAwarded} XP
+            </motion.p>
+          )}
+        </motion.div>
+        {showAchievements && (
+          <AchievementPopup
+            achievements={result.achievementsUnlocked}
+            onDone={handleAchievementsDone}
+          />
         )}
-        {result.achievementsUnlocked.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-            className="mt-3 flex items-center justify-center gap-2 text-badge"
-          >
-            <TrophyIcon size={18} />
-            <span className="text-sm font-semibold">
-              {result.achievementsUnlocked.join(", ")}
-            </span>
-          </motion.div>
-        )}
-      </motion.div>
+      </>
     );
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
+        <label className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">
           How did it go?
         </label>
         <div className="flex gap-2">
@@ -152,7 +160,7 @@ export function SessionLogForm({
               className={`flex flex-1 flex-col items-center gap-1 rounded-xl py-3 transition-all ${
                 rating === value
                   ? `${ratingColors[value - 1]} text-white shadow-md`
-                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                  : "bg-gray-100 dark:bg-dark-muted text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-dark-border"
               }`}
             >
               <StarIcon size={16} className={rating >= value ? "opacity-100" : "opacity-30"} />
@@ -160,13 +168,13 @@ export function SessionLogForm({
             </motion.button>
           ))}
         </div>
-        <p className="mt-1.5 text-center text-xs font-medium text-gray-500">
+        <p className="mt-1.5 text-center text-xs font-medium text-gray-500 dark:text-gray-400">
           {ratingLabels[rating - 1]}
         </p>
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
+        <label className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">
           Reps completed
         </label>
         <div className="flex gap-2">
@@ -179,7 +187,7 @@ export function SessionLogForm({
               className={`flex-1 rounded-xl py-3 text-sm font-semibold transition-all ${
                 reps === value
                   ? "bg-primary-600 text-white shadow-md"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  : "bg-gray-100 dark:bg-dark-muted text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-border"
               }`}
             >
               {value}+
@@ -189,7 +197,7 @@ export function SessionLogForm({
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-semibold text-gray-700">
+        <label className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300">
           Session length
         </label>
         <div className="flex gap-2">
@@ -202,7 +210,7 @@ export function SessionLogForm({
               className={`flex flex-1 flex-col items-center rounded-xl py-3 transition-all ${
                 durationMin === option.value
                   ? "bg-primary-600 text-white shadow-md"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  : "bg-gray-100 dark:bg-dark-muted text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-border"
               }`}
             >
               <span className="text-sm font-semibold">{option.label}</span>
@@ -215,7 +223,7 @@ export function SessionLogForm({
       <div>
         <label
           htmlFor="notes"
-          className="mb-2 block text-sm font-semibold text-gray-700"
+          className="mb-2 block text-sm font-semibold text-gray-700 dark:text-gray-300"
         >
           Notes (optional)
         </label>
@@ -224,13 +232,13 @@ export function SessionLogForm({
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
           rows={2}
-          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500/20 transition-all"
+          className="w-full rounded-xl border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-muted px-4 py-3 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:bg-white dark:focus:bg-dark-elevated focus:outline-none focus:ring-1 focus:ring-primary-500/20 transition-all"
           placeholder="Any observations about your dog's progress..."
         />
       </div>
 
       {error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">
+        <p className="rounded-lg bg-red-50 dark:bg-red-950/30 px-3 py-2 text-sm text-red-600 dark:text-red-400">
           {error}
         </p>
       )}
@@ -239,7 +247,7 @@ export function SessionLogForm({
         <button
           type="button"
           onClick={onClose}
-          className="flex-1 rounded-xl border border-gray-200 py-3.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+          className="flex-1 rounded-xl border border-gray-200 dark:border-dark-border py-3.5 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-muted transition-colors"
         >
           Cancel
         </button>

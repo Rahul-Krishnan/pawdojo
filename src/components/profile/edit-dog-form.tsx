@@ -9,19 +9,17 @@ export function EditDogForm({
   dogId,
   initialName,
   initialBreed,
-  initialAgeMonths,
+  initialBirthday,
 }: {
   dogId: string;
   initialName: string;
   initialBreed: string | null;
-  initialAgeMonths: number | null;
+  initialBirthday: string | null;
 }) {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(initialName);
   const [breed, setBreed] = useState(initialBreed ?? "");
-  const [ageMonths, setAgeMonths] = useState(
-    initialAgeMonths?.toString() ?? ""
-  );
+  const [birthday, setBirthday] = useState(initialBirthday ?? "");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
@@ -30,7 +28,7 @@ export function EditDogForm({
     return (
       <button
         onClick={() => setEditing(true)}
-        className="text-xs font-medium text-primary-600 hover:text-primary-700 transition-colors"
+        className="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 transition-colors"
       >
         Edit
       </button>
@@ -45,7 +43,7 @@ export function EditDogForm({
       dogId,
       name,
       breed: breed || null,
-      ageMonths: ageMonths ? parseInt(ageMonths, 10) : null,
+      birthday: birthday || null,
     });
 
     if (result.error) {
@@ -61,12 +59,12 @@ export function EditDogForm({
   }
 
   const inputClass =
-    "w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500/20 transition-all";
+    "w-full rounded-lg border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-muted px-3 py-2 text-sm text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:bg-white dark:focus:bg-dark-elevated focus:outline-none focus:ring-1 focus:ring-primary-500/20 transition-all";
 
   return (
     <div className="mt-3 space-y-2.5">
       <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1">Name</label>
+        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Name</label>
         <input
           type="text"
           value={name}
@@ -76,7 +74,7 @@ export function EditDogForm({
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1">Breed</label>
+        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Breed</label>
         <input
           type="text"
           value={breed}
@@ -86,19 +84,17 @@ export function EditDogForm({
         />
       </div>
       <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1">Age (months)</label>
+        <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Birthday</label>
         <input
-          type="number"
-          min="0"
-          max="360"
-          value={ageMonths}
-          onChange={(event) => setAgeMonths(event.target.value)}
+          type="date"
+          max={new Date().toISOString().split("T")[0]}
+          value={birthday}
+          onChange={(event) => setBirthday(event.target.value)}
           className={inputClass}
-          placeholder="Optional"
         />
       </div>
       {error && (
-        <p className="text-xs text-red-600 bg-red-50 rounded px-2 py-1">{error}</p>
+        <p className="text-xs text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 rounded px-2 py-1">{error}</p>
       )}
       <div className="flex gap-2">
         <button
@@ -106,10 +102,10 @@ export function EditDogForm({
             setEditing(false);
             setName(initialName);
             setBreed(initialBreed ?? "");
-            setAgeMonths(initialAgeMonths?.toString() ?? "");
+            setBirthday(initialBirthday ?? "");
             setError(null);
           }}
-          className="flex-1 rounded-lg border border-gray-200 py-2 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+          className="flex-1 rounded-lg border border-gray-200 dark:border-dark-border py-2 text-xs font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-muted transition-colors"
         >
           Cancel
         </button>

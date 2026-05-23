@@ -9,14 +9,10 @@ export function TodayLessonCard({
   lessonId,
   title,
   skillName,
-  pathOrder,
-  totalLessons,
 }: {
   lessonId: string;
   title: string;
   skillName: string;
-  pathOrder: number;
-  totalLessons: number;
 }) {
   return (
     <motion.div
@@ -31,14 +27,14 @@ export function TodayLessonCard({
       >
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-primary-100">
-              {skillName} · {pathOrder} of {totalLessons}
+            <p className="text-xs font-semibold uppercase tracking-widest text-primary-200">
+              {skillName}
             </p>
             <h2 className="mt-2 text-lg font-bold">{title}</h2>
           </div>
           <PawIcon size={32} className="text-primary-300/40" />
         </div>
-        <p className="mt-4 text-sm font-semibold text-primary-100">
+        <p className="mt-4 text-sm font-semibold text-primary-200">
           Start Training →
         </p>
       </Link>

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { BoltIcon, FlameIcon, StarIcon, TrophyIcon, LockIcon, CheckIcon } from "@/components/icons";
+import { BoltIcon, FlameIcon, StarIcon, TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon } from "@/components/icons";
 
 export default async function ProgressPage() {
   const supabase = await createClient();
@@ -56,21 +56,21 @@ export default async function ProgressPage() {
 
   return (
     <div className="px-4 pt-6">
-      <h1 className="mb-5 text-2xl font-bold font-heading text-gray-900">Progress</h1>
+      <h1 className="mb-5 text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">Progress</h1>
 
       <div className="mb-6 grid grid-cols-2 gap-3">
         {stats.map((stat) => (
           <div
             key={stat.label}
-            className="rounded-2xl bg-surface-elevated border border-gray-100 p-4"
+            className="rounded-2xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-4"
           >
             <div className="flex items-center gap-2">
               <stat.Icon size={18} className={stat.color} />
-              <span className="text-2xl font-bold font-heading text-gray-900">
+              <span className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
                 {stat.value}
               </span>
             </div>
-            <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+            <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
               {stat.label}
             </p>
           </div>
@@ -91,20 +91,20 @@ export default async function ProgressPage() {
                 key={skill.id}
                 className={`rounded-2xl border p-4 ${
                   isComplete
-                    ? "border-primary-200 bg-primary-50/50"
-                    : "border-gray-100 bg-surface-elevated"
+                    ? "border-primary-200 dark:border-primary-800/40 bg-primary-50/50 dark:bg-primary-950/20"
+                    : "border-gray-100 dark:border-dark-border bg-surface-elevated dark:bg-dark-elevated"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {isComplete && <CheckIcon size={16} className="text-primary-600" />}
-                    <p className="font-semibold text-gray-800">{skill.name}</p>
+                    <p className="font-semibold text-gray-800 dark:text-gray-100">{skill.name}</p>
                   </div>
                   <p className="text-xs font-medium text-gray-400">
                     {skill.done}/{skill.total}
                   </p>
                 </div>
-                <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-gray-200/60">
+                <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-gray-200/60 dark:bg-gray-700/40">
                   <div
                     className={`h-full rounded-full transition-all duration-700 ease-out ${
                       isComplete
@@ -121,15 +121,16 @@ export default async function ProgressPage() {
                       <Link
                         key={lesson.id}
                         href={`/lesson/${lesson.id}`}
-                        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-gray-100"
+                        className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors hover:bg-gray-100 dark:hover:bg-dark-muted active:bg-gray-200 dark:active:bg-dark-border group"
                       >
                         <CheckIcon
                           size={14}
-                          className={isDone ? "text-primary-500 shrink-0" : "text-gray-200 shrink-0"}
+                          className={isDone ? "text-primary-500 shrink-0" : "text-gray-300 dark:text-gray-600 shrink-0"}
                         />
-                        <span className={isDone ? "text-gray-600" : "text-gray-800 font-medium"}>
+                        <span className={`flex-1 ${isDone ? "text-gray-600 dark:text-gray-400" : "text-gray-800 dark:text-gray-200 font-medium"}`}>
                           {lesson.title}
                         </span>
+                        <ChevronRightIcon size={14} className="text-gray-300 dark:text-gray-600 shrink-0 group-hover:text-gray-500 dark:group-hover:text-gray-400 transition-colors" />
                       </Link>
                     );
                   })}

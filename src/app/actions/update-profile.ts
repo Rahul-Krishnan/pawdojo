@@ -8,7 +8,7 @@ export async function updateDog(formData: {
   dogId: string;
   name: string;
   breed: string | null;
-  ageMonths: number | null;
+  birthday: string | null;
 }) {
   const supabase = await createClient();
   const {
@@ -28,9 +28,6 @@ export async function updateDog(formData: {
   if (formData.breed && formData.breed.length > 100) {
     return { error: "Breed name too long" };
   }
-  if (formData.ageMonths !== null && (formData.ageMonths < 0 || formData.ageMonths > 360)) {
-    return { error: "Invalid age" };
-  }
 
   const admin = createAdminClient();
 
@@ -39,7 +36,7 @@ export async function updateDog(formData: {
     .update({
       name: formData.name.trim(),
       breed: formData.breed?.trim() || null,
-      age_months: formData.ageMonths,
+      birthday: formData.birthday || null,
     })
     .eq("id", formData.dogId)
     .eq("user_id", user.id);

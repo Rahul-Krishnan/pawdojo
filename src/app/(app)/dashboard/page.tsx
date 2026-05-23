@@ -4,7 +4,7 @@ import Link from "next/link";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { XpDisplay } from "@/components/dashboard/xp-display";
 import { TodayLessonCard } from "@/components/dashboard/today-lesson-card";
-import { StarIcon, CheckIcon, PawIcon } from "@/components/icons";
+import { StarIcon, CheckIcon, PawIcon, TrophyIcon, LockIcon } from "@/components/icons";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -16,7 +16,6 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // Run all independent queries in parallel
   const [
     { data: profile },
     { data: dog },
@@ -24,6 +23,8 @@ export default async function DashboardPage() {
     { data: completions },
     { data: lessons },
     { data: recentSessions },
+    { data: achievements },
+    { data: allAchievementDefs },
   ] = await Promise.all([
     supabase.from("user_profiles").select("*").eq("id", user.id).single(),
     supabase.from("dogs").select("*").eq("user_id", user.id).single(),
@@ -31,6 +32,8 @@ export default async function DashboardPage() {
     supabase.from("lesson_completions").select("lesson_id").eq("user_id", user.id),
     supabase.from("lessons").select("*, skills(name, key)").order("path_order", { ascending: true }),
     supabase.from("training_sessions").select("*, skills(name)").eq("user_id", user.id).order("logged_at", { ascending: false }).limit(5),
+    supabase.from("user_achievements").select("achievement_def_id, unlocked_at").eq("user_id", user.id),
+    supabase.from("achievement_definitions").select("*").order("sort_order"),
   ]);
 
   if (!dog) {
@@ -43,6 +46,10 @@ export default async function DashboardPage() {
 
   const nextLesson = lessons?.find(
     (lesson) => !completedLessonIds.has(lesson.id)
+  );
+
+  const unlockedIds = new Set(
+    achievements?.filter((a) => a.unlocked_at).map((a) => a.achievement_def_id) ?? []
   );
 
   return (
@@ -73,13 +80,16 @@ export default async function DashboardPage() {
       </div>
 
       {nextLesson && (
-        <TodayLessonCard
-          lessonId={nextLesson.id}
-          title={nextLesson.title}
-          skillName={(nextLesson.skills as { name: string })?.name ?? ""}
-          pathOrder={nextLesson.path_order}
-          totalLessons={lessons?.length ?? 0}
-        />
+        <section>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            Today&apos;s Lesson
+          </h2>
+          <TodayLessonCard
+            lessonId={nextLesson.id}
+            title={nextLesson.title}
+            skillName={(nextLesson.skills as { name: string })?.name ?? ""}
+          />
+        </section>
       )}
 
       {!nextLesson && (
@@ -94,15 +104,47 @@ export default async function DashboardPage() {
         </div>
       )}
 
+      {(allAchievementDefs ?? []).length > 0 && (
+        <section className="mt-6">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            Badges
+          </h2>
+          <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
+            {(allAchievementDefs ?? []).map((def) => {
+              const isUnlocked = unlockedIds.has(def.id);
+              return (
+                <div
+                  key={def.id}
+                  className={`shrink-0 w-28 rounded-2xl p-3 border text-center transition-all ${
+                    isUnlocked
+                      ? "border-accent-200 dark:border-accent-700/40 bg-gradient-to-br from-accent-50 to-accent-100 dark:from-accent-900/30 dark:to-accent-800/20"
+                      : "border-gray-100 dark:border-dark-border bg-gray-50 dark:bg-dark-elevated opacity-40"
+                  }`}
+                >
+                  {isUnlocked ? (
+                    <TrophyIcon size={24} className="mx-auto text-accent-500" />
+                  ) : (
+                    <LockIcon size={24} className="mx-auto text-gray-300 dark:text-gray-600" />
+                  )}
+                  <p className="mt-1.5 text-[10px] font-semibold text-gray-700 dark:text-gray-300 leading-tight line-clamp-2">
+                    {def.name}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {completedLessonIds.size > 0 && (
         <section className="mt-6">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-400">
+            <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
               Completed Lessons
             </h2>
             <Link
               href="/progress"
-              className="text-xs font-semibold text-primary-600 hover:text-primary-700 transition-colors"
+              className="text-xs font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 transition-colors"
             >
               View All
             </Link>
@@ -115,15 +157,15 @@ export default async function DashboardPage() {
                 <Link
                   key={lesson.id}
                   href={`/lesson/${lesson.id}`}
-                  className="flex items-center justify-between rounded-xl bg-white dark:bg-dark-elevated border border-gray-100 dark:border-dark-border px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-dark-border"
+                  className="flex items-center justify-between rounded-xl bg-white dark:bg-dark-elevated border border-gray-100 dark:border-dark-border px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-dark-muted"
                 >
                   <div className="flex items-center gap-2.5">
                     <CheckIcon size={16} className="text-primary-500 shrink-0" />
                     <div>
-                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                         {lesson.title}
                       </p>
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
                         {(lesson.skills as unknown as { name: string })?.name}
                       </p>
                     </div>
@@ -137,7 +179,7 @@ export default async function DashboardPage() {
 
       {recentSessions && recentSessions.length > 0 && (
         <section className="mt-6">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
             Recent Activity
           </h2>
           <div className="space-y-2">
@@ -147,7 +189,7 @@ export default async function DashboardPage() {
                 className="flex items-center justify-between rounded-xl bg-white dark:bg-dark-elevated border border-gray-100 dark:border-dark-border px-4 py-3"
               >
                 <div>
-                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                     {(session.skills as unknown as { name: string })?.name ?? "Training"}
                   </p>
                   <div className="mt-0.5 flex gap-0.5">
@@ -160,7 +202,7 @@ export default async function DashboardPage() {
                     ))}
                   </div>
                 </div>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-gray-500 dark:text-gray-400">
                   {new Date(session.logged_at).toLocaleDateString("en-US", {
                     month: "short",
                     day: "numeric",

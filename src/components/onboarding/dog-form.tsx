@@ -7,7 +7,7 @@ import { motion } from "motion/react";
 export function DogForm() {
   const [name, setName] = useState("");
   const [breed, setBreed] = useState("");
-  const [ageMonths, setAgeMonths] = useState("");
+  const [birthday, setBirthday] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -19,7 +19,7 @@ export function DogForm() {
     const result = await createDog({
       name,
       breed: breed || null,
-      ageMonths: ageMonths ? parseInt(ageMonths, 10) : null,
+      birthday: birthday || null,
     });
 
     if (result?.error) {
@@ -29,7 +29,7 @@ export function DogForm() {
   }
 
   const inputClass =
-    "w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3.5 text-base focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500/20 transition-all";
+    "w-full rounded-xl border border-gray-200 dark:border-dark-border bg-gray-50 dark:bg-dark-muted px-4 py-3.5 text-base text-gray-900 dark:text-gray-100 focus:border-primary-500 focus:bg-white dark:focus:bg-dark-elevated focus:outline-none focus:ring-1 focus:ring-primary-500/20 transition-all";
 
   return (
     <motion.form
@@ -40,7 +40,7 @@ export function DogForm() {
       className="flex flex-col gap-4"
     >
       <div>
-        <label htmlFor="name" className="mb-1.5 block text-sm font-semibold text-gray-700">
+        <label htmlFor="name" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
           Dog&apos;s name *
         </label>
         <input
@@ -50,11 +50,11 @@ export function DogForm() {
           onChange={(event) => setName(event.target.value)}
           required
           className={inputClass}
-          placeholder="e.g. Biscuit"
+          placeholder="eg Biscuit"
         />
       </div>
       <div>
-        <label htmlFor="breed" className="mb-1.5 block text-sm font-semibold text-gray-700">
+        <label htmlFor="breed" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
           Breed (optional)
         </label>
         <input
@@ -63,29 +63,27 @@ export function DogForm() {
           value={breed}
           onChange={(event) => setBreed(event.target.value)}
           className={inputClass}
-          placeholder="e.g. Golden Retriever"
+          placeholder="eg Golden Retriever"
         />
       </div>
       <div>
-        <label htmlFor="age" className="mb-1.5 block text-sm font-semibold text-gray-700">
-          Age in months (optional)
+        <label htmlFor="birthday" className="mb-1.5 block text-sm font-semibold text-gray-700 dark:text-gray-300">
+          Birthday (optional)
         </label>
         <input
-          id="age"
-          type="number"
-          min="0"
-          max="240"
-          value={ageMonths}
-          onChange={(event) => setAgeMonths(event.target.value)}
+          id="birthday"
+          type="date"
+          max={new Date().toISOString().split("T")[0]}
+          value={birthday}
+          onChange={(event) => setBirthday(event.target.value)}
           className={inputClass}
-          placeholder="e.g. 4"
         />
       </div>
       {error && (
         <motion.p
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600"
+          className="rounded-lg bg-red-50 dark:bg-red-950/30 px-3 py-2 text-sm text-red-600 dark:text-red-400"
         >
           {error}
         </motion.p>

@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 export async function createDog(formData: {
   name: string;
   breed: string | null;
-  ageMonths: number | null;
+  birthday: string | null;
 }) {
   const supabase = await createClient();
   const {
@@ -18,7 +18,6 @@ export async function createDog(formData: {
     return { error: "Not authenticated" };
   }
 
-  // Validate inputs
   if (!formData.name || formData.name.trim().length === 0) {
     return { error: "Dog name is required" };
   }
@@ -26,19 +25,16 @@ export async function createDog(formData: {
     return { error: "Dog name too long (max 50 characters)" };
   }
   if (formData.breed && formData.breed.length > 100) {
-    return { error: "Breed name too long (max 100 characters)" };
-  }
-  if (formData.ageMonths !== null && (formData.ageMonths < 0 || formData.ageMonths > 360)) {
-    return { error: "Invalid age" };
+    return { error: "Breed name too long" };
   }
 
   const admin = createAdminClient();
 
   const { error } = await admin.from("dogs").insert({
     user_id: user.id,
-    name: formData.name,
-    breed: formData.breed,
-    age_months: formData.ageMonths,
+    name: formData.name.trim(),
+    breed: formData.breed?.trim() || null,
+    birthday: formData.birthday || null,
   });
 
   if (error) {

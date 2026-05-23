@@ -103,6 +103,8 @@ export async function handleAchievementCheck(
   const achievementDefs: AchievementDef[] = defs.map((d) => ({
     id: d.id,
     key: d.key,
+    name: d.name,
+    description: d.description ?? "",
     conditionType: d.condition_type,
     conditionValue: d.condition_value as Record<string, unknown>,
     xpReward: d.xp_reward,
@@ -156,7 +158,7 @@ export async function handleAchievementCheck(
           .eq("id", data.userId);
       }
     }
-    if (def) unlockedNames.push(def.key);
+    if (def) unlockedNames.push(def.name);
   }
 
   return { achievementsUnlocked: unlockedNames };

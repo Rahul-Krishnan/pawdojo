@@ -104,11 +104,11 @@ export function StarIcon({ size = defaultSize, className = "" }: IconProps) {
 export function PawIcon({ size = defaultSize, className = "" }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
-      <ellipse cx="8" cy="7" rx="2.5" ry="3" />
-      <ellipse cx="16" cy="7" rx="2.5" ry="3" />
-      <ellipse cx="5" cy="13" rx="2" ry="2.5" />
-      <ellipse cx="19" cy="13" rx="2" ry="2.5" />
-      <path d="M12 22c-3 0-5.5-2.5-6-5 -.3-1.5.5-3 2-3.5 1-.3 2.5-.5 4-.5s3 .2 4 .5c1.5.5 2.3 2 2 3.5-.5 2.5-3 5-6 5z" />
+      <ellipse cx="8.5" cy="5.5" rx="2.2" ry="2.8" />
+      <ellipse cx="15.5" cy="5.5" rx="2.2" ry="2.8" />
+      <ellipse cx="5" cy="12" rx="1.8" ry="2.3" />
+      <ellipse cx="19" cy="12" rx="1.8" ry="2.3" />
+      <path d="M12 22c-2.8 0-5.2-2.3-5.7-4.7-.3-1.4.4-2.8 1.8-3.3.9-.3 2.4-.5 3.9-.5s3 .2 3.9.5c1.4.5 2.1 1.9 1.8 3.3-.5 2.4-2.9 4.7-5.7 4.7z" />
     </svg>
   );
 }
@@ -118,6 +118,14 @@ export function SnowflakeIcon({ size = defaultSize, className = "" }: IconProps)
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
       <path d="M12 2v20M2 12h20M4.93 4.93l14.14 14.14M19.07 4.93L4.93 19.07" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
       <circle cx="12" cy="12" r="3" fill="currentColor" opacity="0.3"/>
+    </svg>
+  );
+}
+
+export function ChevronRightIcon({ size = defaultSize, className = "" }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   );
 }
