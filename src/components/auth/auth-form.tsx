@@ -13,13 +13,13 @@ export function AuthForm() {
   const [info, setInfo] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
     setLoading(true);
 
+    const supabase = createClient();
     const action = isSignUp
       ? supabase.auth.signUp({ email, password })
       : supabase.auth.signInWithPassword({ email, password });

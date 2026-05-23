@@ -7,10 +7,10 @@ import { useState } from "react";
 export function SignOutButton() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   async function handleSignOut() {
     setLoading(true);
+    const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/login");
     router.refresh();
