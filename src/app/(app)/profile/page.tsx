@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { PawIcon, UserIcon } from "@/components/icons";
+import { SettingsPanel } from "@/components/profile/settings-panel";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -23,7 +24,7 @@ export default async function ProfilePage() {
     .single();
 
   return (
-    <div className="px-4 pt-6">
+    <div className="px-4 pt-6 pb-4">
       <h1 className="mb-5 text-2xl font-bold font-heading text-gray-900">Profile</h1>
 
       {dog && (
@@ -44,7 +45,7 @@ export default async function ProfilePage() {
         </div>
       )}
 
-      <div className="rounded-2xl border border-gray-100 bg-surface-elevated p-5">
+      <div className="mb-6 rounded-2xl border border-gray-100 bg-surface-elevated p-5">
         <div className="flex items-center gap-4">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
             <UserIcon size={24} className="text-gray-500" />
@@ -58,6 +59,8 @@ export default async function ProfilePage() {
           </div>
         </div>
       </div>
+
+      <SettingsPanel />
     </div>
   );
 }

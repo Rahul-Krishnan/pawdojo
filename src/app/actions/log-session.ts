@@ -12,6 +12,7 @@ export async function logSession(formData: {
   reps: number | null;
   durationMin: number | null;
   notes: string;
+  isRetake?: boolean;
 }) {
   const supabase = await createClient();
   const {
@@ -22,7 +23,6 @@ export async function logSession(formData: {
     return { error: "Not authenticated" };
   }
 
-  // Get user's dog
   const { data: dog } = await supabase
     .from("dogs")
     .select("id")
@@ -35,7 +35,7 @@ export async function logSession(formData: {
 
   const admin = createAdminClient();
 
-  // Create training session
+  // Create training session (always, even on retake)
   const { data: session, error: sessionError } = await admin
     .from("training_sessions")
     .insert({
@@ -54,19 +54,15 @@ export async function logSession(formData: {
     return { error: sessionError.message };
   }
 
-  // Create lesson completion
-  const { error: completionError } = await admin
-    .from("lesson_completions")
-    .insert({
+  // Only create lesson completion on first time (not retake)
+  if (!formData.isRetake) {
+    await admin.from("lesson_completions").insert({
       user_id: user.id,
       dog_id: dog.id,
       lesson_id: formData.lessonId,
       score: formData.rating / 5,
-      xp_awarded: 0, // Will be set by XP handler
+      xp_awarded: 0,
     });
-
-  if (completionError) {
-    return { error: completionError.message };
   }
 
   // Update dog skill progress
@@ -81,7 +77,9 @@ export async function logSession(formData: {
     await admin
       .from("dog_skill_progress")
       .update({
-        lessons_done: existingProgress.lessons_done + 1,
+        lessons_done: formData.isRetake
+          ? existingProgress.lessons_done
+          : existingProgress.lessons_done + 1,
         last_practiced_at: new Date().toISOString(),
       })
       .eq("id", existingProgress.id);
@@ -90,7 +88,7 @@ export async function logSession(formData: {
       user_id: user.id,
       dog_id: dog.id,
       skill_id: formData.skillId,
-      lessons_done: 1,
+      lessons_done: formData.isRetake ? 0 : 1,
       last_practiced_at: new Date().toISOString(),
     });
   }
@@ -100,13 +98,14 @@ export async function logSession(formData: {
     userId: user.id,
     dogId: dog.id,
     sessionId: session.id,
-    lessonId: formData.lessonId,
+    lessonId: formData.isRetake ? null : formData.lessonId,
     skillId: formData.skillId,
     rating: formData.rating,
   });
 
   revalidatePath("/dashboard");
   revalidatePath("/progress");
+  revalidatePath("/practice");
 
   return {
     success: true,

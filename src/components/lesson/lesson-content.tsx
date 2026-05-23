@@ -6,6 +6,7 @@ import remarkGfm from "remark-gfm";
 import { SessionLogForm } from "./session-log-form";
 import Link from "next/link";
 import { motion, AnimatePresence } from "motion/react";
+import { ArrowLeftIcon, CheckIcon } from "@/components/icons";
 
 export function LessonContent({
   lessonId,
@@ -35,10 +36,9 @@ export function LessonContent({
       <Link
         href="/dashboard"
         className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 hover:text-primary-700 transition-colors"
+        aria-label="Back to dashboard"
       >
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="stroke-current">
-          <path d="M10 12L6 8L10 4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
+        <ArrowLeftIcon size={16} />
         Back
       </Link>
 
@@ -49,14 +49,16 @@ export function LessonContent({
 
       {isCompleted && (
         <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary-100 px-3 py-1 text-xs font-semibold text-primary-700">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" className="stroke-current">
-            <path d="M3 7L6 10L11 4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          <CheckIcon size={14} />
           Completed
         </span>
       )}
 
-      <article className="prose prose-sm mt-6 max-w-none prose-headings:font-heading prose-headings:text-gray-900 prose-h2:text-lg prose-h3:text-base prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700">
+      <article
+        className="prose prose-sm mt-6 max-w-none prose-headings:font-heading prose-headings:text-gray-900 prose-h2:text-lg prose-h3:text-base prose-p:text-gray-700 prose-strong:text-gray-900 prose-li:text-gray-700"
+        role="article"
+        aria-label={`Lesson: ${title}`}
+      >
         <Markdown remarkPlugins={[remarkGfm]}>{contentMd}</Markdown>
       </article>
 
@@ -73,6 +75,7 @@ export function LessonContent({
               <SessionLogForm
                 lessonId={lessonId}
                 skillId={skillId}
+                isRetake={isCompleted}
                 onClose={() => setShowLogForm(false)}
               />
             </motion.div>
@@ -80,10 +83,17 @@ export function LessonContent({
             <motion.button
               key="button"
               onClick={() => setShowLogForm(true)}
-              className="w-full rounded-2xl bg-primary-600 py-4 text-base font-semibold text-white shadow-lg shadow-primary-600/25 hover:bg-primary-700 active:scale-[0.98] transition-all"
+              className={`w-full rounded-2xl py-4 text-base font-semibold shadow-lg active:scale-[0.98] transition-all ${
+                isCompleted
+                  ? "bg-accent-500 text-white shadow-accent-500/25 hover:bg-accent-600"
+                  : "bg-primary-600 text-white shadow-primary-600/25 hover:bg-primary-700"
+              }`}
               whileTap={{ scale: 0.97 }}
+              aria-label={isCompleted ? "Practice this lesson again" : "Log a training session"}
             >
-              I trained my dog! (+{xpReward} XP)
+              {isCompleted
+                ? "Practice Again (+XP)"
+                : `I trained my dog! (+${xpReward} XP)`}
             </motion.button>
           )}
         </AnimatePresence>

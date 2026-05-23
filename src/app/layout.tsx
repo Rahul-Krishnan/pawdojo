@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Providers } from "./providers";
+import { ThemeInit } from "@/components/theme-init";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,9 +20,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-white text-gray-900 antialiased">
-        <Providers>{children}</Providers>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Space+Grotesk:wght@300..700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="min-h-screen bg-surface text-gray-900 antialiased">
+        <a href="#main-content" className="skip-to-content">
+          Skip to content
+        </a>
+        <Providers>
+          <ThemeInit />
+          <main id="main-content">{children}</main>
+        </Providers>
       </body>
     </html>
   );

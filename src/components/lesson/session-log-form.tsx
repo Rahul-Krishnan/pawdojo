@@ -25,10 +25,12 @@ const durationOptions = [
 export function SessionLogForm({
   lessonId,
   skillId,
+  isRetake = false,
   onClose,
 }: {
   lessonId: string;
   skillId: string;
+  isRetake?: boolean;
   onClose: () => void;
 }) {
   const [rating, setRating] = useState(3);
@@ -53,6 +55,7 @@ export function SessionLogForm({
       reps,
       durationMin,
       notes,
+      isRetake,
     });
 
     if (response.success) {

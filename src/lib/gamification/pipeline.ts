@@ -1,5 +1,6 @@
-// Gamification pipeline: called after each session log.
-// Steps 6-8 replace the stub handlers with real implementations.
+import { handleStreakUpdate } from "./streak-handler";
+import { handleXPAward } from "./xp-handler";
+import { handleAchievementCheck } from "./achievement-handler";
 
 export type SessionData = {
   userId: string;
@@ -16,34 +17,18 @@ export type PipelineResult = {
   achievementsUnlocked: string[];
 };
 
-type PipelineHandler = (
-  data: SessionData
-) => Promise<Partial<PipelineResult>>;
-
-// Pipeline handlers registered by Steps 6-8
-const handlers: PipelineHandler[] = [];
-
-export function registerHandler(handler: PipelineHandler) {
-  handlers.push(handler);
-}
-
 export async function runGamificationPipeline(
   data: SessionData
 ): Promise<PipelineResult> {
-  const result: PipelineResult = {
-    streakUpdated: false,
-    xpAwarded: 0,
-    achievementsUnlocked: [],
+  // Run handlers in sequence: streak first (updates current_streak),
+  // then XP (updates total_xp), then achievements (reads both).
+  const streakResult = await handleStreakUpdate(data);
+  const xpResult = await handleXPAward(data);
+  const achievementResult = await handleAchievementCheck(data);
+
+  return {
+    streakUpdated: streakResult.streakUpdated,
+    xpAwarded: xpResult.xpAwarded,
+    achievementsUnlocked: achievementResult.achievementsUnlocked,
   };
-
-  for (const handler of handlers) {
-    const partial = await handler(data);
-    if (partial.streakUpdated) result.streakUpdated = true;
-    if (partial.xpAwarded) result.xpAwarded += partial.xpAwarded;
-    if (partial.achievementsUnlocked) {
-      result.achievementsUnlocked.push(...partial.achievementsUnlocked);
-    }
-  }
-
-  return result;
 }
