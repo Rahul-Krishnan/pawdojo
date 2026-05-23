@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { XpDisplay } from "@/components/dashboard/xp-display";
 import { TodayLessonCard } from "@/components/dashboard/today-lesson-card";
+import { StarIcon, CheckIcon, PawIcon } from "@/components/icons";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -14,14 +15,12 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // Fetch user profile
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("*")
     .eq("id", user.id)
     .single();
 
-  // Fetch user's dog
   const { data: dog } = await supabase
     .from("dogs")
     .select("*")
@@ -32,14 +31,12 @@ export default async function DashboardPage() {
     redirect("/onboarding");
   }
 
-  // Fetch streak
   const { data: streak } = await supabase
     .from("user_streaks")
     .select("*")
     .eq("user_id", user.id)
     .single();
 
-  // Fetch completed lesson IDs
   const { data: completions } = await supabase
     .from("lesson_completions")
     .select("lesson_id")
@@ -49,18 +46,15 @@ export default async function DashboardPage() {
     completions?.map((completion) => completion.lesson_id) ?? []
   );
 
-  // Fetch all lessons ordered by path_order
   const { data: lessons } = await supabase
     .from("lessons")
     .select("*, skills(name, key)")
     .order("path_order", { ascending: true });
 
-  // Find the next incomplete lesson
   const nextLesson = lessons?.find(
     (lesson) => !completedLessonIds.has(lesson.id)
   );
 
-  // Recent sessions
   const { data: recentSessions } = await supabase
     .from("training_sessions")
     .select("*, skills(name)")
@@ -70,12 +64,21 @@ export default async function DashboardPage() {
 
   return (
     <div className="px-4 pt-6">
-      <header className="mb-6">
-        <h1 className="text-2xl font-bold">Hi, {dog.name}!</h1>
-        <p className="text-sm text-gray-500">Let&apos;s keep training.</p>
+      <header className="mb-6 flex items-center justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary-600">
+            Welcome back
+          </p>
+          <h1 className="text-2xl font-bold font-heading text-gray-900">
+            {dog.name}
+          </h1>
+        </div>
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100">
+          <PawIcon size={20} className="text-primary-600" />
+        </div>
       </header>
 
-      <div className="mb-6 flex gap-4">
+      <div className="mb-5 flex gap-3">
         <StreakDisplay
           currentStreak={streak?.current_streak ?? 0}
           freezeAvailable={streak?.freeze_available ?? 0}
@@ -97,35 +100,47 @@ export default async function DashboardPage() {
       )}
 
       {!nextLesson && (
-        <div className="rounded-xl border border-green-200 bg-green-50 p-6 text-center">
-          <p className="text-lg font-semibold text-green-800">
+        <div className="rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 p-6 text-center border border-primary-200/50">
+          <CheckIcon size={32} className="mx-auto text-primary-600" />
+          <p className="mt-2 text-lg font-bold font-heading text-gray-900">
             All lessons complete!
           </p>
-          <p className="mt-1 text-sm text-green-600">
-            Keep logging training sessions to maintain your streak.
+          <p className="mt-1 text-sm text-gray-500">
+            Keep logging sessions to maintain your streak.
           </p>
         </div>
       )}
 
       {recentSessions && recentSessions.length > 0 && (
         <section className="mt-6">
-          <h2 className="mb-3 text-lg font-semibold">Recent Activity</h2>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400">
+            Recent Activity
+          </h2>
           <div className="space-y-2">
             {recentSessions.map((session) => (
               <div
                 key={session.id}
-                className="flex items-center justify-between rounded-lg bg-gray-50 px-4 py-3"
+                className="flex items-center justify-between rounded-xl bg-surface-elevated border border-gray-100 px-4 py-3"
               >
                 <div>
-                  <p className="text-sm font-medium">
-                    {(session.skills as { name: string })?.name ?? "Training"}
+                  <p className="text-sm font-semibold text-gray-800">
+                    {(session.skills as unknown as { name: string })?.name ?? "Training"}
                   </p>
-                  <p className="text-xs text-gray-500">
-                    Rating: {"⭐".repeat(session.rating ?? 0)}
-                  </p>
+                  <div className="mt-0.5 flex gap-0.5">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <StarIcon
+                        key={i}
+                        size={12}
+                        className={i < (session.rating ?? 0) ? "text-accent-400" : "text-gray-200"}
+                      />
+                    ))}
+                  </div>
                 </div>
                 <p className="text-xs text-gray-400">
-                  {new Date(session.logged_at).toLocaleDateString()}
+                  {new Date(session.logged_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}
                 </p>
               </div>
             ))}

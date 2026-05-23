@@ -3,13 +3,23 @@
 import { useState } from "react";
 import { logSession } from "@/app/actions/log-session";
 import { useRouter } from "next/navigation";
+import { motion } from "motion/react";
+import { StarIcon, CheckIcon, TrophyIcon } from "@/components/icons";
+import { playTap, playSuccess, playXpEarned, playBadgeUnlock } from "@/lib/sounds";
 
 const ratingLabels = ["Rough", "Tricky", "OK", "Good", "Nailed it"];
+const ratingColors = [
+  "bg-red-500",
+  "bg-orange-500",
+  "bg-accent-500",
+  "bg-primary-500",
+  "bg-primary-600",
+];
 const repOptions = [3, 5, 8, 10];
 const durationOptions = [
-  { label: "Quick (2 min)", value: 2 },
-  { label: "Normal (5 min)", value: 5 },
-  { label: "Long (10+ min)", value: 10 },
+  { label: "Quick", sub: "2 min", value: 2 },
+  { label: "Normal", sub: "5 min", value: 5 },
+  { label: "Long", sub: "10+ min", value: 10 },
 ];
 
 export function SessionLogForm({
@@ -46,6 +56,13 @@ export function SessionLogForm({
     });
 
     if (response.success) {
+      playSuccess();
+      if (response.xpAwarded && response.xpAwarded > 0) {
+        setTimeout(() => playXpEarned(), 400);
+      }
+      if (response.achievementsUnlocked && response.achievementsUnlocked.length > 0) {
+        setTimeout(() => playBadgeUnlock(), 800);
+      }
       setResult({
         xpAwarded: response.xpAwarded ?? 0,
         achievementsUnlocked: response.achievementsUnlocked ?? [],
@@ -53,7 +70,7 @@ export function SessionLogForm({
       setTimeout(() => {
         router.push("/dashboard");
         router.refresh();
-      }, 2000);
+      }, 2500);
     }
 
     setLoading(false);
@@ -61,92 +78,126 @@ export function SessionLogForm({
 
   if (result) {
     return (
-      <div className="rounded-xl bg-green-50 p-6 text-center">
-        <p className="text-2xl">✅</p>
-        <p className="mt-2 text-lg font-semibold text-green-800">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        className="rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 p-8 text-center border border-primary-200/50"
+      >
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 15 }}
+        >
+          <CheckIcon size={48} className="mx-auto text-primary-600" />
+        </motion.div>
+        <motion.p
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="mt-3 text-xl font-bold font-heading text-gray-900"
+        >
           Session logged!
-        </p>
+        </motion.p>
         {result.xpAwarded > 0 && (
-          <p className="mt-1 text-sm text-green-600">
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.45 }}
+            className="mt-2 text-lg font-semibold text-xp"
+          >
             +{result.xpAwarded} XP
-          </p>
+          </motion.p>
         )}
         {result.achievementsUnlocked.length > 0 && (
-          <p className="mt-1 text-sm text-yellow-600">
-            🏆 {result.achievementsUnlocked.join(", ")}
-          </p>
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="mt-3 flex items-center justify-center gap-2 text-badge"
+          >
+            <TrophyIcon size={18} />
+            <span className="text-sm font-semibold">
+              {result.achievementsUnlocked.join(", ")}
+            </span>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
+        <label className="mb-2 block text-sm font-semibold text-gray-700">
           How did it go?
         </label>
         <div className="flex gap-2">
           {[1, 2, 3, 4, 5].map((value) => (
-            <button
+            <motion.button
               key={value}
               type="button"
-              onClick={() => setRating(value)}
-              className={`flex-1 rounded-lg py-3 text-sm font-medium transition-colors ${
+              onClick={() => { setRating(value); playTap(); }}
+              whileTap={{ scale: 0.9 }}
+              className={`flex flex-1 flex-col items-center gap-1 rounded-xl py-3 transition-all ${
                 rating === value
-                  ? "bg-blue-600 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  ? `${ratingColors[value - 1]} text-white shadow-md`
+                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
               }`}
             >
-              {value}
-            </button>
+              <StarIcon size={16} className={rating >= value ? "opacity-100" : "opacity-30"} />
+              <span className="text-xs font-medium">{value}</span>
+            </motion.button>
           ))}
         </div>
-        <p className="mt-1 text-center text-xs text-gray-500">
+        <p className="mt-1.5 text-center text-xs font-medium text-gray-500">
           {ratingLabels[rating - 1]}
         </p>
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
+        <label className="mb-2 block text-sm font-semibold text-gray-700">
           Reps completed
         </label>
         <div className="flex gap-2">
           {repOptions.map((value) => (
-            <button
+            <motion.button
               key={value}
               type="button"
-              onClick={() => setReps(value)}
-              className={`flex-1 rounded-lg py-3 text-sm font-medium transition-colors ${
+              onClick={() => { setReps(value); playTap(); }}
+              whileTap={{ scale: 0.9 }}
+              className={`flex-1 rounded-xl py-3 text-sm font-semibold transition-all ${
                 reps === value
-                  ? "bg-blue-600 text-white"
+                  ? "bg-primary-600 text-white shadow-md"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
               {value}+
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-gray-700">
+        <label className="mb-2 block text-sm font-semibold text-gray-700">
           Session length
         </label>
         <div className="flex gap-2">
           {durationOptions.map((option) => (
-            <button
+            <motion.button
               key={option.value}
               type="button"
-              onClick={() => setDurationMin(option.value)}
-              className={`flex-1 rounded-lg py-3 text-xs font-medium transition-colors ${
+              onClick={() => { setDurationMin(option.value); playTap(); }}
+              whileTap={{ scale: 0.9 }}
+              className={`flex flex-1 flex-col items-center rounded-xl py-3 transition-all ${
                 durationMin === option.value
-                  ? "bg-blue-600 text-white"
+                  ? "bg-primary-600 text-white shadow-md"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              {option.label}
-            </button>
+              <span className="text-sm font-semibold">{option.label}</span>
+              <span className="text-[10px] opacity-70">{option.sub}</span>
+            </motion.button>
           ))}
         </div>
       </div>
@@ -154,7 +205,7 @@ export function SessionLogForm({
       <div>
         <label
           htmlFor="notes"
-          className="mb-2 block text-sm font-medium text-gray-700"
+          className="mb-2 block text-sm font-semibold text-gray-700"
         >
           Notes (optional)
         </label>
@@ -163,26 +214,27 @@ export function SessionLogForm({
           value={notes}
           onChange={(event) => setNotes(event.target.value)}
           rows={2}
-          className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:border-blue-500 focus:outline-none"
+          className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-primary-500/20 transition-all"
           placeholder="Any observations about your dog's progress..."
         />
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex gap-3 pt-1">
         <button
           type="button"
           onClick={onClose}
-          className="flex-1 rounded-lg border border-gray-300 py-3 text-sm font-medium text-gray-600"
+          className="flex-1 rounded-xl border border-gray-200 py-3.5 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
         >
           Cancel
         </button>
-        <button
+        <motion.button
           type="submit"
           disabled={loading}
-          className="flex-1 rounded-lg bg-blue-600 py-3 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          whileTap={{ scale: 0.97 }}
+          className="flex-1 rounded-xl bg-primary-600 py-3.5 text-sm font-semibold text-white shadow-md shadow-primary-600/25 hover:bg-primary-700 disabled:opacity-50 transition-all"
         >
           {loading ? "Logging..." : "Log Session"}
-        </button>
+        </motion.button>
       </div>
     </form>
   );

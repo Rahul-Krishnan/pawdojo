@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { BoltIcon, FlameIcon, StarIcon, TrophyIcon, LockIcon, CheckIcon } from "@/components/icons";
 
 export default async function ProgressPage() {
   const supabase = await createClient();
@@ -48,7 +49,6 @@ export default async function ProgressPage() {
     .select("*")
     .order("sort_order");
 
-  // Compute per-skill progress
   const skillProgress = (skills ?? []).map((skill) => {
     const skillLessons = (lessons ?? []).filter(
       (lesson) => lesson.skill_id === skill.id
@@ -71,48 +71,70 @@ export default async function ProgressPage() {
         .eq("user_id", user.id)
     ).count ?? 0;
 
+  const stats = [
+    { label: "Total XP", value: profile?.total_xp ?? 0, Icon: BoltIcon, color: "text-xp" },
+    { label: "Level", value: profile?.current_level ?? 1, Icon: StarIcon, color: "text-accent-500" },
+    { label: "Best Streak", value: streak?.longest_streak ?? 0, Icon: FlameIcon, color: "text-streak" },
+    { label: "Sessions", value: totalSessions, Icon: CheckIcon, color: "text-primary-600" },
+  ];
+
   return (
     <div className="px-4 pt-6">
-      <h1 className="mb-6 text-2xl font-bold">Progress</h1>
+      <h1 className="mb-5 text-2xl font-bold font-heading text-gray-900">Progress</h1>
 
-      {/* Stats */}
       <div className="mb-6 grid grid-cols-2 gap-3">
-        <div className="rounded-xl bg-gray-50 p-4 text-center">
-          <p className="text-2xl font-bold">{profile?.total_xp ?? 0}</p>
-          <p className="text-xs text-gray-500">Total XP</p>
-        </div>
-        <div className="rounded-xl bg-gray-50 p-4 text-center">
-          <p className="text-2xl font-bold">Lv {profile?.current_level ?? 1}</p>
-          <p className="text-xs text-gray-500">Level</p>
-        </div>
-        <div className="rounded-xl bg-gray-50 p-4 text-center">
-          <p className="text-2xl font-bold">{streak?.longest_streak ?? 0}</p>
-          <p className="text-xs text-gray-500">Longest Streak</p>
-        </div>
-        <div className="rounded-xl bg-gray-50 p-4 text-center">
-          <p className="text-2xl font-bold">{totalSessions}</p>
-          <p className="text-xs text-gray-500">Sessions</p>
-        </div>
+        {stats.map((stat) => (
+          <div
+            key={stat.label}
+            className="rounded-2xl bg-surface-elevated border border-gray-100 p-4"
+          >
+            <div className="flex items-center gap-2">
+              <stat.Icon size={18} className={stat.color} />
+              <span className="text-2xl font-bold font-heading text-gray-900">
+                {stat.value}
+              </span>
+            </div>
+            <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400">
+              {stat.label}
+            </p>
+          </div>
+        ))}
       </div>
 
-      {/* Skill Tree */}
       <section className="mb-6">
-        <h2 className="mb-3 text-lg font-semibold">Skills</h2>
-        <div className="space-y-3">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400">
+          Skills
+        </h2>
+        <div className="space-y-2.5">
           {skillProgress.map((skill) => {
             const percent =
               skill.total > 0 ? (skill.done / skill.total) * 100 : 0;
+            const isComplete = skill.done >= skill.total;
             return (
-              <div key={skill.id} className="rounded-xl bg-gray-50 p-4">
+              <div
+                key={skill.id}
+                className={`rounded-2xl border p-4 ${
+                  isComplete
+                    ? "border-primary-200 bg-primary-50/50"
+                    : "border-gray-100 bg-surface-elevated"
+                }`}
+              >
                 <div className="flex items-center justify-between">
-                  <p className="font-medium">{skill.name}</p>
-                  <p className="text-sm text-gray-500">
+                  <div className="flex items-center gap-2">
+                    {isComplete && <CheckIcon size={16} className="text-primary-600" />}
+                    <p className="font-semibold text-gray-800">{skill.name}</p>
+                  </div>
+                  <p className="text-xs font-medium text-gray-400">
                     {skill.done}/{skill.total}
                   </p>
                 </div>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200">
+                <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-gray-200/60">
                   <div
-                    className="h-full rounded-full bg-blue-500 transition-all duration-500"
+                    className={`h-full rounded-full transition-all duration-700 ease-out ${
+                      isComplete
+                        ? "bg-primary-500"
+                        : "bg-gradient-to-r from-primary-400 to-primary-500"
+                    }`}
                     style={{ width: `${percent}%` }}
                   />
                 </div>
@@ -122,21 +144,30 @@ export default async function ProgressPage() {
         </div>
       </section>
 
-      {/* Badges */}
-      <section>
-        <h2 className="mb-3 text-lg font-semibold">Badges</h2>
-        <div className="grid grid-cols-3 gap-3">
+      <section className="pb-4">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400">
+          Badges
+        </h2>
+        <div className="grid grid-cols-3 gap-2.5">
           {(allAchievementDefs ?? []).map((def) => {
             const isUnlocked = unlockedIds.has(def.id);
             return (
               <div
                 key={def.id}
-                className={`rounded-xl p-3 text-center ${
-                  isUnlocked ? "bg-yellow-50" : "bg-gray-100 opacity-50"
+                className={`rounded-2xl p-3 text-center border transition-all ${
+                  isUnlocked
+                    ? "border-accent-200 bg-gradient-to-br from-accent-50 to-accent-100"
+                    : "border-gray-100 bg-gray-50 opacity-40"
                 }`}
               >
-                <p className="text-2xl">{isUnlocked ? "🏆" : "🔒"}</p>
-                <p className="mt-1 text-xs font-medium">{def.name}</p>
+                {isUnlocked ? (
+                  <TrophyIcon size={28} className="mx-auto text-accent-500" />
+                ) : (
+                  <LockIcon size={28} className="mx-auto text-gray-300" />
+                )}
+                <p className="mt-1.5 text-[10px] font-semibold text-gray-600 leading-tight">
+                  {def.name}
+                </p>
               </div>
             );
           })}

@@ -2,19 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { HomeIcon, RepeatIcon, ChartIcon, UserIcon } from "@/components/icons";
+import { playTap } from "@/lib/sounds";
 
 const tabs = [
-  { href: "/dashboard", label: "Home", icon: "🏠" },
-  { href: "/practice", label: "Practice", icon: "🔄" },
-  { href: "/progress", label: "Progress", icon: "📊" },
-  { href: "/profile", label: "Profile", icon: "👤" },
+  { href: "/dashboard", label: "Home", Icon: HomeIcon },
+  { href: "/practice", label: "Practice", Icon: RepeatIcon },
+  { href: "/progress", label: "Progress", Icon: ChartIcon },
+  { href: "/profile", label: "Profile", Icon: UserIcon },
 ];
 
 export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200 bg-white pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200/80 bg-white/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]">
       <div className="mx-auto flex max-w-lg">
         {tabs.map((tab) => {
           const isActive = pathname.startsWith(tab.href);
@@ -22,12 +24,13 @@ export function BottomNav() {
             <Link
               key={tab.href}
               href={tab.href}
-              className={`flex flex-1 flex-col items-center py-2 text-xs ${
-                isActive ? "text-blue-600" : "text-gray-500"
+              onClick={() => playTap()}
+              className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 transition-colors ${
+                isActive ? "text-primary-600" : "text-gray-400 hover:text-gray-600"
               }`}
             >
-              <span className="text-xl">{tab.icon}</span>
-              <span className="mt-0.5">{tab.label}</span>
+              <tab.Icon size={22} />
+              <span className="text-[10px] font-medium tracking-wide">{tab.label}</span>
             </Link>
           );
         })}

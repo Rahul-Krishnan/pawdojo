@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
+import { PawIcon, UserIcon } from "@/components/icons";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -23,28 +24,39 @@ export default async function ProfilePage() {
 
   return (
     <div className="px-4 pt-6">
-      <h1 className="mb-6 text-2xl font-bold">Profile</h1>
+      <h1 className="mb-5 text-2xl font-bold font-heading text-gray-900">Profile</h1>
 
       {dog && (
-        <div className="mb-6 rounded-xl bg-gray-50 p-6">
-          <h2 className="text-lg font-semibold">{dog.name}</h2>
-          {dog.breed && (
-            <p className="text-sm text-gray-500">{dog.breed}</p>
-          )}
-          {dog.age_months && (
-            <p className="text-sm text-gray-500">
-              {dog.age_months} months old
-            </p>
-          )}
+        <div className="mb-4 rounded-2xl border border-gray-100 bg-surface-elevated p-5">
+          <div className="flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100">
+              <PawIcon size={24} className="text-primary-600" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold font-heading text-gray-900">{dog.name}</h2>
+              <p className="text-sm text-gray-500">
+                {[dog.breed, dog.age_months ? `${dog.age_months} months` : null]
+                  .filter(Boolean)
+                  .join(" · ") || "Good dog"}
+              </p>
+            </div>
+          </div>
         </div>
       )}
 
-      <div className="rounded-xl bg-gray-50 p-6">
-        <h2 className="mb-2 text-lg font-semibold">Account</h2>
-        <p className="text-sm text-gray-600">{user.email}</p>
-        <p className="text-sm text-gray-500">
-          Timezone: {profile?.timezone ?? "UTC"}
-        </p>
+      <div className="rounded-2xl border border-gray-100 bg-surface-elevated p-5">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gray-100">
+            <UserIcon size={24} className="text-gray-500" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-gray-900">Account</h2>
+            <p className="text-sm text-gray-500">{user.email}</p>
+            <p className="text-xs text-gray-400">
+              Timezone: {profile?.timezone ?? "UTC"}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

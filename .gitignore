@@ -11,3 +11,5 @@ coverage/
 .vite/
 *.tsbuildinfo
 next-env.d.ts
+supabase/.temp/
+test-results/
