@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary-50: #f0fdf4;
   --color-primary-100: #dcfce7;
@@ -33,6 +35,11 @@
   --color-surface-elevated: #ffffff;
   --color-surface-muted: #f5f5f4;
 
+  --color-dark-base: #0f1a12;
+  --color-dark-elevated: #1a2b1e;
+  --color-dark-muted: #152218;
+  --color-dark-border: #2a3d2e;
+
   --font-sans: 'DM Sans', system-ui, sans-serif;
   --font-heading: 'Space Grotesk', system-ui, sans-serif;
 }
@@ -40,14 +47,7 @@
 @layer base {
   body {
     font-family: var(--font-sans);
-    background-color: var(--color-surface);
-    color: #1a1a1a;
     transition: background-color 0.2s, color 0.2s;
-  }
-
-  .dark body {
-    background-color: #0f1a12;
-    color: #e5e5e5;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -55,28 +55,6 @@
     letter-spacing: -0.02em;
   }
 
-  /* Dark mode surface overrides */
-  .dark .bg-surface { background-color: #0f1a12; }
-  .dark .bg-surface-elevated { background-color: #1a2b1e; }
-  .dark .bg-surface-muted { background-color: #152218; }
-
-  /* Dark mode text overrides */
-  .dark .text-gray-900 { color: #f5f5f5; }
-  .dark .text-gray-800 { color: #e5e5e5; }
-  .dark .text-gray-700 { color: #d4d4d4; }
-  .dark .text-gray-600 { color: #a3a3a3; }
-  .dark .text-gray-500 { color: #8b8b8b; }
-  .dark .text-gray-400 { color: #737373; }
-
-  /* Dark mode backgrounds */
-  .dark .bg-white { background-color: #1a2b1e; }
-  .dark .bg-gray-50 { background-color: #152218; }
-  .dark .bg-gray-100 { background-color: #1a2b1e; }
-  .dark .border-gray-100 { border-color: #2a3d2e; }
-  .dark .border-gray-200 { border-color: #2a3d2e; }
-  .dark .bg-white\/95 { background-color: rgb(26 43 30 / 0.95); }
-
-  /* Skip to content for a11y */
   .skip-to-content {
     position: absolute;
     left: -9999px;

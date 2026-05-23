@@ -12,11 +12,10 @@ export function SettingsPanel() {
         Settings
       </h2>
 
-      {/* Sound toggle */}
-      <div className="flex items-center justify-between rounded-2xl border border-gray-100 bg-surface-elevated p-4">
+      <div className="flex items-center justify-between rounded-2xl border border-gray-100 dark:border-dark-border bg-white dark:bg-dark-elevated p-4">
         <div>
-          <p className="text-sm font-semibold text-gray-800">Sound effects</p>
-          <p className="text-xs text-gray-500">Chimes, dings, and celebration sounds</p>
+          <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">Sound effects</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">Chimes, dings, and celebration sounds</p>
         </div>
         <button
           onClick={() => {
@@ -27,7 +26,7 @@ export function SettingsPanel() {
           aria-checked={soundEnabled}
           aria-label="Toggle sound effects"
           className={`relative h-7 w-12 rounded-full transition-colors ${
-            soundEnabled ? "bg-primary-500" : "bg-gray-300"
+            soundEnabled ? "bg-primary-500" : "bg-gray-300 dark:bg-gray-600"
           }`}
         >
           <span
@@ -38,9 +37,8 @@ export function SettingsPanel() {
         </button>
       </div>
 
-      {/* Theme selector */}
-      <div className="rounded-2xl border border-gray-100 bg-surface-elevated p-4">
-        <p className="mb-3 text-sm font-semibold text-gray-800">Appearance</p>
+      <div className="rounded-2xl border border-gray-100 dark:border-dark-border bg-white dark:bg-dark-elevated p-4">
+        <p className="mb-3 text-sm font-semibold text-gray-800 dark:text-gray-200">Appearance</p>
         <div className="flex gap-2">
           {(["light", "dark", "system"] as const).map((option) => (
             <button
@@ -50,7 +48,7 @@ export function SettingsPanel() {
               className={`flex-1 rounded-xl py-2.5 text-xs font-semibold capitalize transition-all ${
                 theme === option
                   ? "bg-primary-600 text-white shadow-md"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  : "bg-gray-100 dark:bg-dark-muted text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-border"
               }`}
             >
               {option}

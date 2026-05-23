@@ -27,7 +27,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-surface text-gray-900 antialiased">
+      <body className="min-h-screen bg-surface dark:bg-dark-base text-gray-900 dark:text-gray-100 antialiased">
         <a href="#main-content" className="skip-to-content">
           Skip to content
         </a>

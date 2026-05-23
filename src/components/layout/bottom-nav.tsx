@@ -17,7 +17,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200/80 bg-white/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]"
+      className="fixed bottom-0 left-0 right-0 z-50 border-t border-gray-200/80 dark:border-dark-border bg-white/95 dark:bg-dark-elevated/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)]"
       role="navigation"
       aria-label="Main navigation"
     >
@@ -32,7 +32,9 @@ export function BottomNav() {
               aria-current={isActive ? "page" : undefined}
               aria-label={tab.label}
               className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 min-h-[44px] transition-colors ${
-                isActive ? "text-primary-600" : "text-gray-400 hover:text-gray-600"
+                isActive
+                  ? "text-primary-500"
+                  : "text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300"
               }`}
             >
               <tab.Icon size={22} aria-hidden="true" />

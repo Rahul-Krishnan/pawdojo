@@ -66,15 +66,15 @@ export default async function DashboardPage() {
     <div className="px-4 pt-6">
       <header className="mb-6 flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-widest text-primary-600">
+          <p className="text-xs font-semibold uppercase tracking-widest text-primary-600 dark:text-primary-400">
             Welcome back
           </p>
-          <h1 className="text-2xl font-bold font-heading text-gray-900">
+          <h1 className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
             {dog.name}
           </h1>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100">
-          <PawIcon size={20} className="text-primary-600" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/40">
+          <PawIcon size={20} className="text-primary-600 dark:text-primary-400" />
         </div>
       </header>
 
@@ -100,12 +100,12 @@ export default async function DashboardPage() {
       )}
 
       {!nextLesson && (
-        <div className="rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 p-6 text-center border border-primary-200/50">
-          <CheckIcon size={32} className="mx-auto text-primary-600" />
-          <p className="mt-2 text-lg font-bold font-heading text-gray-900">
+        <div className="rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 p-6 text-center border border-primary-200/50 dark:border-primary-700/30">
+          <CheckIcon size={32} className="mx-auto text-primary-600 dark:text-primary-400" />
+          <p className="mt-2 text-lg font-bold font-heading text-gray-900 dark:text-gray-50">
             All lessons complete!
           </p>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
             Keep logging sessions to maintain your streak.
           </p>
         </div>
@@ -120,10 +120,10 @@ export default async function DashboardPage() {
             {recentSessions.map((session) => (
               <div
                 key={session.id}
-                className="flex items-center justify-between rounded-xl bg-surface-elevated border border-gray-100 px-4 py-3"
+                className="flex items-center justify-between rounded-xl bg-white dark:bg-dark-elevated border border-gray-100 dark:border-dark-border px-4 py-3"
               >
                 <div>
-                  <p className="text-sm font-semibold text-gray-800">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-200">
                     {(session.skills as unknown as { name: string })?.name ?? "Training"}
                   </p>
                   <div className="mt-0.5 flex gap-0.5">
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
                       <StarIcon
                         key={i}
                         size={12}
-                        className={i < (session.rating ?? 0) ? "text-accent-400" : "text-gray-200"}
+                        className={i < (session.rating ?? 0) ? "text-accent-400" : "text-gray-200 dark:text-gray-600"}
                       />
                     ))}
                   </div>
