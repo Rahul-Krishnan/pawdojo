@@ -4,7 +4,7 @@ import { useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { SessionLogForm } from "./session-log-form";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeftIcon, CheckIcon } from "@/components/icons";
 
@@ -26,6 +26,7 @@ export function LessonContent({
   isCompleted: boolean;
 }) {
   const [showLogForm, setShowLogForm] = useState(false);
+  const router = useRouter();
 
   return (
     <motion.div
@@ -33,14 +34,14 @@ export function LessonContent({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Link
-        href="/dashboard"
+      <button
+        onClick={() => router.back()}
         className="mb-4 inline-flex items-center gap-1 text-sm text-gray-500 dark:text-gray-400 hover:text-primary-700 dark:hover:text-primary-400 transition-colors"
-        aria-label="Back to dashboard"
+        aria-label="Go back"
       >
         <ArrowLeftIcon size={16} />
         Back
-      </Link>
+      </button>
 
       <p className="text-xs font-semibold uppercase tracking-widest text-primary-600 dark:text-primary-400">
         {skillName}
