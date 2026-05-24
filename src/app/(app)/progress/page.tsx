@@ -20,6 +20,7 @@ export default async function ProgressPage() {
     { data: achievements },
     { data: allAchievementDefs },
     { count: totalSessions },
+    { data: sessionRatings },
   ] = await Promise.all([
     supabase.from("user_profiles").select("*").eq("id", user.id).single(),
     supabase.from("user_streaks").select("*").eq("user_id", user.id).single(),
@@ -29,9 +30,19 @@ export default async function ProgressPage() {
     supabase.from("user_achievements").select("*, achievement_definitions(*)").eq("user_id", user.id),
     supabase.from("achievement_definitions").select("*").order("sort_order"),
     supabase.from("training_sessions").select("id", { count: "exact" }).eq("user_id", user.id),
+    supabase.from("training_sessions").select("skill_id, rating").eq("user_id", user.id).not("skill_id", "is", null).not("rating", "is", null),
   ]);
 
   const completedIds = new Set(completions?.map((c) => c.lesson_id) ?? []);
+
+  // Build avg rating per skill
+  const ratingsBySkill = new Map<string, number[]>();
+  for (const s of sessionRatings ?? []) {
+    if (!s.skill_id || !s.rating) continue;
+    const arr = ratingsBySkill.get(s.skill_id);
+    if (arr) arr.push(s.rating);
+    else ratingsBySkill.set(s.skill_id, [s.rating]);
+  }
 
   const skillProgress = (skills ?? []).map((skill) => {
     const skillLessons = (lessons ?? []).filter(
@@ -40,7 +51,11 @@ export default async function ProgressPage() {
     const done = skillLessons.filter((lesson) =>
       completedIds.has(lesson.id)
     ).length;
-    return { ...skill, total: skillLessons.length, done, lessons: skillLessons };
+    const ratings = ratingsBySkill.get(skill.id) ?? [];
+    const avgRating = ratings.length > 0
+      ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length
+      : null;
+    return { ...skill, total: skillLessons.length, done, lessons: skillLessons, avgRating };
   });
 
   const unlockedIds = new Set(
@@ -100,9 +115,19 @@ export default async function ProgressPage() {
                     {isComplete && <CheckIcon size={16} className="text-primary-600" />}
                     <p className="font-semibold text-gray-800 dark:text-gray-100">{skill.name}</p>
                   </div>
-                  <p className="text-xs font-medium text-gray-400">
-                    {skill.done}/{skill.total}
-                  </p>
+                  <div className="flex items-center gap-2.5">
+                    {skill.avgRating !== null && (
+                      <div className="flex items-center gap-1">
+                        <StarIcon size={12} className="text-accent-400" />
+                        <span className="text-xs font-semibold text-accent-600 dark:text-accent-400">
+                          {skill.avgRating.toFixed(1)}
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-xs font-medium text-gray-400">
+                      {skill.done}/{skill.total}
+                    </p>
+                  </div>
                 </div>
                 <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-gray-200/60 dark:bg-gray-700/40">
                   <div

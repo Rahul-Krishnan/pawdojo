@@ -80,7 +80,7 @@ export default async function DashboardPage() {
       {nextLesson && (
         <section>
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-            Today&apos;s Lesson
+            Next Lesson
           </h2>
           <TodayLessonCard
             lessonId={nextLesson.id}

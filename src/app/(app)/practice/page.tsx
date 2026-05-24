@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { CheckIcon, RepeatIcon, StarIcon } from "@/components/icons";
+import { StarIcon, ChevronRightIcon } from "@/components/icons";
+import { SkillRadar } from "@/components/practice/skill-radar";
 
 export default async function PracticePage() {
   const supabase = await createClient();
@@ -11,128 +12,130 @@ export default async function PracticePage() {
 
   if (!user) redirect("/login");
 
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const [
+    { data: skills },
+    { data: lessons },
+    { data: completions },
+    { data: sessions },
+  ] = await Promise.all([
+    supabase.from("skills").select("*").order("sort_order"),
+    supabase.from("lessons").select("id, skill_id").order("path_order"),
+    supabase.from("lesson_completions").select("lesson_id").eq("user_id", user.id),
+    supabase.from("training_sessions").select("skill_id, rating").eq("user_id", user.id).not("skill_id", "is", null).not("rating", "is", null),
+  ]);
 
-  const { data: sessions } = await supabase
-    .from("training_sessions")
-    .select("skill_id, rating, logged_at, skills(name, key)")
-    .eq("user_id", user.id)
-    .not("skill_id", "is", null)
-    .gte("logged_at", sevenDaysAgo.toISOString())
-    .order("logged_at", { ascending: false });
+  const completedIds = new Set(completions?.map((c) => c.lesson_id) ?? []);
 
-  const skillMap = new Map<
-    string,
-    { name: string; ratings: number[]; lastRating: number }
-  >();
-
-  for (const session of sessions ?? []) {
-    if (!session.skill_id || !session.rating) continue;
-    const existing = skillMap.get(session.skill_id);
-    if (existing) {
-      existing.ratings.push(session.rating);
-    } else {
-      skillMap.set(session.skill_id, {
-        name: (session.skills as unknown as { name: string })?.name ?? "Unknown",
-        ratings: [session.rating],
-        lastRating: session.rating,
-      });
-    }
+  // Build lessons per skill
+  const lessonsBySkill = new Map<string, string[]>();
+  for (const lesson of lessons ?? []) {
+    const arr = lessonsBySkill.get(lesson.skill_id);
+    if (arr) arr.push(lesson.id);
+    else lessonsBySkill.set(lesson.skill_id, [lesson.id]);
   }
 
-  // Fetch lessons so we can link practice cards to actual lesson pages
-  const { data: allLessons } = await supabase
-    .from("lessons")
-    .select("id, skill_id, path_order, title")
-    .order("path_order");
-
-  const lessonsBySkill = new Map<string, { id: string; title: string }[]>();
-  for (const lesson of allLessons ?? []) {
-    const existing = lessonsBySkill.get(lesson.skill_id);
-    if (existing) {
-      existing.push({ id: lesson.id, title: lesson.title });
-    } else {
-      lessonsBySkill.set(lesson.skill_id, [{ id: lesson.id, title: lesson.title }]);
-    }
+  // Build avg rating per skill
+  const ratingsBySkill = new Map<string, number[]>();
+  for (const s of sessions ?? []) {
+    if (!s.skill_id || !s.rating) continue;
+    const arr = ratingsBySkill.get(s.skill_id);
+    if (arr) arr.push(s.rating);
+    else ratingsBySkill.set(s.skill_id, [s.rating]);
   }
 
-  const practiceSkills = Array.from(skillMap.entries())
-    .filter(([, data]) => {
-      const avg =
-        data.ratings.reduce((sum, rating) => sum + rating, 0) / data.ratings.length;
-      return avg <= 2.5 && data.lastRating < 4;
-    })
-    .sort(([, a], [, b]) => {
-      const avgA = a.ratings.reduce((s, r) => s + r, 0) / a.ratings.length;
-      const avgB = b.ratings.reduce((s, r) => s + r, 0) / b.ratings.length;
-      return avgA - avgB;
-    });
+  // Composite score: 50% avg rating (normalized to 0-1) + 50% completion %
+  const skillScores = (skills ?? []).map((skill) => {
+    const skillLessonIds = lessonsBySkill.get(skill.id) ?? [];
+    const totalLessons = skillLessonIds.length;
+    const doneLessons = skillLessonIds.filter((id) => completedIds.has(id)).length;
+    const completionPct = totalLessons > 0 ? doneLessons / totalLessons : 0;
+
+    const ratings = ratingsBySkill.get(skill.id) ?? [];
+    const avgRating = ratings.length > 0
+      ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length
+      : 0;
+    const ratingPct = avgRating / 5;
+
+    const score = ratings.length > 0
+      ? completionPct * 0.5 + ratingPct * 0.5
+      : completionPct * 0.5;
+
+    return {
+      id: skill.id,
+      name: skill.name,
+      score,
+      avgRating: ratings.length > 0 ? avgRating : null,
+      completionPct,
+      doneLessons,
+      totalLessons,
+      firstLessonId: skillLessonIds[0] ?? null,
+    };
+  });
+
+  const overallScore = skillScores.length > 0
+    ? skillScores.reduce((sum, s) => sum + s.score, 0) / skillScores.length
+    : 0;
 
   return (
     <div className="px-4 pt-6">
-      <h1 className="mb-5 text-2xl font-bold font-heading text-gray-900">Practice</h1>
+      <h1 className="mb-5 text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">Practice</h1>
 
-      {practiceSkills.length === 0 ? (
-        <div className="rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200/50 p-8 text-center">
-          <CheckIcon size={40} className="mx-auto text-primary-500" />
-          <p className="mt-3 text-lg font-bold font-heading text-gray-900">
-            All good!
+      <div className="rounded-2xl border border-gray-100 dark:border-dark-border bg-surface-elevated dark:bg-dark-elevated p-4 mb-6">
+        <div className="text-center mb-2">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            Overall Score
           </p>
-          <p className="mt-1 text-sm text-gray-500">
-            No skills need extra practice right now.
+          <p className="text-3xl font-bold font-heading text-primary-600 dark:text-primary-400">
+            {Math.round(overallScore * 100)}%
           </p>
-          <Link
-            href="/dashboard"
-            className="mt-5 inline-block rounded-xl bg-primary-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-primary-600/25 hover:bg-primary-700 transition-all"
-          >
-            Back to Dashboard
-          </Link>
         </div>
-      ) : (
-        <div className="space-y-3">
-          <p className="text-sm text-gray-500">
-            These skills had low ratings recently. Practice them to improve.
-          </p>
-          {practiceSkills.map(([skillId, data]) => {
-            const avg =
-              data.ratings.reduce((s, r) => s + r, 0) / data.ratings.length;
-            const skillLessons = lessonsBySkill.get(skillId) ?? [];
-            const firstLessonHref = skillLessons[0]
-              ? `/lesson/${skillLessons[0].id}`
-              : "/progress";
-            return (
-              <Link
-                key={skillId}
-                href={firstLessonHref}
-                className="flex items-center justify-between rounded-2xl border border-accent-200 bg-gradient-to-r from-accent-50 to-accent-100/50 p-4 transition-colors hover:from-accent-100 hover:to-accent-200/50"
-              >
-                <div>
-                  <p className="font-semibold text-gray-800">{data.name}</p>
-                  <div className="mt-1 flex items-center gap-3 text-xs text-gray-500">
-                    <span className="flex items-center gap-1">
-                      Avg
-                      <span className="font-semibold text-accent-600">{avg.toFixed(1)}</span>
-                      /5
-                    </span>
+        <SkillRadar
+          skills={skillScores.map((s) => ({ name: s.name, score: s.score }))}
+        />
+        <p className="text-center text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+          Dashed line = perfect score
+        </p>
+      </div>
+
+      <section>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+          Skills Breakdown
+        </h2>
+        <div className="space-y-2">
+          {skillScores.map((skill) => (
+            <Link
+              key={skill.id}
+              href={skill.firstLessonId ? `/lesson/${skill.firstLessonId}` : "/progress"}
+              className="flex items-center justify-between rounded-xl bg-white dark:bg-dark-elevated border border-gray-100 dark:border-dark-border px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-dark-muted active:bg-gray-100 dark:active:bg-dark-border group"
+            >
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                  {skill.name}
+                </p>
+                <div className="mt-1 flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
+                  <span>
+                    {skill.doneLessons}/{skill.totalLessons} lessons
+                  </span>
+                  {skill.avgRating !== null && (
                     <span className="flex items-center gap-0.5">
-                      Last:
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <StarIcon
-                          key={i}
-                          size={10}
-                          className={i < data.lastRating ? "text-accent-400" : "text-gray-200"}
-                        />
-                      ))}
+                      <StarIcon size={10} className="text-accent-400" />
+                      <span className="font-semibold text-accent-600 dark:text-accent-400">
+                        {skill.avgRating.toFixed(1)}
+                      </span>
                     </span>
-                  </div>
+                  )}
                 </div>
-                <RepeatIcon size={22} className="text-accent-500" />
-              </Link>
-            );
-          })}
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-primary-600 dark:text-primary-400">
+                  {Math.round(skill.score * 100)}%
+                </span>
+                <ChevronRightIcon size={14} className="text-gray-300 dark:text-gray-600 group-hover:text-gray-500 dark:group-hover:text-gray-400 transition-colors" />
+              </div>
+            </Link>
+          ))}
         </div>
-      )}
+      </section>
     </div>
   );
 }
