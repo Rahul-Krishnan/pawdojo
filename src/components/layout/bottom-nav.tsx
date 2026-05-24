@@ -2,12 +2,11 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HomeIcon, RepeatIcon, ChartIcon, UserIcon } from "@/components/icons";
+import { HomeIcon, ChartIcon, UserIcon } from "@/components/icons";
 import { playTap } from "@/lib/sounds";
 
 const tabs = [
   { href: "/dashboard", label: "Home", Icon: HomeIcon },
-  { href: "/practice", label: "Practice", Icon: RepeatIcon },
   { href: "/progress", label: "Progress", Icon: ChartIcon },
   { href: "/profile", label: "Profile", Icon: UserIcon },
 ];

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { BoltIcon, FlameIcon, StarIcon, TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon } from "@/components/icons";
+import { SkillRadar } from "@/components/practice/skill-radar";
 
 export default async function ProgressPage() {
   const supabase = await createClient();
@@ -37,11 +38,11 @@ export default async function ProgressPage() {
 
   // Build avg rating per skill
   const ratingsBySkill = new Map<string, number[]>();
-  for (const s of sessionRatings ?? []) {
-    if (!s.skill_id || !s.rating) continue;
-    const arr = ratingsBySkill.get(s.skill_id);
-    if (arr) arr.push(s.rating);
-    else ratingsBySkill.set(s.skill_id, [s.rating]);
+  for (const session of sessionRatings ?? []) {
+    if (!session.skill_id || !session.rating) continue;
+    const arr = ratingsBySkill.get(session.skill_id);
+    if (arr) arr.push(session.rating);
+    else ratingsBySkill.set(session.skill_id, [session.rating]);
   }
 
   const skillProgress = (skills ?? []).map((skill) => {
@@ -55,8 +56,17 @@ export default async function ProgressPage() {
     const avgRating = ratings.length > 0
       ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length
       : null;
-    return { ...skill, total: skillLessons.length, done, lessons: skillLessons, avgRating };
+    const completionPct = skillLessons.length > 0 ? done / skillLessons.length : 0;
+    const ratingPct = avgRating !== null ? avgRating / 5 : 0;
+    const radarScore = ratings.length > 0
+      ? completionPct * 0.5 + ratingPct * 0.5
+      : completionPct * 0.5;
+    return { ...skill, total: skillLessons.length, done, lessons: skillLessons, avgRating, radarScore };
   });
+
+  const overallScore = skillProgress.length > 0
+    ? skillProgress.reduce((sum, s) => sum + s.radarScore, 0) / skillProgress.length
+    : 0;
 
   const unlockedIds = new Set(
     achievements?.filter((a) => a.unlocked_at).map((a) => a.achievement_def_id) ?? []
@@ -73,6 +83,25 @@ export default async function ProgressPage() {
     <div className="px-4 pt-6">
       <h1 className="mb-5 text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">Progress</h1>
 
+      {/* Radar chart */}
+      <div className="rounded-2xl border border-gray-100 dark:border-dark-border bg-surface-elevated dark:bg-dark-elevated p-4 mb-6">
+        <div className="text-center mb-2">
+          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            Overall Score
+          </p>
+          <p className="text-3xl font-bold font-heading text-primary-600 dark:text-primary-400">
+            {Math.round(overallScore * 100)}%
+          </p>
+        </div>
+        <SkillRadar
+          skills={skillProgress.map((s) => ({ name: s.name, score: s.radarScore }))}
+        />
+        <p className="text-center text-[10px] text-gray-400 dark:text-gray-500 mt-1">
+          Dashed line = perfect score
+        </p>
+      </div>
+
+      {/* Stat cards */}
       <div className="mb-6 grid grid-cols-2 gap-3">
         {stats.map((stat) => (
           <div
@@ -92,8 +121,9 @@ export default async function ProgressPage() {
         ))}
       </div>
 
+      {/* Skills */}
       <section className="mb-6">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
           Skills
         </h2>
         <div className="space-y-2.5">
@@ -166,8 +196,9 @@ export default async function ProgressPage() {
         </div>
       </section>
 
+      {/* Badges */}
       <section className="pb-4">
-        <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400">
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
           Badges
         </h2>
         <div className="grid grid-cols-2 gap-2.5">
