@@ -24,6 +24,7 @@ export default async function DashboardPage() {
     { data: lessons },
     { data: achievements },
     { data: allAchievementDefs },
+    { data: sessionRatings },
   ] = await Promise.all([
     supabase.from("user_profiles").select("*").eq("id", user.id).single(),
     supabase.from("dogs").select("*").eq("user_id", user.id).single(),
@@ -32,6 +33,7 @@ export default async function DashboardPage() {
     supabase.from("lessons").select("*, skills(name, key)").order("path_order", { ascending: true }),
     supabase.from("user_achievements").select("achievement_def_id, unlocked_at").eq("user_id", user.id),
     supabase.from("achievement_definitions").select("*").order("sort_order"),
+    supabase.from("training_sessions").select("skill_id, rating, logged_at").eq("user_id", user.id).not("skill_id", "is", null).not("rating", "is", null).order("logged_at", { ascending: false }),
   ]);
 
   if (!dog) {
@@ -42,9 +44,50 @@ export default async function DashboardPage() {
     completions?.map((completion) => completion.lesson_id) ?? []
   );
 
-  const nextLesson = lessons?.find(
+  // Step 1: find the next uncompleted lesson in the linear path
+  const nextNewLesson = lessons?.find(
     (lesson) => !completedLessonIds.has(lesson.id)
   );
+
+  // Step 2: if all lessons are done, find a weak one to resurface
+  // "Weak" = avg rating below 3 for that skill, weighted by recency
+  let nextLesson = nextNewLesson;
+  let isReview = false;
+
+  if (!nextNewLesson && lessons && lessons.length > 0) {
+    // Build avg rating per skill from sessions
+    const ratingsBySkill = new Map<string, { total: number; count: number; lastDate: string }>();
+    for (const session of sessionRatings ?? []) {
+      if (!session.skill_id || !session.rating) continue;
+      const existing = ratingsBySkill.get(session.skill_id);
+      if (existing) {
+        existing.total += session.rating;
+        existing.count += 1;
+      } else {
+        ratingsBySkill.set(session.skill_id, {
+          total: session.rating,
+          count: 1,
+          lastDate: session.logged_at,
+        });
+      }
+    }
+
+    // Find skills with avg rating below 3
+    const weakSkillIds = new Set<string>();
+    for (const [skillId, data] of ratingsBySkill) {
+      if (data.total / data.count < 3) {
+        weakSkillIds.add(skillId);
+      }
+    }
+
+    if (weakSkillIds.size > 0) {
+      // Pick the first completed lesson from the weakest skill (by path_order)
+      nextLesson = lessons.find(
+        (lesson) => weakSkillIds.has(lesson.skill_id) && completedLessonIds.has(lesson.id)
+      );
+      if (nextLesson) isReview = true;
+    }
+  }
 
   const unlockedIds = new Set(
     achievements?.filter((a) => a.unlocked_at).map((a) => a.achievement_def_id) ?? []
@@ -80,13 +123,18 @@ export default async function DashboardPage() {
       {nextLesson && (
         <section>
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-            Next Lesson
+            {isReview ? "Review Lesson" : "Next Lesson"}
           </h2>
           <TodayLessonCard
             lessonId={nextLesson.id}
             title={nextLesson.title}
             skillName={(nextLesson.skills as { name: string })?.name ?? ""}
           />
+          {isReview && (
+            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
+              Your scores in this skill were low. Practice to improve!
+            </p>
+          )}
         </section>
       )}
 
@@ -94,10 +142,10 @@ export default async function DashboardPage() {
         <div className="rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 p-6 text-center border border-primary-200/50 dark:border-primary-700/30">
           <CheckIcon size={32} className="mx-auto text-primary-600 dark:text-primary-400" />
           <p className="mt-2 text-lg font-bold font-heading text-gray-900 dark:text-gray-50">
-            All lessons complete!
+            All caught up!
           </p>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Keep logging sessions to maintain your streak.
+            All lessons complete with good scores. Keep training!
           </p>
         </div>
       )}
