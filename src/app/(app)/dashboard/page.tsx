@@ -4,7 +4,7 @@ import Link from "next/link";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { XpDisplay } from "@/components/dashboard/xp-display";
 import { TodayLessonCard } from "@/components/dashboard/today-lesson-card";
-import { StarIcon, CheckIcon, PawIcon, TrophyIcon, LockIcon } from "@/components/icons";
+import { CheckIcon, PawIcon, TrophyIcon, LockIcon } from "@/components/icons";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -22,7 +22,6 @@ export default async function DashboardPage() {
     { data: streak },
     { data: completions },
     { data: lessons },
-    { data: recentSessions },
     { data: achievements },
     { data: allAchievementDefs },
   ] = await Promise.all([
@@ -31,7 +30,6 @@ export default async function DashboardPage() {
     supabase.from("user_streaks").select("*").eq("user_id", user.id).single(),
     supabase.from("lesson_completions").select("lesson_id").eq("user_id", user.id),
     supabase.from("lessons").select("*, skills(name, key)").order("path_order", { ascending: true }),
-    supabase.from("training_sessions").select("*, skills(name)").eq("user_id", user.id).order("logged_at", { ascending: false }).limit(5),
     supabase.from("user_achievements").select("achievement_def_id, unlocked_at").eq("user_id", user.id),
     supabase.from("achievement_definitions").select("*").order("sort_order"),
   ]);
@@ -177,42 +175,6 @@ export default async function DashboardPage() {
         </section>
       )}
 
-      {recentSessions && recentSessions.length > 0 && (
-        <section className="mt-6">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-            Recent Activity
-          </h2>
-          <div className="space-y-2">
-            {recentSessions.map((session) => (
-              <div
-                key={session.id}
-                className="flex items-center justify-between rounded-xl bg-white dark:bg-dark-elevated border border-gray-100 dark:border-dark-border px-4 py-3"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-                    {(session.skills as unknown as { name: string })?.name ?? "Training"}
-                  </p>
-                  <div className="mt-0.5 flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <StarIcon
-                        key={i}
-                        size={12}
-                        className={i < (session.rating ?? 0) ? "text-accent-400" : "text-gray-200 dark:text-gray-600"}
-                      />
-                    ))}
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {new Date(session.logged_at).toLocaleDateString("en-US", {
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
     </div>
   );
 }

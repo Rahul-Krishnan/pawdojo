@@ -442,7 +442,7 @@ insert into public.lessons (id, skill_id, title, content_md, lesson_order, path_
  1, 39, 10),
 
 ('b1000000-0000-0000-0000-000000000040', 'a1000000-0000-0000-0000-000000000012',
- 'Settle: The Relaxation Protocol',
+ 'Settle: Structured Relaxation',
  '## Structured Relaxation Training
 
 **Prerequisites:** Your dog lies down when tethered within 5 minutes.
@@ -456,7 +456,7 @@ insert into public.lessons (id, skill_id, title, content_md, lesson_order, path_
 5. Gradually increase the intensity: doorbell sounds, walking to the door, other people moving
 
 ### Tips
-- This is a formal protocol developed by veterinary behaviorist Dr. Karen Overall
+- This structured approach is used by professional trainers and veterinary behaviorists
 - Each step builds on the last. Don''t skip ahead
 - If your dog gets up, you went too fast. Go back two steps
 - The goal is a dog who stays relaxed no matter what''s happening around them',
