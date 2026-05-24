@@ -61,11 +61,11 @@ export default async function DashboardPage() {
     }
   }
 
-  // Find weak skills: avg rating below 3, sorted by worst first
+  // Find weak skills: avg rating 3 or below, sorted by worst first
   const weakSkills: { skillId: string; avg: number; lastDate: string }[] = [];
   for (const [skillId, data] of ratingsBySkill) {
     const avg = data.total / data.count;
-    if (avg < 3) {
+    if (avg <= 3) {
       weakSkills.push({ skillId, avg, lastDate: data.lastDate });
     }
   }
