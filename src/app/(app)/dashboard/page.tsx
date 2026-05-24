@@ -44,49 +44,67 @@ export default async function DashboardPage() {
     completions?.map((completion) => completion.lesson_id) ?? []
   );
 
-  // Step 1: find the next uncompleted lesson in the linear path
-  const nextNewLesson = lessons?.find(
+  // Build avg rating per skill from sessions
+  const ratingsBySkill = new Map<string, { total: number; count: number; lastDate: string }>();
+  for (const session of sessionRatings ?? []) {
+    if (!session.skill_id || !session.rating) continue;
+    const existing = ratingsBySkill.get(session.skill_id);
+    if (existing) {
+      existing.total += session.rating;
+      existing.count += 1;
+    } else {
+      ratingsBySkill.set(session.skill_id, {
+        total: session.rating,
+        count: 1,
+        lastDate: session.logged_at,
+      });
+    }
+  }
+
+  // Find weak skills: avg rating below 3, sorted by worst first
+  const weakSkills: { skillId: string; avg: number; lastDate: string }[] = [];
+  for (const [skillId, data] of ratingsBySkill) {
+    const avg = data.total / data.count;
+    if (avg < 3) {
+      weakSkills.push({ skillId, avg, lastDate: data.lastDate });
+    }
+  }
+  weakSkills.sort((a, b) => a.avg - b.avg);
+
+  // Find the weakest skill's first completed lesson (for review)
+  let reviewLesson = null;
+  for (const weak of weakSkills) {
+    const found = (lessons ?? []).find(
+      (lesson) => lesson.skill_id === weak.skillId && completedLessonIds.has(lesson.id)
+    );
+    if (found) {
+      reviewLesson = found;
+      break;
+    }
+  }
+
+  // Find next uncompleted lesson in the linear path
+  const nextNewLesson = (lessons ?? []).find(
     (lesson) => !completedLessonIds.has(lesson.id)
   );
 
-  // Step 2: if all lessons are done, find a weak one to resurface
-  // "Weak" = avg rating below 3 for that skill, weighted by recency
+  // Decision: alternate between new lessons and reviews.
+  // Show a review if there's a weak skill AND the user has completed
+  // at least 2 lessons since their last review would have appeared.
+  // Simple heuristic: show review when completedCount is odd and there's a weak skill.
+  const completedCount = completedLessonIds.size;
+  const showReview = reviewLesson && completedCount > 0 && completedCount % 3 === 0;
+
   let nextLesson = nextNewLesson;
   let isReview = false;
 
-  if (!nextNewLesson && lessons && lessons.length > 0) {
-    // Build avg rating per skill from sessions
-    const ratingsBySkill = new Map<string, { total: number; count: number; lastDate: string }>();
-    for (const session of sessionRatings ?? []) {
-      if (!session.skill_id || !session.rating) continue;
-      const existing = ratingsBySkill.get(session.skill_id);
-      if (existing) {
-        existing.total += session.rating;
-        existing.count += 1;
-      } else {
-        ratingsBySkill.set(session.skill_id, {
-          total: session.rating,
-          count: 1,
-          lastDate: session.logged_at,
-        });
-      }
-    }
-
-    // Find skills with avg rating below 3
-    const weakSkillIds = new Set<string>();
-    for (const [skillId, data] of ratingsBySkill) {
-      if (data.total / data.count < 3) {
-        weakSkillIds.add(skillId);
-      }
-    }
-
-    if (weakSkillIds.size > 0) {
-      // Pick the first completed lesson from the weakest skill (by path_order)
-      nextLesson = lessons.find(
-        (lesson) => weakSkillIds.has(lesson.skill_id) && completedLessonIds.has(lesson.id)
-      );
-      if (nextLesson) isReview = true;
-    }
+  if (showReview && reviewLesson) {
+    nextLesson = reviewLesson;
+    isReview = true;
+  } else if (!nextNewLesson && reviewLesson) {
+    // All new lessons done, but weak skills remain
+    nextLesson = reviewLesson;
+    isReview = true;
   }
 
   const unlockedIds = new Set(
