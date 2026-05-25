@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
-import { PawIcon, UserIcon } from "@/components/icons";
+import Image from "next/image";
+import { UserIcon } from "@/components/icons";
 import { SettingsPanel } from "@/components/profile/settings-panel";
 import { SignOutButton } from "@/components/profile/sign-out-button";
 import { EditDogForm } from "@/components/profile/edit-dog-form";
@@ -42,9 +43,7 @@ export default async function ProfilePage() {
         <div className="mb-4 rounded-2xl border border-gray-100 dark:border-dark-border bg-surface-elevated dark:bg-dark-elevated p-5">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/40">
-                <PawIcon size={24} className="text-primary-600 dark:text-primary-400" />
-              </div>
+              <Image src="/images/logo.png" alt="" width={48} height={48} className="rounded-full" />
               <div>
                 <h2 className="text-lg font-bold font-heading text-gray-900 dark:text-gray-50">{dog.name}</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">

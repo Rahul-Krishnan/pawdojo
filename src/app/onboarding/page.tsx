@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { DogForm } from "@/components/onboarding/dog-form";
-import { PawIcon } from "@/components/icons";
+import Image from "next/image";
 
 export default async function OnboardingPage() {
   const supabase = await createClient();
@@ -23,13 +23,11 @@ export default async function OnboardingPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-100">
-        <PawIcon size={30} className="text-primary-600" />
-      </div>
-      <h1 className="mt-4 text-2xl font-bold font-heading text-gray-900">
+      <Image src="/images/logo.png" alt="Paw Dojo" width={80} height={80} priority />
+      <h1 className="mt-4 text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
         Tell us about your dog
       </h1>
-      <p className="mt-1 text-sm text-gray-500">
+      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
         We&apos;ll personalize your training plan.
       </p>
       <div className="mt-8 w-full max-w-sm">

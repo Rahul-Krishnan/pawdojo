@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
-  <rect width="180" height="180" rx="40" fill="#16a34a"/>
-  <g fill="white" transform="translate(22 17) scale(5.67)">
+  <rect width="180" height="180" rx="40" fill="#EA171D"/>
+  <g fill="#FFFDF1" transform="translate(22 17) scale(5.67)">
     <ellipse cx="8.5" cy="5.5" rx="2.2" ry="2.8"/>
     <ellipse cx="15.5" cy="5.5" rx="2.2" ry="2.8"/>
     <ellipse cx="5" cy="12" rx="1.8" ry="2.3"/>

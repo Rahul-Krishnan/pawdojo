@@ -3,7 +3,7 @@ import { test, expect } from "playwright/test";
 test.describe("Pawdojo app", () => {
   test("landing page shows title and get started button", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("h1")).toContainText("Pawdojo");
+    await expect(page.locator("h1")).toContainText("Paw Dojo");
     await expect(page.locator('a[href="/login"]')).toBeVisible();
   });
 

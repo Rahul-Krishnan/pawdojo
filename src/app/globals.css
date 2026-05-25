@@ -4,41 +4,46 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --color-primary-50: #f0fdf4;
-  --color-primary-100: #dcfce7;
-  --color-primary-200: #bbf7d0;
-  --color-primary-300: #86efac;
-  --color-primary-400: #4ade80;
-  --color-primary-500: #22c55e;
-  --color-primary-600: #16a34a;
-  --color-primary-700: #15803d;
-  --color-primary-800: #166534;
-  --color-primary-900: #14532d;
+  /* Primary: warm red from the belt/highlights (#EA171D) */
+  --color-primary-50: #fef2f2;
+  --color-primary-100: #fee2e2;
+  --color-primary-200: #fecaca;
+  --color-primary-300: #fca5a5;
+  --color-primary-400: #f87171;
+  --color-primary-500: #EA171D;
+  --color-primary-600: #d41419;
+  --color-primary-700: #b91c1c;
+  --color-primary-800: #991b1b;
+  --color-primary-900: #7f1d1d;
 
-  --color-accent-50: #fffbeb;
-  --color-accent-100: #fef3c7;
-  --color-accent-200: #fde68a;
-  --color-accent-300: #fcd34d;
-  --color-accent-400: #fbbf24;
-  --color-accent-500: #f59e0b;
-  --color-accent-600: #d97706;
-  --color-accent-700: #b45309;
-  --color-accent-800: #92400e;
-  --color-accent-900: #78350f;
+  /* Accent: warm gold/tan from the dog (#F2DFBD) */
+  --color-accent-50: #FFFDF1;
+  --color-accent-100: #fef6e0;
+  --color-accent-200: #F8EBD5;
+  --color-accent-300: #F2DFBD;
+  --color-accent-400: #e8cc96;
+  --color-accent-500: #d4a94e;
+  --color-accent-600: #b8872e;
+  --color-accent-700: #956a1f;
+  --color-accent-800: #7a5518;
+  --color-accent-900: #654614;
 
-  --color-streak: #ef4444;
-  --color-xp: #3b82f6;
-  --color-badge: #a855f7;
-  --color-success: #22c55e;
+  /* Semantic colors */
+  --color-streak: #EA171D;
+  --color-xp: #d4a94e;
+  --color-badge: #EA171D;
+  --color-success: #16a34a;
 
-  --color-surface: #fafaf9;
-  --color-surface-elevated: #ffffff;
-  --color-surface-muted: #f5f5f4;
+  /* Light mode surfaces */
+  --color-surface: #F8EBD5;
+  --color-surface-elevated: #FFFDF1;
+  --color-surface-muted: #F2DFBD;
 
-  --color-dark-base: #0f1a12;
-  --color-dark-elevated: #1a2b1e;
-  --color-dark-muted: #152218;
-  --color-dark-border: #2a3d2e;
+  /* Dark mode surfaces: warm dark tones derived from #1E1A16 */
+  --color-dark-base: #1E1A16;
+  --color-dark-elevated: #2a2520;
+  --color-dark-muted: #24201b;
+  --color-dark-border: #3d3630;
 
   --font-sans: 'DM Sans', system-ui, sans-serif;
   --font-heading: 'Space Grotesk', system-ui, sans-serif;
@@ -70,7 +75,7 @@
     width: auto;
     height: auto;
     padding: 1rem;
-    background: var(--color-primary-600);
+    background: var(--color-primary-500);
     color: white;
     z-index: 100;
     font-weight: 600;

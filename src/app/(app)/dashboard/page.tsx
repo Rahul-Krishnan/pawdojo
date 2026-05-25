@@ -4,7 +4,8 @@ import Link from "next/link";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { XpDisplay } from "@/components/dashboard/xp-display";
 import { TodayLessonCard } from "@/components/dashboard/today-lesson-card";
-import { CheckIcon, PawIcon, TrophyIcon, LockIcon } from "@/components/icons";
+import Image from "next/image";
+import { CheckIcon, TrophyIcon, LockIcon } from "@/components/icons";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -122,9 +123,7 @@ export default async function DashboardPage() {
             {dog.name}
           </h1>
         </div>
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/40">
-          <PawIcon size={20} className="text-primary-600 dark:text-primary-400" />
-        </div>
+        <Image src="/images/logo.png" alt="Paw Dojo" width={44} height={44} className="rounded-full" />
       </header>
 
       <div className="mb-5 flex gap-3">

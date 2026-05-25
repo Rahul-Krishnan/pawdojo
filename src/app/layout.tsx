@@ -4,8 +4,8 @@ import { ThemeInit } from "@/components/theme-init";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pawdojo",
-  description: "Gamified dog training app",
+  title: "Paw Dojo",
+  description: "Focus. Tricks. Treats.",
 };
 
 export const viewport: Viewport = {
@@ -27,7 +27,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-surface dark:bg-dark-base text-gray-900 dark:text-gray-100 antialiased">
+      <body className="min-h-screen bg-surface dark:bg-dark-base text-[#1E1A16] dark:text-gray-100 antialiased">
         <a href="#main-content" className="skip-to-content">
           Skip to content
         </a>

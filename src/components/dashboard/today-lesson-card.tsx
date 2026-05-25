@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "motion/react";
-import { PawIcon } from "@/components/icons";
 import { playTap } from "@/lib/sounds";
 
 export function TodayLessonCard({
@@ -23,7 +23,7 @@ export function TodayLessonCard({
       <Link
         href={`/lesson/${lessonId}`}
         onClick={() => playTap()}
-        className="block rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 p-6 text-white shadow-lg shadow-primary-600/20 transition-all hover:shadow-xl hover:shadow-primary-600/30 active:scale-[0.98]"
+        className="block rounded-2xl bg-gradient-to-br from-primary-500 to-primary-700 p-6 text-white shadow-lg shadow-primary-500/20 transition-all hover:shadow-xl hover:shadow-primary-500/30 active:scale-[0.98]"
       >
         <div className="flex items-start justify-between">
           <div>
@@ -32,7 +32,7 @@ export function TodayLessonCard({
             </p>
             <h2 className="mt-2 text-lg font-bold">{title}</h2>
           </div>
-          <PawIcon size={32} className="text-primary-300/40" />
+          <Image src="/images/logo.png" alt="" width={40} height={40} className="opacity-30" />
         </div>
         <p className="mt-4 text-sm font-semibold text-primary-200">
           Start Training →
