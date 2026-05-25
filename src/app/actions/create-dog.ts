@@ -30,17 +30,27 @@ export async function createDog(formData: {
 
   const admin = createAdminClient();
 
-  const { error } = await admin.from("dogs").insert({
-    user_id: user.id,
-    name: formData.name.trim(),
-    breed: formData.breed?.trim() || null,
-    birthday: formData.birthday || null,
-  });
+  const { data: newDog, error } = await admin
+    .from("dogs")
+    .insert({
+      user_id: user.id,
+      name: formData.name.trim(),
+      breed: formData.breed?.trim() || null,
+      birthday: formData.birthday || null,
+    })
+    .select("id")
+    .single();
 
-  if (error) {
-    console.error("Failed to create dog:", error.message);
+  if (error || !newDog) {
+    console.error("Failed to create dog:", error?.message);
     return { error: "Something went wrong. Please try again." };
   }
+
+  // Set the new dog as the active dog
+  await admin
+    .from("user_profiles")
+    .update({ active_dog_id: newDog.id, updated_at: new Date().toISOString() })
+    .eq("id", user.id);
 
   redirect("/dashboard");
 }

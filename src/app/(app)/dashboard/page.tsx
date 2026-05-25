@@ -6,6 +6,7 @@ import { XpDisplay } from "@/components/dashboard/xp-display";
 import { TodayLessonCard } from "@/components/dashboard/today-lesson-card";
 import Image from "next/image";
 import { CheckIcon, TrophyIcon, LockIcon } from "@/components/icons";
+import { DogSwitcher } from "@/components/dashboard/dog-switcher";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -19,27 +20,33 @@ export default async function DashboardPage() {
 
   const [
     { data: profile },
-    { data: dog },
+    { data: allDogs },
     { data: streak },
-    { data: completions },
     { data: lessons },
     { data: achievements },
     { data: allAchievementDefs },
-    { data: sessionRatings },
   ] = await Promise.all([
     supabase.from("user_profiles").select("*").eq("id", user.id).single(),
-    supabase.from("dogs").select("*").eq("user_id", user.id).single(),
+    supabase.from("dogs").select("*").eq("user_id", user.id).order("created_at"),
     supabase.from("user_streaks").select("*").eq("user_id", user.id).single(),
-    supabase.from("lesson_completions").select("lesson_id").eq("user_id", user.id),
     supabase.from("lessons").select("*, skills(name, key)").order("path_order", { ascending: true }),
     supabase.from("user_achievements").select("achievement_def_id, unlocked_at").eq("user_id", user.id),
     supabase.from("achievement_definitions").select("*").order("sort_order"),
-    supabase.from("training_sessions").select("skill_id, rating, logged_at").eq("user_id", user.id).not("skill_id", "is", null).not("rating", "is", null).order("logged_at", { ascending: false }),
   ]);
 
-  if (!dog) {
+  if (!allDogs || allDogs.length === 0) {
     redirect("/onboarding");
   }
+
+  // Resolve active dog
+  const activeDogId = profile?.active_dog_id ?? allDogs[0].id;
+  const dog = allDogs.find((d) => d.id === activeDogId) ?? allDogs[0];
+
+  // Fetch dog-scoped data using active dog
+  const [{ data: completions }, { data: sessionRatings }] = await Promise.all([
+    supabase.from("lesson_completions").select("lesson_id").eq("dog_id", dog.id),
+    supabase.from("training_sessions").select("skill_id, rating, logged_at").eq("dog_id", dog.id).not("skill_id", "is", null).not("rating", "is", null).order("logged_at", { ascending: false }),
+  ]);
 
   const completedLessonIds = new Set(
     completions?.map((completion) => completion.lesson_id) ?? []
@@ -119,9 +126,10 @@ export default async function DashboardPage() {
           <p className="text-xs font-semibold uppercase tracking-widest text-primary-600 dark:text-primary-400">
             Welcome back
           </p>
-          <h1 className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
-            {dog.name}
-          </h1>
+          <DogSwitcher
+            activeDogId={dog.id}
+            dogs={allDogs.map((d) => ({ id: d.id, name: d.name }))}
+          />
         </div>
         <Image src="/images/logo.png" alt="Paw Dojo" width={44} height={44} className="rounded-full" />
       </header>

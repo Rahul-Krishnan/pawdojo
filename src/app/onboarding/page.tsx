@@ -17,18 +17,18 @@ export default async function OnboardingPage() {
     .eq("user_id", user.id)
     .limit(1);
 
-  if (dogs && dogs.length > 0) {
-    redirect("/dashboard");
-  }
+  const hasExistingDogs = dogs && dogs.length > 0;
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
       <Image src="/images/logo.png" alt="Paw Dojo" width={80} height={80} priority />
       <h1 className="mt-4 text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
-        Tell us about your dog
+        {hasExistingDogs ? "Add another dog" : "Tell us about your dog"}
       </h1>
       <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-        We&apos;ll personalize your training plan.
+        {hasExistingDogs
+          ? "Each dog gets their own training progress."
+          : "We\u0027ll personalize your training plan."}
       </p>
       <div className="mt-8 w-full max-w-sm">
         <DogForm />

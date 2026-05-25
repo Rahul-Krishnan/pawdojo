@@ -12,26 +12,33 @@ export default async function ProgressPage() {
 
   if (!user) redirect("/login");
 
+  // Fetch profile to get active_dog_id, plus dog-independent data
   const [
     { data: profile },
     { data: streak },
     { data: skills },
-    { data: completions },
     { data: lessons },
     { data: achievements },
     { data: allAchievementDefs },
-    { count: totalSessions },
-    { data: sessionRatings },
+    { data: firstDog },
   ] = await Promise.all([
     supabase.from("user_profiles").select("*").eq("id", user.id).single(),
     supabase.from("user_streaks").select("*").eq("user_id", user.id).single(),
     supabase.from("skills").select("*").order("sort_order"),
-    supabase.from("lesson_completions").select("lesson_id").eq("user_id", user.id),
     supabase.from("lessons").select("id, skill_id, path_order, title").order("path_order"),
     supabase.from("user_achievements").select("*, achievement_definitions(*)").eq("user_id", user.id),
     supabase.from("achievement_definitions").select("*").order("sort_order"),
-    supabase.from("training_sessions").select("id", { count: "exact" }).eq("user_id", user.id),
-    supabase.from("training_sessions").select("skill_id, rating").eq("user_id", user.id).not("skill_id", "is", null).not("rating", "is", null),
+    supabase.from("dogs").select("id").eq("user_id", user.id).order("created_at").limit(1),
+  ]);
+
+  const activeDogId = profile?.active_dog_id ?? firstDog?.[0]?.id;
+
+  // Fetch dog-scoped data
+  const dogFilter = activeDogId ? { key: "dog_id" as const, val: activeDogId } : { key: "user_id" as const, val: user.id };
+  const [{ data: completions }, { count: totalSessions }, { data: sessionRatings }] = await Promise.all([
+    supabase.from("lesson_completions").select("lesson_id").eq(dogFilter.key, dogFilter.val),
+    supabase.from("training_sessions").select("id", { count: "exact" }).eq(dogFilter.key, dogFilter.val),
+    supabase.from("training_sessions").select("skill_id, rating").eq(dogFilter.key, dogFilter.val).not("skill_id", "is", null).not("rating", "is", null),
   ]);
 
   const completedIds = new Set(completions?.map((c) => c.lesson_id) ?? []);

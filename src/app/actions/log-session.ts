@@ -40,15 +40,32 @@ export async function logSession(formData: {
     return { error: "Notes too long (max 1000 characters)" };
   }
 
-  const { data: dog } = await supabase
-    .from("dogs")
-    .select("id")
-    .eq("user_id", user.id)
+  // Get active dog from user profile
+  const { data: profileData } = await supabase
+    .from("user_profiles")
+    .select("active_dog_id")
+    .eq("id", user.id)
     .single();
 
-  if (!dog) {
+  let dogId = profileData?.active_dog_id;
+
+  // Fallback: if no active dog set, use first dog
+  if (!dogId) {
+    const { data: firstDog } = await supabase
+      .from("dogs")
+      .select("id")
+      .eq("user_id", user.id)
+      .order("created_at")
+      .limit(1)
+      .single();
+    dogId = firstDog?.id;
+  }
+
+  if (!dogId) {
     return { error: "No dog found" };
   }
+
+  const dog = { id: dogId };
 
   const admin = createAdminClient();
 
