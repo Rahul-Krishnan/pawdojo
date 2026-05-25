@@ -92,7 +92,7 @@ export function DogForm() {
         type="submit"
         disabled={loading || !name}
         whileTap={{ scale: 0.97 }}
-        className="mt-1 rounded-xl bg-primary-600 px-4 py-3.5 text-base font-semibold text-white shadow-md shadow-primary-600/25 hover:bg-primary-700 disabled:opacity-50 transition-all"
+        className="mt-1 rounded-xl bg-success-600 px-4 py-3.5 text-base font-semibold text-white shadow-md shadow-success-600/25 hover:bg-success-700 disabled:opacity-50 transition-all"
       >
         {loading ? "..." : "Start Training"}
       </motion.button>

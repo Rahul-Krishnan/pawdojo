@@ -66,7 +66,7 @@ export function TimezoneSelector({ currentTimezone }: { currentTimezone: string 
       <button
         onClick={handleSave}
         disabled={loading}
-        className="rounded-lg bg-primary-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
+        className="rounded-lg bg-success-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-success-700 disabled:opacity-50 transition-colors"
       >
         {loading ? "..." : "Save"}
       </button>

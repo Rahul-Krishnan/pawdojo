@@ -13,8 +13,8 @@ const ratingColors = [
   "bg-red-500",
   "bg-orange-500",
   "bg-accent-500",
-  "bg-primary-500",
-  "bg-primary-600",
+  "bg-success-600",
+  "bg-success-700",
 ];
 const repOptions = [3, 5, 8, 10];
 const durationOptions = [
@@ -113,7 +113,7 @@ export function SessionLogForm({
             animate={{ scale: 1 }}
             transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 15 }}
           >
-            <CheckIcon size={48} className="mx-auto text-primary-600 dark:text-primary-400" />
+            <CheckIcon size={48} className="mx-auto text-success-600 dark:text-success-400" />
           </motion.div>
           <motion.p
             initial={{ opacity: 0, y: 8 }}
@@ -186,7 +186,7 @@ export function SessionLogForm({
               whileTap={{ scale: 0.9 }}
               className={`flex-1 rounded-xl py-3 text-sm font-semibold transition-all ${
                 reps === value
-                  ? "bg-primary-600 text-white shadow-md"
+                  ? "bg-success-600 text-white shadow-md"
                   : "bg-gray-100 dark:bg-dark-muted text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-border"
               }`}
             >
@@ -209,7 +209,7 @@ export function SessionLogForm({
               whileTap={{ scale: 0.9 }}
               className={`flex flex-1 flex-col items-center rounded-xl py-3 transition-all ${
                 durationMin === option.value
-                  ? "bg-primary-600 text-white shadow-md"
+                  ? "bg-success-600 text-white shadow-md"
                   : "bg-gray-100 dark:bg-dark-muted text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-border"
               }`}
             >
@@ -255,7 +255,7 @@ export function SessionLogForm({
           type="submit"
           disabled={loading}
           whileTap={{ scale: 0.97 }}
-          className="flex-1 rounded-xl bg-primary-600 py-3.5 text-sm font-semibold text-white shadow-md shadow-primary-600/25 hover:bg-primary-700 disabled:opacity-50 transition-all"
+          className="flex-1 rounded-xl bg-success-600 py-3.5 text-sm font-semibold text-white shadow-md shadow-success-600/25 hover:bg-success-700 disabled:opacity-50 transition-all"
         >
           {loading ? "Logging..." : "Log Session"}
         </motion.button>

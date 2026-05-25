@@ -112,7 +112,7 @@ export function EditDogForm({
         <button
           onClick={handleSave}
           disabled={loading || !name.trim()}
-          className="flex-1 rounded-lg bg-primary-600 py-2 text-xs font-semibold text-white hover:bg-primary-700 disabled:opacity-50 transition-colors"
+          className="flex-1 rounded-lg bg-success-600 py-2 text-xs font-semibold text-white hover:bg-success-700 disabled:opacity-50 transition-colors"
         >
           {loading ? "Saving..." : "Save"}
         </button>

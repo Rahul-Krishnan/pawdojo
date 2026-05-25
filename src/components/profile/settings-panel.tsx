@@ -26,7 +26,7 @@ export function SettingsPanel() {
           aria-checked={soundEnabled}
           aria-label="Toggle sound effects"
           className={`relative h-7 w-12 rounded-full transition-colors ${
-            soundEnabled ? "bg-primary-500" : "bg-gray-300 dark:bg-gray-600"
+            soundEnabled ? "bg-success-600" : "bg-gray-300 dark:bg-gray-600"
           }`}
         >
           <span

@@ -28,11 +28,23 @@
   --color-accent-800: #7a5518;
   --color-accent-900: #654614;
 
+  /* Success green scale (from #036D46) */
+  --color-success-50: #ecfdf5;
+  --color-success-100: #d1fae5;
+  --color-success-200: #a7f3d0;
+  --color-success-300: #6ee7b7;
+  --color-success-400: #34d399;
+  --color-success-500: #059669;
+  --color-success-600: #036D46;
+  --color-success-700: #025c3a;
+  --color-success-800: #064e3b;
+  --color-success-900: #053f30;
+
   /* Semantic colors */
   --color-streak: #EA171D;
-  --color-xp: #d4a94e;
+  --color-xp: #036D46;
   --color-badge: #EA171D;
-  --color-success: #16a34a;
+  --color-success: #036D46;
 
   /* Light mode surfaces */
   --color-surface: #F8EBD5;

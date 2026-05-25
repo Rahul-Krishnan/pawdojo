@@ -164,8 +164,8 @@ export default async function DashboardPage() {
       )}
 
       {!nextLesson && (
-        <div className="rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900/30 dark:to-primary-800/20 p-6 text-center border border-primary-200/50 dark:border-primary-700/30">
-          <CheckIcon size={32} className="mx-auto text-primary-600 dark:text-primary-400" />
+        <div className="rounded-2xl bg-gradient-to-br from-success-50 to-success-100 dark:from-success-900/30 dark:to-success-800/20 p-6 text-center border border-success-200/50 dark:border-success-700/30">
+          <CheckIcon size={32} className="mx-auto text-success-600 dark:text-success-400" />
           <p className="mt-2 text-lg font-bold font-heading text-gray-900 dark:text-gray-50">
             All caught up!
           </p>
@@ -231,7 +231,7 @@ export default async function DashboardPage() {
                   className="flex items-center justify-between rounded-xl bg-white dark:bg-dark-elevated border border-gray-100 dark:border-dark-border px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-dark-muted"
                 >
                   <div className="flex items-center gap-2.5">
-                    <CheckIcon size={16} className="text-primary-500 shrink-0" />
+                    <CheckIcon size={16} className="text-success-600 shrink-0" />
                     <div>
                       <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
                         {lesson.title}

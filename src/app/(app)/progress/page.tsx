@@ -83,7 +83,7 @@ export default async function ProgressPage() {
     { label: "Total XP", value: profile?.total_xp ?? 0, Icon: BoltIcon, color: "text-xp" },
     { label: "Level", value: profile?.current_level ?? 1, Icon: StarIcon, color: "text-accent-500" },
     { label: "Best Streak", value: streak?.longest_streak ?? 0, Icon: FlameIcon, color: "text-streak" },
-    { label: "Sessions", value: totalSessions ?? 0, Icon: CheckIcon, color: "text-primary-600" },
+    { label: "Sessions", value: totalSessions ?? 0, Icon: CheckIcon, color: "text-success-600" },
   ];
 
   return (
@@ -96,7 +96,7 @@ export default async function ProgressPage() {
           <p className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
             Overall Score
           </p>
-          <p className="text-3xl font-bold font-heading text-primary-600 dark:text-primary-400">
+          <p className="text-3xl font-bold font-heading text-success-600 dark:text-success-400">
             {Math.round(overallScore * 100)}%
           </p>
         </div>
@@ -143,13 +143,13 @@ export default async function ProgressPage() {
                 key={skill.id}
                 className={`rounded-2xl border p-4 ${
                   isComplete
-                    ? "border-primary-200 dark:border-primary-800/40 bg-primary-50/50 dark:bg-primary-950/20"
+                    ? "border-success-200 dark:border-success-800/40 bg-success-50/50 dark:bg-success-950/20"
                     : "border-gray-100 dark:border-dark-border bg-surface-elevated dark:bg-dark-elevated"
                 }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    {isComplete && <CheckIcon size={16} className="text-primary-600" />}
+                    {isComplete && <CheckIcon size={16} className="text-success-600" />}
                     <p className="font-semibold text-gray-800 dark:text-gray-100">{skill.name}</p>
                   </div>
                   <div className="flex items-center gap-2.5">
@@ -170,8 +170,8 @@ export default async function ProgressPage() {
                   <div
                     className={`h-full rounded-full transition-all duration-700 ease-out ${
                       isComplete
-                        ? "bg-primary-500"
-                        : "bg-gradient-to-r from-primary-400 to-primary-500"
+                        ? "bg-success-600"
+                        : "bg-gradient-to-r from-success-500 to-success-600"
                     }`}
                     style={{ width: `${percent}%` }}
                   />
@@ -187,7 +187,7 @@ export default async function ProgressPage() {
                       >
                         <CheckIcon
                           size={14}
-                          className={isDone ? "text-primary-500 shrink-0" : "text-gray-300 dark:text-gray-600 shrink-0"}
+                          className={isDone ? "text-success-600 shrink-0" : "text-gray-300 dark:text-gray-600 shrink-0"}
                         />
                         <span className={`flex-1 ${isDone ? "text-gray-600 dark:text-gray-400" : "text-gray-800 dark:text-gray-200 font-medium"}`}>
                           {lesson.title}

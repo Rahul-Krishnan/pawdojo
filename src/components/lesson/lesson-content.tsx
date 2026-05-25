@@ -49,7 +49,7 @@ export function LessonContent({
       <h1 className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-50">{title}</h1>
 
       {isCompleted && (
-        <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-primary-100 dark:bg-primary-900/40 px-3 py-1 text-xs font-semibold text-primary-700 dark:text-primary-300">
+        <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-success-100 dark:bg-success-900/40 px-3 py-1 text-xs font-semibold text-success-700 dark:text-success-300">
           <CheckIcon size={14} />
           Completed
         </span>
@@ -86,8 +86,8 @@ export function LessonContent({
               onClick={() => setShowLogForm(true)}
               className={`w-full rounded-2xl py-4 text-base font-semibold shadow-lg active:scale-[0.98] transition-all ${
                 isCompleted
-                  ? "bg-accent-500 text-white shadow-accent-500/25 hover:bg-accent-600"
-                  : "bg-primary-600 text-white shadow-primary-600/25 hover:bg-primary-700"
+                  ? "bg-accent-600 text-white shadow-accent-600/25 hover:bg-accent-700"
+                  : "bg-success-600 text-white shadow-success-600/25 hover:bg-success-700"
               }`}
               whileTap={{ scale: 0.97 }}
               aria-label={isCompleted ? "Practice this lesson again" : "Log a training session"}
