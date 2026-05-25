@@ -4,7 +4,7 @@ import { ThemeInit } from "@/components/theme-init";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Goodboy",
+  title: "Pawdojo",
   description: "Gamified dog training app",
 };
 

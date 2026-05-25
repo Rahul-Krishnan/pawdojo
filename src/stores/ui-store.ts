@@ -24,8 +24,8 @@ function getStoredValue<T>(key: string, fallback: T): T {
 }
 
 export const useUIStore = create<UIStore>((set) => ({
-  soundEnabled: getStoredValue("goodboy-sound", true),
-  theme: getStoredValue<Theme>("goodboy-theme", "system"),
+  soundEnabled: getStoredValue("pawdojo-sound", true),
+  theme: getStoredValue<Theme>("pawdojo-theme", "system"),
 
   toggleSound: () =>
     set((state) => {
@@ -33,14 +33,14 @@ export const useUIStore = create<UIStore>((set) => ({
       setMuted(!next);
       setHapticEnabled(next);
       if (typeof window !== "undefined") {
-        localStorage.setItem("goodboy-sound", JSON.stringify(next));
+        localStorage.setItem("pawdojo-sound", JSON.stringify(next));
       }
       return { soundEnabled: next };
     }),
 
   setTheme: (theme: Theme) => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("goodboy-theme", JSON.stringify(theme));
+      localStorage.setItem("pawdojo-theme", JSON.stringify(theme));
       const root = document.documentElement;
       root.classList.remove("light", "dark");
       if (theme === "system") {

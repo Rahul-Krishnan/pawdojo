@@ -1,15 +1,15 @@
-# Goodboy
+# Pawdojo
 
 Gamified dog training app (mobile-first web). Duolingo model applied to dog training.
+Domain: pawdojo.app
 
 ## Project Structure
 
-- `src/` — App source code
+- `src/app/` — Next.js App Router pages and layouts
 - `src/components/` — Reusable UI components
-- `src/pages/` — Route-level page components
-- `src/hooks/` — Custom React hooks
-- `src/utils/` — Utility functions
-- `src/styles/` — Global styles and theme
-- `src/assets/` — Images, icons, static assets
-- `public/` — Static public files
-- `tests/` — Test files
+- `src/lib/` — Library code (supabase, gamification, sounds, haptics)
+- `src/stores/` — Zustand state management
+- `src/app/actions/` — Server actions
+- `supabase/` — Migrations and seed SQL
+- `tests/` — Vitest unit tests
+- `e2e/` — Playwright e2e tests

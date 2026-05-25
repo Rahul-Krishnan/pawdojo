@@ -1,9 +1,9 @@
 import { test, expect } from "playwright/test";
 
-test.describe("Goodboy app", () => {
+test.describe("Pawdojo app", () => {
   test("landing page shows title and get started button", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator("h1")).toContainText("Goodboy");
+    await expect(page.locator("h1")).toContainText("Pawdojo");
     await expect(page.locator('a[href="/login"]')).toBeVisible();
   });
 
