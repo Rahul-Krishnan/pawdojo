@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { BoltIcon, FlameIcon, StarIcon, TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon } from "@/components/icons";
+import { getBelt } from "@/lib/gamification/xp";
 import { SkillRadar } from "@/components/practice/skill-radar";
 
 export default async function ProgressPage() {
@@ -79,11 +80,13 @@ export default async function ProgressPage() {
     achievements?.filter((a) => a.unlocked_at).map((a) => a.achievement_def_id) ?? []
   );
 
+  const currentBelt = getBelt(profile?.current_level ?? 1);
+
   const stats = [
-    { label: "Total XP", value: profile?.total_xp ?? 0, Icon: BoltIcon, color: "text-xp" },
-    { label: "Level", value: profile?.current_level ?? 1, Icon: StarIcon, color: "text-accent-500" },
-    { label: "Best Streak", value: streak?.longest_streak ?? 0, Icon: FlameIcon, color: "text-streak" },
-    { label: "Sessions", value: totalSessions ?? 0, Icon: CheckIcon, color: "text-success-600" },
+    { label: "Total XP", value: String(profile?.total_xp ?? 0), Icon: BoltIcon, color: "text-xp" },
+    { label: "Belt", value: currentBelt.name.replace(" Belt", ""), Icon: null, beltColor: currentBelt.color, color: "" },
+    { label: "Best Streak", value: String(streak?.longest_streak ?? 0), Icon: FlameIcon, color: "text-streak" },
+    { label: "Sessions", value: String(totalSessions ?? 0), Icon: CheckIcon, color: "text-success-600" },
   ];
 
   return (
@@ -116,7 +119,11 @@ export default async function ProgressPage() {
             className="rounded-2xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-4"
           >
             <div className="flex items-center gap-2">
-              <stat.Icon size={18} className={stat.color} />
+              {stat.Icon ? (
+                <stat.Icon size={18} className={stat.color} />
+              ) : stat.beltColor ? (
+                <div className={`h-5 w-5 rounded-full ${stat.beltColor} border border-gray-300/50 dark:border-gray-600/50 shrink-0`} />
+              ) : null}
               <span className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
                 {stat.value}
               </span>

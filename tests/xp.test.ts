@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { calculateXPAward, calculateLevel, xpForLevel } from "@/lib/gamification/xp";
+import { calculateXPAward, calculateLevel, xpForLevel, getBelt, getNextBelt } from "@/lib/gamification/xp";
 
 describe("calculateXPAward", () => {
   it("awards base XP for lesson completion", () => {
@@ -95,5 +95,45 @@ describe("xpForLevel", () => {
 
   it("level 5 requires 2500 XP", () => {
     expect(xpForLevel(5)).toBe(2500);
+  });
+});
+
+describe("getBelt", () => {
+  it("returns White Belt at level 0", () => {
+    expect(getBelt(0).name).toBe("White Belt");
+  });
+
+  it("returns White Belt at level 1", () => {
+    expect(getBelt(1).name).toBe("White Belt");
+  });
+
+  it("returns Yellow Belt at level 2", () => {
+    expect(getBelt(2).name).toBe("Yellow Belt");
+  });
+
+  it("returns Green Belt at level 6", () => {
+    expect(getBelt(6).name).toBe("Green Belt");
+  });
+
+  it("returns Black Belt at level 20", () => {
+    expect(getBelt(20).name).toBe("Black Belt");
+  });
+
+  it("returns Black Belt at level 50 (beyond max)", () => {
+    expect(getBelt(50).name).toBe("Black Belt");
+  });
+});
+
+describe("getNextBelt", () => {
+  it("returns Yellow Belt as next after level 0", () => {
+    expect(getNextBelt(0)?.name).toBe("Yellow Belt");
+  });
+
+  it("returns null at max belt level", () => {
+    expect(getNextBelt(20)).toBeNull();
+  });
+
+  it("returns Green Belt as next for level 5", () => {
+    expect(getNextBelt(5)?.name).toBe("Green Belt");
   });
 });
