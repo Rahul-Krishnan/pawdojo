@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { BoltIcon, HeadbandIcon, StarIcon, ScrollIcon, LockIcon, CheckIcon, ChevronRightIcon } from "@/components/icons";
+import { BoltIcon, HeadbandIcon, StarIcon, TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon } from "@/components/icons";
 import { getBelt } from "@/lib/gamification/xp";
 import { SkillRadar } from "@/components/practice/skill-radar";
 
@@ -210,10 +210,10 @@ export default async function ProgressPage() {
         </div>
       </section>
 
-      {/* Scrolls */}
+      {/* Honors */}
       <section className="pb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-          Scrolls
+          Honors
         </h2>
         <div className="grid grid-cols-2 gap-2.5">
           {(allAchievementDefs ?? []).map((def) => {
@@ -229,7 +229,7 @@ export default async function ProgressPage() {
               >
                 <div className="flex items-start gap-2.5">
                   {isUnlocked ? (
-                    <ScrollIcon size={22} className="mt-0.5 shrink-0 text-accent-500" />
+                    <TrophyIcon size={22} className="mt-0.5 shrink-0 text-accent-500" />
                   ) : (
                     <LockIcon size={22} className="mt-0.5 shrink-0 text-gray-300 dark:text-gray-500" />
                   )}
