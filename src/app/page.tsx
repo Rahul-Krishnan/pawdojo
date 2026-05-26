@@ -11,6 +11,7 @@ export default function Home() {
         width={280}
         height={280}
         priority
+        className="rounded-3xl"
       />
 
       <div className="mt-6 flex gap-6 text-center">

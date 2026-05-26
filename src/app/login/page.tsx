@@ -10,6 +10,7 @@ export default function LoginPage() {
         width={280}
         height={140}
         priority
+        className="rounded-3xl"
       />
       <div className="mt-6 w-full max-w-sm">
         <AuthForm />
