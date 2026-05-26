@@ -428,7 +428,7 @@ insert into public.lessons (id, skill_id, title, content_md, lesson_order, path_
 
 ### Steps
 
-1. Sit on the couch. Put your dog on a leash tied to something nearby
+1. Sit on the couch with your dog nearby on a short leash attached to a heavy piece of furniture (so they can lie down comfortably but can''t wander off)
 2. Ignore your dog completely. Read a book, scroll your phone
 3. When they stop pacing/whining and lie down, calmly drop a treat between their paws
 4. Don''t say anything. Don''t make eye contact. Just reward the calm
