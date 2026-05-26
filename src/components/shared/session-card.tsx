@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { StarIcon } from "@/components/icons";
 
 export function SessionCard({
@@ -7,6 +8,7 @@ export function SessionCard({
   durationMin,
   notes,
   loggedAt,
+  href,
 }: {
   skillName: string;
   rating: number;
@@ -14,9 +16,10 @@ export function SessionCard({
   durationMin?: number | null;
   notes?: string | null;
   loggedAt: string;
+  href?: string;
 }) {
-  return (
-    <div className="rounded-xl bg-surface-elevated dark:bg-dark-muted border border-gray-100 dark:border-dark-border px-4 py-3">
+  const content = (
+    <>
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
           {skillName}
@@ -52,6 +55,14 @@ export function SessionCard({
           {notes}
         </p>
       )}
-    </div>
+    </>
   );
+
+  const className = "block rounded-xl bg-surface-elevated dark:bg-dark-muted border border-gray-100 dark:border-dark-border px-4 py-3 transition-colors hover:bg-surface-muted dark:hover:bg-dark-border";
+
+  if (href) {
+    return <Link href={href} className={className}>{content}</Link>;
+  }
+
+  return <div className="rounded-xl bg-surface-elevated dark:bg-dark-muted border border-gray-100 dark:border-dark-border px-4 py-3">{content}</div>;
 }
