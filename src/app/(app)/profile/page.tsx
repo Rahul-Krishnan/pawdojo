@@ -6,6 +6,7 @@ import { UserIcon, CheckIcon } from "@/components/icons";
 import { SettingsPanel } from "@/components/profile/settings-panel";
 import { SignOutButton } from "@/components/profile/sign-out-button";
 import { EditDogForm } from "@/components/profile/edit-dog-form";
+import { DeleteDogButton } from "@/components/profile/delete-dog-button";
 import { TimezoneSelector } from "@/components/profile/timezone-selector";
 
 function formatAge(birthday: string | null): string {
@@ -78,12 +79,19 @@ export default async function ProfilePage() {
                       </p>
                     </div>
                   </div>
-                  <EditDogForm
-                    dogId={dog.id}
-                    initialName={dog.name}
-                    initialBreed={dog.breed}
-                    initialBirthday={dog.birthday}
-                  />
+                  <div className="flex items-center gap-3">
+                    <DeleteDogButton
+                      dogId={dog.id}
+                      dogName={dog.name}
+                      isLastDog={(allDogs ?? []).length <= 1}
+                    />
+                    <EditDogForm
+                      dogId={dog.id}
+                      initialName={dog.name}
+                      initialBreed={dog.breed}
+                      initialBirthday={dog.birthday}
+                    />
+                  </div>
                 </div>
               </div>
             );

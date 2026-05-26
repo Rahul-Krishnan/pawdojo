@@ -38,9 +38,7 @@ export async function switchDog(dogId: string) {
     return { error: "Failed to switch. Please try again." };
   }
 
-  revalidatePath("/dashboard");
-  revalidatePath("/progress");
-  revalidatePath("/profile");
+  revalidatePath("/", "layout");
 
   return { success: true };
 }
