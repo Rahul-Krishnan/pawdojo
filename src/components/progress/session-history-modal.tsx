@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { motion, AnimatePresence } from "motion/react";
-import { CheckIcon, StarIcon } from "@/components/icons";
+import { CheckIcon } from "@/components/icons";
+import { SessionCard } from "@/components/shared/session-card";
 import { playTap } from "@/lib/sounds";
 
 type Session = {
@@ -56,7 +57,7 @@ export function SessionsStatCard({
   );
 }
 
-function SessionHistoryModal({
+export function SessionHistoryModal({
   dogId,
   onClose,
 }: {
@@ -147,46 +148,15 @@ function SessionHistoryModal({
 
           <div className="space-y-2">
             {sessions.map((session) => (
-              <div
+              <SessionCard
                 key={session.id}
-                className="rounded-xl bg-white dark:bg-dark-muted border border-gray-100 dark:border-dark-border px-4 py-3"
-              >
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-                    {session.skill_name}
-                  </p>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">
-                    {new Date(session.logged_at).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </p>
-                </div>
-                <div className="mt-1 flex items-center gap-3">
-                  <div className="flex gap-0.5">
-                    {Array.from({ length: 5 }).map((_, index) => (
-                      <StarIcon
-                        key={index}
-                        size={12}
-                        className={index < session.rating ? "text-accent-400" : "text-gray-200 dark:text-gray-600"}
-                      />
-                    ))}
-                  </div>
-                  {(session.reps || session.duration_min) && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                      {[
-                        session.reps ? `${session.reps}+ reps` : null,
-                        session.duration_min ? `${session.duration_min} min` : null,
-                      ].filter(Boolean).join(" · ")}
-                    </p>
-                  )}
-                </div>
-                {session.notes && (
-                  <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400 italic">
-                    {session.notes}
-                  </p>
-                )}
-              </div>
+                skillName={session.skill_name}
+                rating={session.rating}
+                reps={session.reps}
+                durationMin={session.duration_min}
+                notes={session.notes}
+                loggedAt={session.logged_at}
+              />
             ))}
           </div>
 
