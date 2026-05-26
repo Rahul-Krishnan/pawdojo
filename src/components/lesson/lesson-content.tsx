@@ -62,9 +62,7 @@ export function LessonContent({
       {isCompleted && (
         <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-success-100 dark:bg-success-900/40 px-3 py-1 text-xs font-semibold text-success-700 dark:text-success-300">
           <CheckIcon size={14} />
-          {sessions.length > 1
-            ? `Practiced ${sessions.length} times`
-            : "Completed"}
+          Practiced {sessions.length} time{sessions.length !== 1 ? "s" : ""}
         </span>
       )}
 
