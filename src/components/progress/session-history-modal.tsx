@@ -9,13 +9,16 @@ import { playTap } from "@/lib/sounds";
 
 type Session = {
   id: string;
-  skill_name: string;
+  lessonName: string;
+  lessonHref: string | null;
   rating: number;
   reps: number | null;
   duration_min: number | null;
   notes: string | null;
   logged_at: string;
 };
+
+type LessonInfo = { id: string; skill_id: string; title: string };
 
 const PAGE_SIZE = 20;
 
@@ -68,37 +71,61 @@ export function SessionHistoryModal({
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
+  const [lessonsMap, setLessonsMap] = useState<Map<string, LessonInfo>>(new Map());
   const supabase = createClient();
+
+  // Load lessons once to resolve skill_id -> lesson name/href
+  useEffect(() => {
+    supabase
+      .from("lessons")
+      .select("id, skill_id, title")
+      .order("path_order")
+      .then(({ data }) => {
+        const map = new Map<string, LessonInfo>();
+        for (const lesson of data ?? []) {
+          if (!map.has(lesson.skill_id)) {
+            map.set(lesson.skill_id, lesson);
+          }
+        }
+        setLessonsMap(map);
+      });
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchPage = useCallback(async (pageOffset: number) => {
     setLoading(true);
     const { data } = await supabase
       .from("training_sessions")
-      .select("id, rating, reps, duration_min, notes, logged_at, skills(name)")
+      .select("id, skill_id, rating, reps, duration_min, notes, logged_at, skills(name)")
       .eq("dog_id", dogId)
       .not("skill_id", "is", null)
       .order("logged_at", { ascending: false })
       .range(pageOffset, pageOffset + PAGE_SIZE - 1);
 
-    const mapped = (data ?? []).map((row) => ({
-      id: row.id,
-      skill_name: (row.skills as unknown as { name: string })?.name ?? "Training",
-      rating: row.rating ?? 0,
-      reps: row.reps,
-      duration_min: row.duration_min,
-      notes: row.notes,
-      logged_at: row.logged_at,
-    }));
+    const mapped = (data ?? []).map((row) => {
+      const lesson = lessonsMap.get(row.skill_id ?? "");
+      return {
+        id: row.id,
+        lessonName: lesson?.title ?? (row.skills as unknown as { name: string })?.name ?? "Training",
+        lessonHref: lesson ? `/lesson/${lesson.id}` : null,
+        rating: row.rating ?? 0,
+        reps: row.reps,
+        duration_min: row.duration_min,
+        notes: row.notes,
+        logged_at: row.logged_at,
+      };
+    });
 
     setSessions((prev) => pageOffset === 0 ? mapped : [...prev, ...mapped]);
     setHasMore(mapped.length === PAGE_SIZE);
     setOffset(pageOffset + PAGE_SIZE);
     setLoading(false);
-  }, [dogId, supabase]);
+  }, [dogId, supabase, lessonsMap]);
 
   useEffect(() => {
-    fetchPage(0);
-  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+    if (lessonsMap.size > 0) {
+      fetchPage(0);
+    }
+  }, [lessonsMap]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleScroll(event: React.UIEvent<HTMLDivElement>) {
     const target = event.currentTarget;
@@ -150,12 +177,13 @@ export function SessionHistoryModal({
             {sessions.map((session) => (
               <SessionCard
                 key={session.id}
-                skillName={session.skill_name}
+                skillName={session.lessonName}
                 rating={session.rating}
                 reps={session.reps}
                 durationMin={session.duration_min}
                 notes={session.notes}
                 loggedAt={session.logged_at}
+                href={session.lessonHref ?? undefined}
               />
             ))}
           </div>

@@ -233,15 +233,19 @@ export default async function DashboardPage() {
 
       <RecentSessions
         dogId={dog.id}
-        sessions={(recentSessions ?? []).map((session) => ({
-          id: session.id,
-          skillName: (session.skills as unknown as { name: string })?.name ?? "Training",
-          rating: session.rating ?? 0,
-          reps: session.reps ?? null,
-          durationMin: session.duration_min ?? null,
-          notes: session.notes ?? null,
-          loggedAt: session.logged_at,
-        }))}
+        sessions={(recentSessions ?? []).map((session) => {
+          const lessonForSkill = (lessons ?? []).find((lesson) => lesson.skill_id === session.skill_id);
+          return {
+            id: session.id,
+            skillName: lessonForSkill?.title ?? (session.skills as unknown as { name: string })?.name ?? "Training",
+            rating: session.rating ?? 0,
+            reps: session.reps ?? null,
+            durationMin: session.duration_min ?? null,
+            notes: session.notes ?? null,
+            loggedAt: session.logged_at,
+            href: lessonForSkill ? `/lesson/${lessonForSkill.id}` : undefined,
+          };
+        })}
       />
 
     </div>

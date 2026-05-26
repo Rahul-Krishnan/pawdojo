@@ -14,6 +14,7 @@ type RecentSession = {
   durationMin: number | null;
   notes: string | null;
   loggedAt: string;
+  href?: string;
 };
 
 export function RecentSessions({
@@ -50,6 +51,7 @@ export function RecentSessions({
             durationMin={session.durationMin}
             notes={session.notes}
             loggedAt={session.loggedAt}
+            href={session.href}
           />
         ))}
       </div>
