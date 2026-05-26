@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon, StarIcon, FlameIcon } from "@/components/icons";
+import { TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon, StarIcon } from "@/components/icons";
 import { getBelt } from "@/lib/gamification/xp";
 import { SkillRadar } from "@/components/practice/skill-radar";
 import { BeltStatCard } from "@/components/dashboard/belt-stat-card";
@@ -95,7 +95,6 @@ export default async function ProgressPage() {
 
   const simpleStats = [
     { label: "Total XP", value: String(activeDog?.total_xp ?? 0), Icon: null, color: "", imageSrc: "/images/xp.svg" },
-    { label: "Best Streak", value: String(dogStreak?.longest_streak ?? 0), Icon: FlameIcon, color: "text-streak" },
     { label: "Sessions", value: String(totalSessions ?? 0), Icon: CheckIcon, color: "text-success-600" },
   ];
 
