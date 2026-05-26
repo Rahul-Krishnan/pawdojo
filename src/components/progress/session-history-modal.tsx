@@ -1,0 +1,208 @@
+"use client";
+
+import { useState, useEffect, useCallback } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { motion, AnimatePresence } from "motion/react";
+import { CheckIcon, StarIcon } from "@/components/icons";
+import { playTap } from "@/lib/sounds";
+
+type Session = {
+  id: string;
+  skill_name: string;
+  rating: number;
+  reps: number | null;
+  duration_min: number | null;
+  notes: string | null;
+  logged_at: string;
+};
+
+const PAGE_SIZE = 20;
+
+export function SessionsStatCard({
+  sessionCount,
+  dogId,
+}: {
+  sessionCount: number;
+  dogId: string;
+}) {
+  const [showModal, setShowModal] = useState(false);
+
+  return (
+    <>
+      <button
+        onClick={() => { setShowModal(true); playTap(); }}
+        className="rounded-2xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-4 text-left transition-colors hover:bg-surface-muted dark:hover:bg-dark-muted active:scale-[0.98]"
+      >
+        <div className="flex items-center gap-2">
+          <CheckIcon size={18} className="text-success-600" />
+          <span className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
+            {sessionCount}
+          </span>
+        </div>
+        <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+          Sessions
+        </p>
+      </button>
+
+      <AnimatePresence>
+        {showModal && (
+          <SessionHistoryModal
+            dogId={dogId}
+            onClose={() => setShowModal(false)}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
+function SessionHistoryModal({
+  dogId,
+  onClose,
+}: {
+  dogId: string;
+  onClose: () => void;
+}) {
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(0);
+  const supabase = createClient();
+
+  const fetchPage = useCallback(async (pageOffset: number) => {
+    setLoading(true);
+    const { data } = await supabase
+      .from("training_sessions")
+      .select("id, rating, reps, duration_min, notes, logged_at, skills(name)")
+      .eq("dog_id", dogId)
+      .not("skill_id", "is", null)
+      .order("logged_at", { ascending: false })
+      .range(pageOffset, pageOffset + PAGE_SIZE - 1);
+
+    const mapped = (data ?? []).map((row) => ({
+      id: row.id,
+      skill_name: (row.skills as unknown as { name: string })?.name ?? "Training",
+      rating: row.rating ?? 0,
+      reps: row.reps,
+      duration_min: row.duration_min,
+      notes: row.notes,
+      logged_at: row.logged_at,
+    }));
+
+    setSessions((prev) => pageOffset === 0 ? mapped : [...prev, ...mapped]);
+    setHasMore(mapped.length === PAGE_SIZE);
+    setOffset(pageOffset + PAGE_SIZE);
+    setLoading(false);
+  }, [dogId, supabase]);
+
+  useEffect(() => {
+    fetchPage(0);
+  }, []);  // eslint-disable-line react-hooks/exhaustive-deps
+
+  function handleScroll(event: React.UIEvent<HTMLDivElement>) {
+    const target = event.currentTarget;
+    const nearBottom = target.scrollHeight - target.scrollTop - target.clientHeight < 100;
+    if (nearBottom && hasMore && !loading) {
+      fetchPage(offset);
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ y: 100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        exit={{ y: 100, opacity: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        className="w-full max-w-sm rounded-t-3xl sm:rounded-3xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border shadow-2xl max-h-[80vh] flex flex-col"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-5 pb-3 shrink-0">
+          <h2 className="text-lg font-bold font-heading text-gray-900 dark:text-gray-50">
+            Session History
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-xs font-semibold text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+          >
+            Done
+          </button>
+        </div>
+
+        <div
+          className="overflow-y-auto px-5 pb-8 sm:pb-5"
+          onScroll={handleScroll}
+        >
+          {sessions.length === 0 && !loading && (
+            <p className="text-center text-sm text-gray-400 dark:text-gray-500 py-8">
+              No sessions logged yet
+            </p>
+          )}
+
+          <div className="space-y-2">
+            {sessions.map((session) => (
+              <div
+                key={session.id}
+                className="rounded-xl bg-white dark:bg-dark-muted border border-gray-100 dark:border-dark-border px-4 py-3"
+              >
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                    {session.skill_name}
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    {new Date(session.logged_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </p>
+                </div>
+                <div className="mt-1 flex items-center gap-3">
+                  <div className="flex gap-0.5">
+                    {Array.from({ length: 5 }).map((_, index) => (
+                      <StarIcon
+                        key={index}
+                        size={12}
+                        className={index < session.rating ? "text-accent-400" : "text-gray-200 dark:text-gray-600"}
+                      />
+                    ))}
+                  </div>
+                  {(session.reps || session.duration_min) && (
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {[
+                        session.reps ? `${session.reps}+ reps` : null,
+                        session.duration_min ? `${session.duration_min} min` : null,
+                      ].filter(Boolean).join(" · ")}
+                    </p>
+                  )}
+                </div>
+                {session.notes && (
+                  <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400 italic">
+                    {session.notes}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {loading && (
+            <div className="flex justify-center py-4">
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-gray-200 border-t-primary-500" />
+            </div>
+          )}
+
+          {!hasMore && sessions.length > 0 && (
+            <p className="text-center text-xs text-gray-400 dark:text-gray-500 py-3">
+              All sessions loaded
+            </p>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}

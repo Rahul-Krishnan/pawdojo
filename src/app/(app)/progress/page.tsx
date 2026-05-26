@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon, StarIcon } from "@/components/icons";
+import { SessionsStatCard } from "@/components/progress/session-history-modal";
 import { getBelt } from "@/lib/gamification/xp";
 import { SkillRadar } from "@/components/practice/skill-radar";
 import { BeltStatCard } from "@/components/dashboard/belt-stat-card";
@@ -93,10 +94,7 @@ export default async function ProgressPage() {
     achievements?.filter((a) => a.unlocked_at).map((a) => a.achievement_def_id) ?? []
   );
 
-  const simpleStats = [
-    { label: "Total XP", value: String(activeDog?.total_xp ?? 0), Icon: null, color: "", imageSrc: "/images/xp.svg" },
-    { label: "Sessions", value: String(totalSessions ?? 0), Icon: CheckIcon, color: "text-success-600" },
-  ];
+  const dogXp = activeDog?.total_xp ?? 0;
 
   return (
     <div className="px-4 pt-6">
@@ -131,26 +129,21 @@ export default async function ProgressPage() {
           currentLevel={activeDog?.current_level ?? 1}
           totalXp={activeDog?.total_xp ?? 0}
         />
-        {simpleStats.map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-2xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-4"
-          >
-            <div className="flex items-center gap-2">
-              {stat.Icon ? (
-                <stat.Icon size={18} className={stat.color} />
-              ) : stat.imageSrc ? (
-                <Image src={stat.imageSrc} alt="" width={24} height={24} className="shrink-0 dark:brightness-90" />
-              ) : null}
-              <span className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
-                {stat.value}
-              </span>
-            </div>
-            <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-              {stat.label}
-            </p>
+        <div className="rounded-2xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-4">
+          <div className="flex items-center gap-2">
+            <Image src="/images/xp.svg" alt="" width={24} height={24} className="shrink-0 dark:brightness-90" />
+            <span className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
+              {dogXp}
+            </span>
           </div>
-        ))}
+          <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            Total XP
+          </p>
+        </div>
+        <SessionsStatCard
+          sessionCount={totalSessions ?? 0}
+          dogId={activeDogId ?? ""}
+        />
       </div>
 
       {/* Skills */}
