@@ -59,10 +59,10 @@ export function LessonContent({
       </p>
       <h1 className="mt-1 text-2xl font-bold text-gray-900 dark:text-gray-50">{title}</h1>
 
-      {isCompleted && (
+      {sessions.length > 0 && (
         <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-success-100 dark:bg-success-900/40 px-3 py-1 text-xs font-semibold text-success-700 dark:text-success-300">
           <CheckIcon size={14} />
-          Completed
+          Trained {sessions.length} time{sessions.length !== 1 ? "s" : ""}
         </span>
       )}
 
