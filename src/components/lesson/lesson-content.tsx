@@ -69,6 +69,7 @@ export function LessonContent({
           lessonId={lessonId}
           skillId={skillId}
           isRetake={isCompleted}
+          xpReward={xpReward}
           onClose={() => router.back()}
         />
       </div>

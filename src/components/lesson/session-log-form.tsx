@@ -27,11 +27,13 @@ export function SessionLogForm({
   lessonId,
   skillId,
   isRetake = false,
+  xpReward = 10,
   onClose,
 }: {
   lessonId: string;
   skillId: string;
   isRetake?: boolean;
+  xpReward?: number;
   onClose: () => void;
 }) {
   const [rating, setRating] = useState(3);
@@ -243,23 +245,22 @@ export function SessionLogForm({
         </p>
       )}
 
-      <div className="flex gap-3 pt-1">
-        <button
-          type="button"
-          onClick={onClose}
-          className="flex-1 rounded-xl border border-gray-200 dark:border-dark-border py-3.5 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-dark-muted transition-colors"
-        >
-          Cancel
-        </button>
-        <motion.button
-          type="submit"
-          disabled={loading}
-          whileTap={{ scale: 0.97 }}
-          className="flex-1 rounded-xl bg-success-600 py-3.5 text-sm font-semibold text-white shadow-md shadow-success-600/25 hover:bg-success-700 disabled:opacity-50 transition-all"
-        >
-          {loading ? "Logging..." : "Log Session"}
-        </motion.button>
-      </div>
+      <motion.button
+        type="submit"
+        disabled={loading}
+        whileTap={{ scale: 0.97 }}
+        className={`w-full rounded-2xl py-4 text-base font-semibold shadow-lg active:scale-[0.98] transition-all ${
+          isRetake
+            ? "bg-accent-600 text-white shadow-accent-600/25 hover:bg-accent-700"
+            : "bg-success-600 text-white shadow-success-600/25 hover:bg-success-700"
+        } disabled:opacity-50`}
+      >
+        {loading
+          ? "Logging..."
+          : isRetake
+            ? "Practice Again (+XP)"
+            : `I trained my dog! (+${xpReward} XP)`}
+      </motion.button>
     </form>
   );
 }
