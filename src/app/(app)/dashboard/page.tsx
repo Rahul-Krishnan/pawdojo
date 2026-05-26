@@ -5,7 +5,7 @@ import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { XpDisplay } from "@/components/dashboard/xp-display";
 import { TodayLessonCard } from "@/components/dashboard/today-lesson-card";
 import Image from "next/image";
-import { CheckIcon, TrophyIcon, LockIcon } from "@/components/icons";
+import { CheckIcon, LockIcon, StarIcon } from "@/components/icons";
 import { RecentSessions } from "@/components/dashboard/recent-sessions";
 import { DogSwitcher } from "@/components/dashboard/dog-switcher";
 import { SkipButton } from "@/components/dashboard/skip-button";
@@ -215,7 +215,7 @@ export default async function DashboardPage() {
                   }`}
                 >
                   {isUnlocked ? (
-                    <TrophyIcon size={24} className="mx-auto text-accent-500" />
+                    <Image src="/images/award.svg" alt="" width={28} height={28} className="mx-auto" />
                   ) : (
                     <LockIcon size={24} className="mx-auto text-gray-300 dark:text-gray-600" />
                   )}

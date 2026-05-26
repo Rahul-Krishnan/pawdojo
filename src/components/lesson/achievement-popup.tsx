@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "motion/react";
-import { TrophyIcon } from "@/components/icons";
+import Image from "next/image";
 
 export function AchievementPopup({
   achievements,
@@ -34,7 +34,7 @@ export function AchievementPopup({
             animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 12 }}
           >
-            <TrophyIcon size={64} className="mx-auto text-accent-500" />
+            <Image src="/images/award.svg" alt="" width={80} height={80} className="mx-auto" />
           </motion.div>
 
           <motion.p

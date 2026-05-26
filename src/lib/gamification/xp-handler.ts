@@ -105,11 +105,14 @@ export async function handleXPAward(
       .eq("id", data.userId)
       .single();
 
+    const userTotalXp = (profile?.total_xp ?? 0) + totalXpAwarded;
+    const userLevel = calculateLevel(userTotalXp);
+
     await admin
       .from("user_profiles")
       .update({
-        total_xp: (profile?.total_xp ?? 0) + totalXpAwarded,
-        current_level: Math.max(newLevel, 1),
+        total_xp: userTotalXp,
+        current_level: Math.max(userLevel, 1),
         updated_at: new Date().toISOString(),
       })
       .eq("id", data.userId);

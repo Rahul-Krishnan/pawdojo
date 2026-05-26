@@ -27,23 +27,31 @@ export async function handleAchievementCheck(
     .select("*")
     .eq("user_id", data.userId);
 
-  // Build user stats from DB
-  const { data: profile } = await admin
-    .from("user_profiles")
-    .select("total_xp, current_streak")
-    .eq("id", data.userId)
+  // Build stats scoped to the active dog
+  const { data: dogRow } = await admin
+    .from("dogs")
+    .select("total_xp")
+    .eq("id", data.dogId)
     .single();
+
+  // Read streak from dog_streaks (not user_profiles)
+  const { data: dogStreakRows } = await admin
+    .from("dog_streaks")
+    .select("current_streak")
+    .eq("dog_id", data.dogId)
+    .limit(1);
+  const dogStreak = dogStreakRows?.[0];
 
   const { count: sessionCount } = await admin
     .from("training_sessions")
     .select("id", { count: "exact", head: true })
-    .eq("user_id", data.userId);
+    .eq("dog_id", data.dogId);
 
-  // Count completed lessons by skill key
+  // Count completed lessons by skill key, scoped to this dog
   const { data: completions } = await admin
     .from("lesson_completions")
     .select("lesson_id, lessons(skill_id, skills(key))")
-    .eq("user_id", data.userId);
+    .eq("dog_id", data.dogId);
 
   const completedLessonsBySkill: Record<string, number> = {};
   const countedLessons = new Set<string>();
@@ -69,11 +77,11 @@ export async function handleAchievementCheck(
     }
   }
 
-  // Check if any session has a 5-star rating
+  // Check if any session has a 5-star rating (per dog)
   const { count: perfectCount } = await admin
     .from("training_sessions")
     .select("id", { count: "exact", head: true })
-    .eq("user_id", data.userId)
+    .eq("dog_id", data.dogId)
     .eq("rating", 5);
 
   // Fetch basic skill keys
@@ -83,9 +91,9 @@ export async function handleAchievementCheck(
     .eq("category", "basics");
 
   const stats: UserStats = {
-    currentStreak: profile?.current_streak ?? 0,
+    currentStreak: dogStreak?.current_streak ?? 0,
     totalSessions: sessionCount ?? 0,
-    totalXp: profile?.total_xp ?? 0,
+    totalXp: dogRow?.total_xp ?? 0,
     completedLessonsBySkill,
     totalLessonsPerSkill,
     hasSessionRating5: (perfectCount ?? 0) > 0,

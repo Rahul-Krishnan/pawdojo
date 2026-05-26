@@ -27,22 +27,41 @@ export default async function LessonPage({
     notFound();
   }
 
+  // Get active dog ID
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("active_dog_id")
+    .eq("id", user.id)
+    .single();
+
+  const activeDogId = profile?.active_dog_id;
+
   const skillId = (lesson.skills as { id: string }).id;
 
+  // Filter by active dog for per-dog completion and session history
+  const completionQuery = supabase
+    .from("lesson_completions")
+    .select("id")
+    .eq("lesson_id", id);
+
+  const sessionsQuery = supabase
+    .from("training_sessions")
+    .select("id, rating, notes, logged_at, reps, duration_min")
+    .eq("skill_id", skillId)
+    .order("logged_at", { ascending: false })
+    .limit(10);
+
+  if (activeDogId) {
+    completionQuery.eq("dog_id", activeDogId);
+    sessionsQuery.eq("dog_id", activeDogId);
+  } else {
+    completionQuery.eq("user_id", user.id);
+    sessionsQuery.eq("user_id", user.id);
+  }
+
   const [{ data: completion }, { data: sessions }] = await Promise.all([
-    supabase
-      .from("lesson_completions")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("lesson_id", id)
-      .limit(1),
-    supabase
-      .from("training_sessions")
-      .select("id, rating, notes, logged_at, reps, duration_min")
-      .eq("user_id", user.id)
-      .eq("skill_id", skillId)
-      .order("logged_at", { ascending: false })
-      .limit(10),
+    completionQuery.limit(1),
+    sessionsQuery,
   ]);
 
   const isCompleted = completion && completion.length > 0;

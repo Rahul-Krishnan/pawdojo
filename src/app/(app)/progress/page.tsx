@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon, StarIcon } from "@/components/icons";
+import { LockIcon, CheckIcon, ChevronRightIcon, StarIcon } from "@/components/icons";
 import { SessionsStatCard } from "@/components/progress/session-history-modal";
 import { getBelt } from "@/lib/gamification/xp";
 import { SkillRadar } from "@/components/practice/skill-radar";
@@ -235,7 +235,7 @@ export default async function ProgressPage() {
               >
                 <div className="flex items-start gap-2.5">
                   {isUnlocked ? (
-                    <TrophyIcon size={22} className="mt-0.5 shrink-0 text-accent-500" />
+                    <Image src="/images/award.svg" alt="" width={24} height={24} className="mt-0.5 shrink-0" />
                   ) : (
                     <LockIcon size={22} className="mt-0.5 shrink-0 text-gray-300 dark:text-gray-500" />
                   )}
