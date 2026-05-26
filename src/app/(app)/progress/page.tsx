@@ -43,19 +43,20 @@ export default async function ProgressPage() {
     : activeDogRow?.[0] ?? null;
 
   // Fetch dog-scoped data using explicit dog_id filter
-  const [{ data: completions }, { count: totalSessions }, { data: sessionRatings }, { data: dogStreak }] = activeDogId
+  const [{ data: completions }, { count: totalSessions }, { data: sessionRatings }, { data: dogStreakRows }] = activeDogId
     ? await Promise.all([
         supabase.from("lesson_completions").select("lesson_id").eq("dog_id", activeDogId),
         supabase.from("training_sessions").select("id", { count: "exact" }).eq("dog_id", activeDogId),
         supabase.from("training_sessions").select("skill_id, rating").eq("dog_id", activeDogId).not("skill_id", "is", null).not("rating", "is", null),
-        supabase.from("dog_streaks").select("*").eq("dog_id", activeDogId).single(),
+        supabase.from("dog_streaks").select("*").eq("dog_id", activeDogId).limit(1),
       ])
     : await Promise.all([
         supabase.from("lesson_completions").select("lesson_id").eq("user_id", user.id),
         supabase.from("training_sessions").select("id", { count: "exact" }).eq("user_id", user.id),
         supabase.from("training_sessions").select("skill_id, rating").eq("user_id", user.id).not("skill_id", "is", null).not("rating", "is", null),
-        supabase.from("dog_streaks").select("*").eq("dog_id", "none").single(),
+        supabase.from("dog_streaks").select("*").eq("dog_id", "none").limit(1),
       ]);
+  const dogStreak = dogStreakRows?.[0] ?? null;
 
   const completedIds = new Set(completions?.map((c) => c.lesson_id) ?? []);
 

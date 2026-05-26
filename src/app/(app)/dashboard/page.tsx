@@ -44,12 +44,13 @@ export default async function DashboardPage() {
   const dog = allDogs.find((d) => d.id === activeDogId) ?? allDogs[0];
 
   // Fetch dog-scoped data: completions, sessions, and dog streak
-  const [{ data: completions }, { data: sessionRatings }, { data: recentSessions }, { data: dogStreak }] = await Promise.all([
+  const [{ data: completions }, { data: sessionRatings }, { data: recentSessions }, { data: dogStreakRows }] = await Promise.all([
     supabase.from("lesson_completions").select("lesson_id").eq("dog_id", dog.id),
     supabase.from("training_sessions").select("skill_id, rating, logged_at").eq("dog_id", dog.id).not("skill_id", "is", null).not("rating", "is", null).order("logged_at", { ascending: false }),
     supabase.from("training_sessions").select("id, skill_id, rating, reps, duration_min, notes, logged_at, skills(name)").eq("dog_id", dog.id).not("skill_id", "is", null).order("logged_at", { ascending: false }).limit(5),
-    supabase.from("dog_streaks").select("*").eq("dog_id", dog.id).single(),
+    supabase.from("dog_streaks").select("*").eq("dog_id", dog.id).limit(1),
   ]);
+  const dogStreak = dogStreakRows?.[0] ?? null;
 
   const completedLessonIds = new Set(
     completions?.map((completion) => completion.lesson_id) ?? []

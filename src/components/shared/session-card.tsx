@@ -58,11 +58,11 @@ export function SessionCard({
     </>
   );
 
-  const className = "block rounded-xl bg-surface-elevated dark:bg-dark-muted border border-gray-100 dark:border-dark-border px-4 py-3 transition-colors hover:bg-surface-muted dark:hover:bg-dark-border";
+  const baseClass = "rounded-xl bg-surface-elevated dark:bg-dark-muted border border-gray-100 dark:border-dark-border px-4 py-3";
 
   if (href) {
-    return <Link href={href} className={className}>{content}</Link>;
+    return <Link href={href} className={`block ${baseClass} transition-colors hover:bg-surface-muted dark:hover:bg-dark-border`}>{content}</Link>;
   }
 
-  return <div className="rounded-xl bg-surface-elevated dark:bg-dark-muted border border-gray-100 dark:border-dark-border px-4 py-3">{content}</div>;
+  return <div className={baseClass}>{content}</div>;
 }
