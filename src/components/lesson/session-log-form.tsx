@@ -249,17 +249,9 @@ export function SessionLogForm({
         type="submit"
         disabled={loading}
         whileTap={{ scale: 0.97 }}
-        className={`w-full rounded-2xl py-4 text-base font-semibold shadow-lg active:scale-[0.98] transition-all ${
-          isRetake
-            ? "bg-accent-600 text-white shadow-accent-600/25 hover:bg-accent-700"
-            : "bg-success-600 text-white shadow-success-600/25 hover:bg-success-700"
-        } disabled:opacity-50`}
+        className="w-full rounded-2xl py-4 text-base font-semibold shadow-lg active:scale-[0.98] transition-all bg-success-600 text-white shadow-success-600/25 hover:bg-success-700 disabled:opacity-50"
       >
-        {loading
-          ? "Logging..."
-          : isRetake
-            ? "Practice Again (+XP)"
-            : `I trained my dog! (+${xpReward} XP)`}
+        {loading ? "Logging..." : `I trained my dog! (+${xpReward} XP)`}
       </motion.button>
     </form>
   );

@@ -5,7 +5,7 @@ import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { XpDisplay } from "@/components/dashboard/xp-display";
 import { TodayLessonCard } from "@/components/dashboard/today-lesson-card";
 import Image from "next/image";
-import { CheckIcon, TrophyIcon, LockIcon } from "@/components/icons";
+import { CheckIcon, TrophyIcon, LockIcon, StarIcon } from "@/components/icons";
 import { DogSwitcher } from "@/components/dashboard/dog-switcher";
 import { SkipButton } from "@/components/dashboard/skip-button";
 import { getSkippedLessons } from "@/app/actions/skip-lesson";
@@ -45,9 +45,10 @@ export default async function DashboardPage() {
   const dog = allDogs.find((d) => d.id === activeDogId) ?? allDogs[0];
 
   // Fetch dog-scoped data using active dog
-  const [{ data: completions }, { data: sessionRatings }] = await Promise.all([
+  const [{ data: completions }, { data: sessionRatings }, { data: recentSessions }] = await Promise.all([
     supabase.from("lesson_completions").select("lesson_id").eq("dog_id", dog.id),
     supabase.from("training_sessions").select("skill_id, rating, logged_at").eq("dog_id", dog.id).not("skill_id", "is", null).not("rating", "is", null).order("logged_at", { ascending: false }),
+    supabase.from("training_sessions").select("id, skill_id, rating, logged_at, skills(name)").eq("dog_id", dog.id).not("skill_id", "is", null).order("logged_at", { ascending: false }).limit(5),
   ]);
 
   const completedLessonIds = new Set(
@@ -230,43 +231,44 @@ export default async function DashboardPage() {
         </section>
       )}
 
-      {completedLessonIds.size > 0 && (
+      {recentSessions && recentSessions.length > 0 && (
         <section className="mt-6">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-              Completed Lessons
-            </h2>
-            <Link
-              href="/progress"
-              className="text-xs font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 transition-colors"
-            >
-              View All
-            </Link>
-          </div>
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+            Recent Sessions
+          </h2>
           <div className="space-y-2">
-            {lessons
-              ?.filter((lesson) => completedLessonIds.has(lesson.id))
-              .slice(0, 4)
-              .map((lesson) => (
+            {recentSessions.map((session) => {
+              const skillName = (session.skills as unknown as { name: string })?.name ?? "Training";
+              const lessonForSkill = (lessons ?? []).find((lesson) => lesson.skill_id === session.skill_id);
+              return (
                 <Link
-                  key={lesson.id}
-                  href={`/lesson/${lesson.id}`}
-                  className="flex items-center justify-between rounded-xl bg-white dark:bg-dark-elevated border border-gray-100 dark:border-dark-border px-4 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-dark-muted"
+                  key={session.id}
+                  href={lessonForSkill ? `/lesson/${lessonForSkill.id}` : "/progress"}
+                  className="flex items-center justify-between rounded-xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border px-4 py-3 transition-colors hover:bg-surface-muted dark:hover:bg-dark-muted"
                 >
-                  <div className="flex items-center gap-2.5">
-                    <CheckIcon size={16} className="text-success-600 shrink-0" />
-                    <div>
-                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-                        {lesson.title}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400">
-                        {(lesson.skills as unknown as { name: string })?.name}
-                      </p>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                      {skillName}
+                    </p>
+                    <div className="mt-0.5 flex gap-0.5">
+                      {Array.from({ length: 5 }).map((_, index) => (
+                        <StarIcon
+                          key={index}
+                          size={12}
+                          className={index < (session.rating ?? 0) ? "text-accent-400" : "text-gray-200 dark:text-gray-600"}
+                        />
+                      ))}
                     </div>
                   </div>
-                  <span className="text-xs font-medium text-accent-500">Practice</span>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    {new Date(session.logged_at).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </p>
                 </Link>
-              ))}
+              );
+            })}
           </div>
         </section>
       )}
