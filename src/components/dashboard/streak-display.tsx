@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { SnowflakeIcon } from "@/components/icons";
 import { AnimatePresence } from "motion/react";
 import { FocusModal } from "./focus-modal";
 import { playTap } from "@/lib/sounds";
@@ -34,10 +33,9 @@ export function StreakDisplay({
               day focus
             </p>
             {freezeAvailable > 0 && (
-              <div className="mt-1 flex items-center gap-1 text-xs text-blue-500 dark:text-blue-400">
-                <SnowflakeIcon size={12} />
-                <span>{freezeAvailable} save{freezeAvailable > 1 ? "s" : ""} remaining</span>
-              </div>
+              <p className="mt-1 text-xs text-primary-500 dark:text-primary-400">
+                {freezeAvailable} save{freezeAvailable > 1 ? "s" : ""} remaining
+              </p>
             )}
           </div>
         </div>
