@@ -93,12 +93,17 @@ export function AuthForm() {
       >
         {loading ? "..." : isSignUp ? "Sign Up" : "Log In"}
       </motion.button>
+      <div className="mt-2 flex items-center gap-3">
+        <div className="flex-1 h-px bg-gray-200 dark:bg-dark-border" />
+        <span className="text-xs text-gray-400 dark:text-gray-500">or</span>
+        <div className="flex-1 h-px bg-gray-200 dark:bg-dark-border" />
+      </div>
       <button
         type="button"
         onClick={() => setIsSignUp(!isSignUp)}
-        className="text-sm text-gray-400 dark:text-gray-500 hover:text-primary-600 dark:hover:text-primary-400 transition-colors"
+        className="rounded-xl border-2 border-primary-500 dark:border-primary-600 px-4 py-3 text-base font-semibold text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-950/20 transition-all"
       >
-        {isSignUp ? "Already have an account? Log in" : "Need an account? Sign up"}
+        {isSignUp ? "Already have an account? Log in" : "Create an account"}
       </button>
     </motion.form>
   );
