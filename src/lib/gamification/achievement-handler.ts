@@ -1,5 +1,4 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { calculateLevel } from "./xp";
 import {
   evaluateAchievements,
   type AchievementDef,
@@ -150,39 +149,9 @@ export async function handleAchievementCheck(
         idempotency_key: `${data.userId}:achievement:${defId}`,
       });
 
-      // Update dog XP (per-dog)
-      const { data: currentDog } = await admin
-        .from("dogs")
-        .select("total_xp")
-        .eq("id", data.dogId)
-        .single();
-
-      if (currentDog) {
-        const newDogXp = currentDog.total_xp + def.xpReward;
-        await admin
-          .from("dogs")
-          .update({ total_xp: newDogXp, current_level: Math.max(calculateLevel(newDogXp), 1) })
-          .eq("id", data.dogId);
-      }
-
-      // Update user profile aggregate XP
-      const { data: currentProfile } = await admin
-        .from("user_profiles")
-        .select("total_xp")
-        .eq("id", data.userId)
-        .single();
-
-      if (currentProfile) {
-        const newUserXp = currentProfile.total_xp + def.xpReward;
-        await admin
-          .from("user_profiles")
-          .update({
-            total_xp: newUserXp,
-            current_level: Math.max(calculateLevel(newUserXp), 1),
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", data.userId);
-      }
+      // Atomic XP increment for achievement rewards
+      await admin.rpc("increment_dog_xp", { dog_id_param: data.dogId, xp_amount: def.xpReward });
+      await admin.rpc("increment_user_xp", { user_id_param: data.userId, xp_amount: def.xpReward });
     }
     if (def) unlockedNames.push(def.name);
   }

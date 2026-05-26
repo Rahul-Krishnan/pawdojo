@@ -27,6 +27,20 @@ export async function logSession(formData: {
   if (!formData.lessonId || !formData.skillId) {
     return { error: "Missing lesson or skill" };
   }
+
+  // Verify lesson exists and belongs to the submitted skill
+  const { data: lessonCheck } = await supabase
+    .from("lessons")
+    .select("id, skill_id")
+    .eq("id", formData.lessonId)
+    .single();
+
+  if (!lessonCheck) {
+    return { error: "Lesson not found" };
+  }
+  if (lessonCheck.skill_id !== formData.skillId) {
+    return { error: "Lesson does not belong to this skill" };
+  }
   if (typeof formData.rating !== "number" || formData.rating < 1 || formData.rating > 5) {
     return { error: "Rating must be between 1 and 5" };
   }
@@ -90,14 +104,15 @@ export async function logSession(formData: {
   }
 
   // Only create lesson completion on first time (not retake)
+  // Use upsert with unique constraint to prevent duplicates from double-submits
   if (!formData.isRetake) {
-    await admin.from("lesson_completions").insert({
+    await admin.from("lesson_completions").upsert({
       user_id: user.id,
       dog_id: dog.id,
       lesson_id: formData.lessonId,
       score: formData.rating / 5,
       xp_awarded: 0,
-    });
+    }, { onConflict: "dog_id,lesson_id", ignoreDuplicates: true });
   }
 
   // Update dog skill progress

@@ -7,16 +7,30 @@ export async function handleXPAward(
 ): Promise<{ xpAwarded: number }> {
   const admin = createAdminClient();
 
-  // Get today's session XP to check daily cap
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  // Fetch user timezone for correct day boundary
+  const { data: profileRow } = await admin
+    .from("user_profiles")
+    .select("timezone")
+    .eq("id", data.userId)
+    .single();
+  const timezone = profileRow?.timezone ?? "UTC";
+
+  // Compute UTC timestamp of midnight in the user's local timezone
+  // eg for America/Los_Angeles (UTC-7), local midnight = 07:00 UTC
+  const utcNow = new Date();
+  const localNow = new Date(utcNow.toLocaleString("en-US", { timeZone: timezone }));
+  const tzOffsetMs = localNow.getTime() - utcNow.getTime();
+  const todayLocal = utcNow.toLocaleDateString("en-CA", { timeZone: timezone });
+  const dateParts = todayLocal.split("-").map(Number);
+  const midnightUtcRaw = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
+  const todayStartUtc = new Date(midnightUtcRaw.getTime() - tzOffsetMs);
 
   const { data: todayXpRows } = await admin
     .from("xp_transactions")
     .select("xp_amount")
     .eq("user_id", data.userId)
     .eq("action_type", "session_log")
-    .gte("awarded_at", todayStart.toISOString());
+    .gte("awarded_at", todayStartUtc.toISOString());
 
   const dailySessionXpSoFar = (todayXpRows ?? []).reduce(
     (sum, row) => sum + row.xp_amount,
@@ -28,7 +42,7 @@ export async function handleXPAward(
     .from("xp_transactions")
     .select("id", { count: "exact", head: true })
     .eq("user_id", data.userId)
-    .gte("awarded_at", todayStart.toISOString());
+    .gte("awarded_at", todayStartUtc.toISOString());
 
   const isFirstOfDay = (todayCount ?? 0) === 0;
 
@@ -79,43 +93,10 @@ export async function handleXPAward(
     }
   }
 
-  // Update dog with new totals (per-dog XP)
+  // Atomic XP increment (prevents lost updates under concurrent writes)
   if (totalXpAwarded > 0) {
-    const { data: dogRow } = await admin
-      .from("dogs")
-      .select("total_xp")
-      .eq("id", data.dogId)
-      .single();
-
-    const newTotalXp = (dogRow?.total_xp ?? 0) + totalXpAwarded;
-    const newLevel = calculateLevel(newTotalXp);
-
-    await admin
-      .from("dogs")
-      .update({
-        total_xp: newTotalXp,
-        current_level: Math.max(newLevel, 1),
-      })
-      .eq("id", data.dogId);
-
-    // Also update user profile aggregate (for achievements)
-    const { data: profile } = await admin
-      .from("user_profiles")
-      .select("total_xp")
-      .eq("id", data.userId)
-      .single();
-
-    const userTotalXp = (profile?.total_xp ?? 0) + totalXpAwarded;
-    const userLevel = calculateLevel(userTotalXp);
-
-    await admin
-      .from("user_profiles")
-      .update({
-        total_xp: userTotalXp,
-        current_level: Math.max(userLevel, 1),
-        updated_at: new Date().toISOString(),
-      })
-      .eq("id", data.userId);
+    await admin.rpc("increment_dog_xp", { dog_id_param: data.dogId, xp_amount: totalXpAwarded });
+    await admin.rpc("increment_user_xp", { user_id_param: data.userId, xp_amount: totalXpAwarded });
   }
 
   return { xpAwarded: totalXpAwarded };
