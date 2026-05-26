@@ -64,7 +64,7 @@ export async function handleXPAward(
         isFirstOfDay: false,
       },
       data.userId,
-      data.lessonId
+      `${data.dogId}:${data.lessonId}`
     );
 
     const { error } = await admin.from("xp_transactions").insert({
