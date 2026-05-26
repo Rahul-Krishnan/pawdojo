@@ -122,6 +122,15 @@ export default async function ProgressPage() {
 
       {/* Stat cards */}
       <div className="mb-6 grid grid-cols-2 gap-3">
+        <FocusStatCard
+          currentStreak={dogStreak?.current_streak ?? 0}
+          longestStreak={dogStreak?.longest_streak ?? 0}
+          freezeAvailable={dogStreak?.freeze_available ?? 0}
+        />
+        <BeltStatCard
+          currentLevel={activeDog?.current_level ?? 1}
+          totalXp={activeDog?.total_xp ?? 0}
+        />
         {simpleStats.map((stat) => (
           <div
             key={stat.label}
@@ -142,15 +151,6 @@ export default async function ProgressPage() {
             </p>
           </div>
         ))}
-        <BeltStatCard
-          currentLevel={activeDog?.current_level ?? 1}
-          totalXp={activeDog?.total_xp ?? 0}
-        />
-        <FocusStatCard
-          currentStreak={dogStreak?.current_streak ?? 0}
-          longestStreak={dogStreak?.longest_streak ?? 0}
-          freezeAvailable={dogStreak?.freeze_available ?? 0}
-        />
       </div>
 
       {/* Skills */}
