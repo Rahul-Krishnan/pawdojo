@@ -1,11 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { SessionLogForm } from "./session-log-form";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import { ArrowLeftIcon, CheckIcon } from "@/components/icons";
 
 export function LessonContent({
@@ -25,7 +24,6 @@ export function LessonContent({
   xpReward: number;
   isCompleted: boolean;
 }) {
-  const [showLogForm, setShowLogForm] = useState(false);
   const router = useRouter();
 
   return (
@@ -64,40 +62,15 @@ export function LessonContent({
       </article>
 
       <div className="mt-8 pb-6">
-        <AnimatePresence mode="wait">
-          {showLogForm ? (
-            <motion.div
-              key="form"
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.2 }}
-            >
-              <SessionLogForm
-                lessonId={lessonId}
-                skillId={skillId}
-                isRetake={isCompleted}
-                onClose={() => setShowLogForm(false)}
-              />
-            </motion.div>
-          ) : (
-            <motion.button
-              key="button"
-              onClick={() => setShowLogForm(true)}
-              className={`w-full rounded-2xl py-4 text-base font-semibold shadow-lg active:scale-[0.98] transition-all ${
-                isCompleted
-                  ? "bg-accent-600 text-white shadow-accent-600/25 hover:bg-accent-700"
-                  : "bg-success-600 text-white shadow-success-600/25 hover:bg-success-700"
-              }`}
-              whileTap={{ scale: 0.97 }}
-              aria-label={isCompleted ? "Practice this lesson again" : "Log a training session"}
-            >
-              {isCompleted
-                ? "Practice Again (+XP)"
-                : `I trained my dog! (+${xpReward} XP)`}
-            </motion.button>
-          )}
-        </AnimatePresence>
+        <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+          {isCompleted ? "Practice Again" : "Log Training"}
+        </h2>
+        <SessionLogForm
+          lessonId={lessonId}
+          skillId={skillId}
+          isRetake={isCompleted}
+          onClose={() => router.back()}
+        />
       </div>
     </motion.div>
   );
