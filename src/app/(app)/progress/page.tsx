@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { BoltIcon, TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon, StarIcon } from "@/components/icons";
+import { TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon, StarIcon } from "@/components/icons";
 import { getBelt } from "@/lib/gamification/xp";
 import { SkillRadar } from "@/components/practice/skill-radar";
 import { BeltStatCard } from "@/components/dashboard/belt-stat-card";
@@ -84,7 +84,7 @@ export default async function ProgressPage() {
   );
 
   const simpleStats = [
-    { label: "Total XP", value: String(profile?.total_xp ?? 0), Icon: BoltIcon, color: "text-xp" },
+    { label: "Total XP", value: String(profile?.total_xp ?? 0), Icon: null, color: "", imageSrc: "/images/xp.svg" },
     { label: "Sessions", value: String(totalSessions ?? 0), Icon: CheckIcon, color: "text-success-600" },
   ];
 
@@ -118,7 +118,11 @@ export default async function ProgressPage() {
             className="rounded-2xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-4"
           >
             <div className="flex items-center gap-2">
-              <stat.Icon size={18} className={stat.color} />
+              {stat.Icon ? (
+                <stat.Icon size={18} className={stat.color} />
+              ) : stat.imageSrc ? (
+                <Image src={stat.imageSrc} alt="" width={24} height={24} className="shrink-0 dark:brightness-90" />
+              ) : null}
               <span className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
                 {stat.value}
               </span>

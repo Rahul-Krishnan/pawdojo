@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { BoltIcon, TrophyIcon } from "@/components/icons";
+import { TrophyIcon } from "@/components/icons";
 
 export default function Home() {
   return (
@@ -20,7 +20,7 @@ export default function Home() {
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Focus</span>
         </div>
         <div className="flex flex-col items-center gap-1">
-          <BoltIcon size={24} className="text-xp" />
+          <Image src="/images/xp.svg" alt="" width={48} height={48} />
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400">XP</span>
         </div>
         <div className="flex flex-col items-center gap-1">
