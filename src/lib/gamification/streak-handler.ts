@@ -7,12 +7,28 @@ export async function handleStreakUpdate(
 ): Promise<{ streakUpdated: boolean }> {
   const admin = createAdminClient();
 
-  // Fetch current streak state
-  const { data: streakRow } = await admin
-    .from("user_streaks")
+  // Fetch current dog streak state (per-dog streaks)
+  let { data: streakRow } = await admin
+    .from("dog_streaks")
     .select("*")
-    .eq("user_id", data.userId)
+    .eq("dog_id", data.dogId)
     .single();
+
+  // If no dog streak row exists yet, create one
+  if (!streakRow) {
+    const { data: newRow } = await admin
+      .from("dog_streaks")
+      .insert({
+        dog_id: data.dogId,
+        current_streak: 0,
+        longest_streak: 0,
+        last_streak_date: null,
+        freeze_available: 2,
+      })
+      .select()
+      .single();
+    streakRow = newRow;
+  }
 
   if (!streakRow) {
     return { streakUpdated: false };
@@ -45,7 +61,19 @@ export async function handleStreakUpdate(
     return { streakUpdated: false };
   }
 
-  // Update streak record
+  // Update dog streak record
+  await admin
+    .from("dog_streaks")
+    .update({
+      current_streak: newState.currentStreak,
+      longest_streak: newState.longestStreak,
+      last_streak_date: newState.lastStreakDate,
+      freeze_available: newState.freezeAvailable,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("dog_id", data.dogId);
+
+  // Also keep user_streaks updated (for achievements)
   await admin
     .from("user_streaks")
     .update({
@@ -56,16 +84,6 @@ export async function handleStreakUpdate(
       updated_at: new Date().toISOString(),
     })
     .eq("user_id", data.userId);
-
-  // Also update denormalized field on user_profiles
-  await admin
-    .from("user_profiles")
-    .update({
-      current_streak: newState.currentStreak,
-      longest_streak: newState.longestStreak,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", data.userId);
 
   // Log streak events
   for (const event of events) {

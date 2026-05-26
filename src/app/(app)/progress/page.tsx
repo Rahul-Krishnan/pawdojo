@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon, StarIcon } from "@/components/icons";
+import { TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon, StarIcon, FlameIcon } from "@/components/icons";
 import { getBelt } from "@/lib/gamification/xp";
 import { SkillRadar } from "@/components/practice/skill-radar";
 import { BeltStatCard } from "@/components/dashboard/belt-stat-card";
@@ -19,35 +19,40 @@ export default async function ProgressPage() {
   // Fetch profile to get active_dog_id, plus dog-independent data
   const [
     { data: profile },
-    { data: streak },
     { data: skills },
     { data: lessons },
     { data: achievements },
     { data: allAchievementDefs },
-    { data: firstDog },
+    { data: activeDogRow },
   ] = await Promise.all([
     supabase.from("user_profiles").select("*").eq("id", user.id).single(),
-    supabase.from("user_streaks").select("*").eq("user_id", user.id).single(),
     supabase.from("skills").select("*").order("sort_order"),
     supabase.from("lessons").select("id, skill_id, path_order, title").order("path_order"),
     supabase.from("user_achievements").select("*, achievement_definitions(*)").eq("user_id", user.id),
     supabase.from("achievement_definitions").select("*").order("sort_order"),
-    supabase.from("dogs").select("id").eq("user_id", user.id).order("created_at").limit(1),
+    supabase.from("dogs").select("*").eq("user_id", user.id).order("created_at").limit(1),
   ]);
 
-  const activeDogId = profile?.active_dog_id ?? firstDog?.[0]?.id;
+  const activeDogId = profile?.active_dog_id ?? activeDogRow?.[0]?.id;
+
+  // Fetch the active dog's full row for XP/level
+  const activeDog = activeDogId
+    ? (await supabase.from("dogs").select("*").eq("id", activeDogId).single()).data
+    : activeDogRow?.[0] ?? null;
 
   // Fetch dog-scoped data using explicit dog_id filter
-  const [{ data: completions }, { count: totalSessions }, { data: sessionRatings }] = activeDogId
+  const [{ data: completions }, { count: totalSessions }, { data: sessionRatings }, { data: dogStreak }] = activeDogId
     ? await Promise.all([
         supabase.from("lesson_completions").select("lesson_id").eq("dog_id", activeDogId),
         supabase.from("training_sessions").select("id", { count: "exact" }).eq("dog_id", activeDogId),
         supabase.from("training_sessions").select("skill_id, rating").eq("dog_id", activeDogId).not("skill_id", "is", null).not("rating", "is", null),
+        supabase.from("dog_streaks").select("*").eq("dog_id", activeDogId).single(),
       ])
     : await Promise.all([
         supabase.from("lesson_completions").select("lesson_id").eq("user_id", user.id),
         supabase.from("training_sessions").select("id", { count: "exact" }).eq("user_id", user.id),
         supabase.from("training_sessions").select("skill_id, rating").eq("user_id", user.id).not("skill_id", "is", null).not("rating", "is", null),
+        supabase.from("dog_streaks").select("*").eq("dog_id", "none").single(),
       ]);
 
   const completedIds = new Set(completions?.map((c) => c.lesson_id) ?? []);
@@ -89,7 +94,8 @@ export default async function ProgressPage() {
   );
 
   const simpleStats = [
-    { label: "Total XP", value: String(profile?.total_xp ?? 0), Icon: null, color: "", imageSrc: "/images/xp.svg" },
+    { label: "Total XP", value: String(activeDog?.total_xp ?? 0), Icon: null, color: "", imageSrc: "/images/xp.svg" },
+    { label: "Best Streak", value: String(dogStreak?.longest_streak ?? 0), Icon: FlameIcon, color: "text-streak" },
     { label: "Sessions", value: String(totalSessions ?? 0), Icon: CheckIcon, color: "text-success-600" },
   ];
 
@@ -138,13 +144,13 @@ export default async function ProgressPage() {
           </div>
         ))}
         <BeltStatCard
-          currentLevel={profile?.current_level ?? 1}
-          totalXp={profile?.total_xp ?? 0}
+          currentLevel={activeDog?.current_level ?? 1}
+          totalXp={activeDog?.total_xp ?? 0}
         />
         <FocusStatCard
-          currentStreak={streak?.current_streak ?? 0}
-          longestStreak={streak?.longest_streak ?? 0}
-          freezeAvailable={streak?.freeze_available ?? 0}
+          currentStreak={dogStreak?.current_streak ?? 0}
+          longestStreak={dogStreak?.longest_streak ?? 0}
+          freezeAvailable={dogStreak?.freeze_available ?? 0}
         />
       </div>
 

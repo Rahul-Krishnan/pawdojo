@@ -79,21 +79,36 @@ export async function handleXPAward(
     }
   }
 
-  // Update user profile with new totals
+  // Update dog with new totals (per-dog XP)
   if (totalXpAwarded > 0) {
+    const { data: dogRow } = await admin
+      .from("dogs")
+      .select("total_xp")
+      .eq("id", data.dogId)
+      .single();
+
+    const newTotalXp = (dogRow?.total_xp ?? 0) + totalXpAwarded;
+    const newLevel = calculateLevel(newTotalXp);
+
+    await admin
+      .from("dogs")
+      .update({
+        total_xp: newTotalXp,
+        current_level: Math.max(newLevel, 1),
+      })
+      .eq("id", data.dogId);
+
+    // Also update user profile aggregate (for achievements)
     const { data: profile } = await admin
       .from("user_profiles")
       .select("total_xp")
       .eq("id", data.userId)
       .single();
 
-    const newTotalXp = (profile?.total_xp ?? 0) + totalXpAwarded;
-    const newLevel = calculateLevel(newTotalXp);
-
     await admin
       .from("user_profiles")
       .update({
-        total_xp: newTotalXp,
+        total_xp: (profile?.total_xp ?? 0) + totalXpAwarded,
         current_level: Math.max(newLevel, 1),
         updated_at: new Date().toISOString(),
       })

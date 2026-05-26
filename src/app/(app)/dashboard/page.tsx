@@ -23,14 +23,12 @@ export default async function DashboardPage() {
   const [
     { data: profile },
     { data: allDogs },
-    { data: streak },
     { data: lessons },
     { data: achievements },
     { data: allAchievementDefs },
   ] = await Promise.all([
     supabase.from("user_profiles").select("*").eq("id", user.id).single(),
     supabase.from("dogs").select("*").eq("user_id", user.id).order("created_at"),
-    supabase.from("user_streaks").select("*").eq("user_id", user.id).single(),
     supabase.from("lessons").select("*, skills(name, key)").order("path_order", { ascending: true }),
     supabase.from("user_achievements").select("achievement_def_id, unlocked_at").eq("user_id", user.id),
     supabase.from("achievement_definitions").select("*").order("sort_order"),
@@ -44,11 +42,12 @@ export default async function DashboardPage() {
   const activeDogId = profile?.active_dog_id ?? allDogs[0].id;
   const dog = allDogs.find((d) => d.id === activeDogId) ?? allDogs[0];
 
-  // Fetch dog-scoped data using active dog
-  const [{ data: completions }, { data: sessionRatings }, { data: recentSessions }] = await Promise.all([
+  // Fetch dog-scoped data: completions, sessions, and dog streak
+  const [{ data: completions }, { data: sessionRatings }, { data: recentSessions }, { data: dogStreak }] = await Promise.all([
     supabase.from("lesson_completions").select("lesson_id").eq("dog_id", dog.id),
     supabase.from("training_sessions").select("skill_id, rating, logged_at").eq("dog_id", dog.id).not("skill_id", "is", null).not("rating", "is", null).order("logged_at", { ascending: false }),
     supabase.from("training_sessions").select("id, skill_id, rating, logged_at, skills(name)").eq("dog_id", dog.id).not("skill_id", "is", null).order("logged_at", { ascending: false }).limit(5),
+    supabase.from("dog_streaks").select("*").eq("dog_id", dog.id).single(),
   ]);
 
   const completedLessonIds = new Set(
@@ -149,13 +148,13 @@ export default async function DashboardPage() {
 
       <div className="mb-5 flex gap-3">
         <StreakDisplay
-          currentStreak={streak?.current_streak ?? 0}
-          longestStreak={streak?.longest_streak ?? 0}
-          freezeAvailable={streak?.freeze_available ?? 0}
+          currentStreak={dogStreak?.current_streak ?? 0}
+          longestStreak={dogStreak?.longest_streak ?? 0}
+          freezeAvailable={dogStreak?.freeze_available ?? 0}
         />
         <XpDisplay
-          totalXp={profile?.total_xp ?? 0}
-          currentLevel={profile?.current_level ?? 1}
+          totalXp={dog.total_xp ?? 0}
+          currentLevel={dog.current_level ?? 1}
         />
       </div>
 
