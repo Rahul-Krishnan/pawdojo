@@ -8,6 +8,7 @@ import { getBelt } from "@/lib/gamification/xp";
 import { SkillRadar } from "@/components/practice/skill-radar";
 import { BeltStatCard } from "@/components/dashboard/belt-stat-card";
 import { FocusStatCard } from "@/components/dashboard/focus-stat-card";
+import { XpStatCard } from "@/components/dashboard/xp-stat-card";
 
 export default async function ProgressPage() {
   const supabase = await createClient();
@@ -129,17 +130,10 @@ export default async function ProgressPage() {
           currentLevel={activeDog?.current_level ?? 1}
           totalXp={activeDog?.total_xp ?? 0}
         />
-        <div className="rounded-2xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-4">
-          <div className="flex items-center gap-2">
-            <Image src="/images/xp.svg" alt="" width={24} height={24} className="shrink-0 dark:brightness-90" />
-            <span className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
-              {dogXp}
-            </span>
-          </div>
-          <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-            Total XP
-          </p>
-        </div>
+        <XpStatCard
+          totalXp={dogXp}
+          currentLevel={activeDog?.current_level ?? 1}
+        />
         <SessionsStatCard
           sessionCount={totalSessions ?? 0}
           dogId={activeDogId ?? ""}
