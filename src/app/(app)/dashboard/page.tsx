@@ -161,7 +161,7 @@ export default async function DashboardPage() {
       {nextLesson && (
         <section>
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-            {isReview ? "Review Lesson" : "Next Lesson"}
+            {isReview ? "Next Lesson (Review)" : "Next Lesson"}
           </h2>
           <TodayLessonCard
             lessonId={nextLesson.id}
