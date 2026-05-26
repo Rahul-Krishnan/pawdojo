@@ -6,20 +6,15 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
       <Image
-        src="/images/logo.png"
-        alt="Paw Dojo logo"
-        width={160}
-        height={160}
+        src="/images/logo-full.png"
+        alt="Paw Dojo: Focus. Tricks. Treats."
+        width={280}
+        height={280}
         priority
+        className="dark:brightness-90"
       />
-      <h1 className="mt-4 text-4xl font-bold font-heading tracking-tight text-gray-900 dark:text-gray-50">
-        Paw Dojo
-      </h1>
-      <p className="mt-2 text-center text-base text-gray-600 dark:text-gray-400">
-        Focus. Tricks. Treats.
-      </p>
 
-      <div className="mt-8 flex gap-6 text-center">
+      <div className="mt-6 flex gap-6 text-center">
         <div className="flex flex-col items-center gap-1">
           <FlameIcon size={24} className="text-streak" />
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Streaks</span>
