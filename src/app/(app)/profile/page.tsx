@@ -7,6 +7,7 @@ import { SettingsPanel } from "@/components/profile/settings-panel";
 import { SignOutButton } from "@/components/profile/sign-out-button";
 import { EditDogForm } from "@/components/profile/edit-dog-form";
 import { DeleteDogButton } from "@/components/profile/delete-dog-button";
+import { ActivateDogButton } from "@/components/profile/activate-dog-button";
 import { TimezoneSelector } from "@/components/profile/timezone-selector";
 
 function formatAge(birthday: string | null): string {
@@ -60,26 +61,28 @@ export default async function ProfilePage() {
                 }`}
               >
                 <div className="flex items-start justify-between">
-                  <div className="flex items-center gap-4">
-                    <Image src="/images/logo.svg" alt="" width={56} height={56} />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-lg font-bold font-heading text-gray-900 dark:text-gray-50">{dog.name}</h3>
-                        {isActive && (
-                          <span className="inline-flex items-center gap-0.5 rounded-full bg-success-100 dark:bg-success-900/40 px-2 py-0.5 text-[10px] font-semibold text-success-700 dark:text-success-300">
-                            <CheckIcon size={10} />
-                            Active
-                          </span>
-                        )}
+                  <ActivateDogButton dogId={dog.id} isActive={isActive}>
+                    <div className="flex items-center gap-4">
+                      <Image src="/images/logo.svg" alt="" width={56} height={56} />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="text-lg font-bold font-heading text-gray-900 dark:text-gray-50">{dog.name}</h3>
+                          {isActive && (
+                            <span className="inline-flex items-center gap-0.5 rounded-full bg-success-100 dark:bg-success-900/40 px-2 py-0.5 text-[10px] font-semibold text-success-700 dark:text-success-300">
+                              <CheckIcon size={10} />
+                              Active
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          {[dog.breed, formatAge(dog.birthday)]
+                            .filter((val) => val && val !== "Good dog")
+                            .join(" · ") || "Good dog"}
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-500 dark:text-gray-400">
-                        {[dog.breed, formatAge(dog.birthday)]
-                          .filter((val) => val && val !== "Good dog")
-                          .join(" · ") || "Good dog"}
-                      </p>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-3">
+                  </ActivateDogButton>
+                  <div className="flex items-center gap-3 shrink-0">
                     <DeleteDogButton
                       dogId={dog.id}
                       dogName={dog.name}
