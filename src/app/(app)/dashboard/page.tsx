@@ -7,6 +7,8 @@ import { TodayLessonCard } from "@/components/dashboard/today-lesson-card";
 import Image from "next/image";
 import { CheckIcon, TrophyIcon, LockIcon } from "@/components/icons";
 import { DogSwitcher } from "@/components/dashboard/dog-switcher";
+import { SkipButton } from "@/components/dashboard/skip-button";
+import { getSkippedLessons } from "@/app/actions/skip-lesson";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -52,6 +54,8 @@ export default async function DashboardPage() {
     completions?.map((completion) => completion.lesson_id) ?? []
   );
 
+  const skippedLessonIds = await getSkippedLessons();
+
   // Build avg rating per skill from sessions
   const ratingsBySkill = new Map<string, { total: number; count: number; lastDate: string }>();
   for (const session of sessionRatings ?? []) {
@@ -91,10 +95,17 @@ export default async function DashboardPage() {
     }
   }
 
-  // Find next uncompleted lesson in the linear path
+  // Find next uncompleted lesson in the linear path, skipping skipped ones
   const nextNewLesson = (lessons ?? []).find(
-    (lesson) => !completedLessonIds.has(lesson.id)
+    (lesson) => !completedLessonIds.has(lesson.id) && !skippedLessonIds.has(lesson.id)
   );
+
+  // If all uncompleted lessons are skipped, show the first skipped one (they come back)
+  const nextSkippedLesson = !nextNewLesson
+    ? (lessons ?? []).find(
+        (lesson) => !completedLessonIds.has(lesson.id) && skippedLessonIds.has(lesson.id)
+      )
+    : null;
 
   // Decision: alternate between new lessons and reviews.
   // Show a review if there's a weak skill AND the user has completed
@@ -103,14 +114,13 @@ export default async function DashboardPage() {
   const completedCount = completedLessonIds.size;
   const showReview = reviewLesson && completedCount > 0 && completedCount % 3 === 0;
 
-  let nextLesson = nextNewLesson;
+  let nextLesson = nextNewLesson ?? nextSkippedLesson ?? null;
   let isReview = false;
 
   if (showReview && reviewLesson) {
     nextLesson = reviewLesson;
     isReview = true;
-  } else if (!nextNewLesson && reviewLesson) {
-    // All new lessons done, but weak skills remain
+  } else if (!nextNewLesson && !nextSkippedLesson && reviewLesson) {
     nextLesson = reviewLesson;
     isReview = true;
   }
@@ -158,11 +168,14 @@ export default async function DashboardPage() {
             title={nextLesson.title}
             skillName={(nextLesson.skills as { name: string })?.name ?? ""}
           />
-          {isReview && (
-            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400 text-center">
-              Your scores in this skill were low. Practice to improve!
-            </p>
-          )}
+          <div className="mt-3 flex items-center justify-center gap-4">
+            {isReview && (
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Low scores in this skill
+              </p>
+            )}
+            <SkipButton lessonId={nextLesson.id} />
+          </div>
         </section>
       )}
 
