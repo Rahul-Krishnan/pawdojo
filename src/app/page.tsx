@@ -5,15 +5,13 @@ import { BoltIcon, TrophyIcon } from "@/components/icons";
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
-      <div className="dark:bg-accent-200/20 dark:rounded-3xl dark:p-6">
-        <Image
-          src="/images/logo-with-title.svg"
-          alt="Paw Dojo: Focus. Tricks. Treats."
-          width={280}
-          height={280}
-          priority
-        />
-      </div>
+      <Image
+        src="/images/logo-with-title.svg"
+        alt="Paw Dojo: Focus. Tricks. Treats."
+        width={280}
+        height={280}
+        priority
+      />
 
       <div className="mt-6 flex gap-6 text-center">
         <div className="flex flex-col items-center gap-1">
