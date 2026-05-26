@@ -235,7 +235,7 @@ export default async function ProgressPage() {
               >
                 <div className="flex items-start gap-2.5">
                   {isUnlocked ? (
-                    <Image src="/images/award.svg" alt="" width={24} height={24} className="mt-0.5 shrink-0" />
+                    <Image src="/images/award.svg" alt="" width={36} height={36} className="mt-0.5 shrink-0" />
                   ) : (
                     <LockIcon size={22} className="mt-0.5 shrink-0 text-gray-300 dark:text-gray-500" />
                   )}

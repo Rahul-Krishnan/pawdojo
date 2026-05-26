@@ -56,7 +56,7 @@ export default async function DashboardPage() {
     completions?.map((completion) => completion.lesson_id) ?? []
   );
 
-  const skippedLessonIds = await getSkippedLessons();
+  const skippedLessonIds = await getSkippedLessons(dog.id);
 
   // Build avg rating per skill from sessions
   const ratingsBySkill = new Map<string, { total: number; count: number; lastDate: string }>();
@@ -215,7 +215,7 @@ export default async function DashboardPage() {
                   }`}
                 >
                   {isUnlocked ? (
-                    <Image src="/images/award.svg" alt="" width={28} height={28} className="mx-auto" />
+                    <Image src="/images/award.svg" alt="" width={40} height={40} className="mx-auto" />
                   ) : (
                     <LockIcon size={24} className="mx-auto text-gray-300 dark:text-gray-600" />
                   )}

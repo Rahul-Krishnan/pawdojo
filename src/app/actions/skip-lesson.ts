@@ -1,21 +1,38 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
-const COOKIE_KEY = "pawdojo-skipped-lessons";
+function getCookieKey(dogId: string): string {
+  return `pawdojo-skipped-${dogId.slice(0, 8)}`;
+}
 
 export async function skipLesson(lessonId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: profile } = await supabase
+    .from("user_profiles")
+    .select("active_dog_id")
+    .eq("id", user.id)
+    .single();
+
+  const dogId = profile?.active_dog_id;
+  if (!dogId) return { error: "No active dog" };
+
   const cookieStore = await cookies();
-  const existing = cookieStore.get(COOKIE_KEY)?.value ?? "";
+  const key = getCookieKey(dogId);
+  const existing = cookieStore.get(key)?.value ?? "";
   const skipped = existing ? existing.split(",") : [];
 
   if (!skipped.includes(lessonId)) {
     skipped.push(lessonId);
   }
 
-  cookieStore.set(COOKIE_KEY, skipped.join(","), {
-    maxAge: 60 * 60 * 24 * 7, // 7 days, then skipped lessons come back
+  cookieStore.set(key, skipped.join(","), {
+    maxAge: 60 * 60 * 24 * 7,
     path: "/",
     httpOnly: true,
     sameSite: "lax",
@@ -25,8 +42,9 @@ export async function skipLesson(lessonId: string) {
   return { success: true };
 }
 
-export async function getSkippedLessons(): Promise<Set<string>> {
+export async function getSkippedLessons(dogId: string): Promise<Set<string>> {
   const cookieStore = await cookies();
-  const value = cookieStore.get(COOKIE_KEY)?.value ?? "";
+  const key = getCookieKey(dogId);
+  const value = cookieStore.get(key)?.value ?? "";
   return new Set(value ? value.split(",") : []);
 }

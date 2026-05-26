@@ -34,7 +34,7 @@ export function AchievementPopup({
             animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 12 }}
           >
-            <Image src="/images/award.svg" alt="" width={80} height={80} className="mx-auto" />
+            <Image src="/images/award.svg" alt="" width={100} height={100} className="mx-auto" />
           </motion.div>
 
           <motion.p
