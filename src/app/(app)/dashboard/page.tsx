@@ -139,6 +139,7 @@ export default async function DashboardPage() {
       <div className="mb-5 flex gap-3">
         <StreakDisplay
           currentStreak={streak?.current_streak ?? 0}
+          longestStreak={streak?.longest_streak ?? 0}
           freezeAvailable={streak?.freeze_available ?? 0}
         />
         <XpDisplay
@@ -188,7 +189,7 @@ export default async function DashboardPage() {
               return (
                 <div
                   key={def.id}
-                  className={`shrink-0 w-28 rounded-2xl p-3 border text-center transition-all ${
+                  className={`shrink-0 w-36 rounded-2xl p-3 border text-center transition-all ${
                     isUnlocked
                       ? "border-accent-200 dark:border-accent-700/40 bg-gradient-to-br from-accent-50 to-accent-100 dark:from-accent-900/30 dark:to-accent-800/20"
                       : "border-gray-100 dark:border-dark-border bg-gray-50 dark:bg-dark-elevated opacity-40"
@@ -201,6 +202,9 @@ export default async function DashboardPage() {
                   )}
                   <p className="mt-1.5 text-[10px] font-semibold text-gray-700 dark:text-gray-300 leading-tight line-clamp-2">
                     {def.name}
+                  </p>
+                  <p className="mt-0.5 text-[9px] text-gray-400 dark:text-gray-500 leading-snug line-clamp-2">
+                    {def.description}
                   </p>
                 </div>
               );

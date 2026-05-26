@@ -2,12 +2,11 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { SnowflakeIcon } from "@/components/icons";
 import { AnimatePresence } from "motion/react";
 import { FocusModal } from "./focus-modal";
 import { playTap } from "@/lib/sounds";
 
-export function StreakDisplay({
+export function FocusStatCard({
   currentStreak,
   longestStreak,
   freezeAvailable,
@@ -22,23 +21,17 @@ export function StreakDisplay({
     <>
       <button
         onClick={() => { setShowModal(true); playTap(); }}
-        className="flex-1 rounded-2xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-4 text-left transition-colors hover:bg-surface-muted dark:hover:bg-dark-muted active:scale-[0.98]"
+        className="rounded-2xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-4 text-left transition-colors hover:bg-surface-muted dark:hover:bg-dark-muted active:scale-[0.98]"
       >
         <div className="flex items-center gap-2">
-          <Image src="/images/focus.svg" alt="" width={36} height={36} className="dark:brightness-90" />
-          <span className="text-3xl font-bold font-heading text-gray-900 dark:text-gray-50">
-            {currentStreak}
+          <Image src="/images/focus.svg" alt="" width={20} height={20} className="shrink-0 dark:brightness-90" />
+          <span className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
+            {longestStreak}
           </span>
         </div>
-        <p className="mt-1.5 text-xs font-medium text-gray-500 dark:text-gray-400">
-          day focus
+        <p className="mt-1 text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
+          Best Focus
         </p>
-        {freezeAvailable > 0 && (
-          <div className="mt-2 flex items-center gap-1 text-xs text-blue-500 dark:text-blue-400">
-            <SnowflakeIcon size={12} />
-            <span>{freezeAvailable} freeze{freezeAvailable > 1 ? "s" : ""}</span>
-          </div>
-        )}
       </button>
 
       <AnimatePresence>

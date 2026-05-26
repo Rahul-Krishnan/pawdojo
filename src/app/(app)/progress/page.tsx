@@ -2,9 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { BoltIcon, StarIcon, TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon } from "@/components/icons";
+import { BoltIcon, TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon, StarIcon } from "@/components/icons";
 import { getBelt } from "@/lib/gamification/xp";
 import { SkillRadar } from "@/components/practice/skill-radar";
+import { BeltStatCard } from "@/components/dashboard/belt-stat-card";
+import { FocusStatCard } from "@/components/dashboard/focus-stat-card";
 
 export default async function ProgressPage() {
   const supabase = await createClient();
@@ -81,12 +83,8 @@ export default async function ProgressPage() {
     achievements?.filter((a) => a.unlocked_at).map((a) => a.achievement_def_id) ?? []
   );
 
-  const currentBelt = getBelt(profile?.current_level ?? 1);
-
-  const stats = [
+  const simpleStats = [
     { label: "Total XP", value: String(profile?.total_xp ?? 0), Icon: BoltIcon, color: "text-xp" },
-    { label: "Belt", value: currentBelt.name.replace(" Belt", ""), Icon: null, beltColor: currentBelt.color, color: "" },
-    { label: "Best Focus", value: String(streak?.longest_streak ?? 0), Icon: null, color: "", imageSrc: "/images/focus.svg" },
     { label: "Sessions", value: String(totalSessions ?? 0), Icon: CheckIcon, color: "text-success-600" },
   ];
 
@@ -114,19 +112,13 @@ export default async function ProgressPage() {
 
       {/* Stat cards */}
       <div className="mb-6 grid grid-cols-2 gap-3">
-        {stats.map((stat) => (
+        {simpleStats.map((stat) => (
           <div
             key={stat.label}
             className="rounded-2xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-4"
           >
             <div className="flex items-center gap-2">
-              {stat.Icon ? (
-                <stat.Icon size={18} className={stat.color} />
-              ) : stat.beltColor ? (
-                <div className={`h-5 w-5 rounded-full ${stat.beltColor} border border-gray-300/50 dark:border-gray-600/50 shrink-0`} />
-              ) : stat.imageSrc ? (
-                <Image src={stat.imageSrc} alt="" width={20} height={20} className="shrink-0 dark:brightness-90" />
-              ) : null}
+              <stat.Icon size={18} className={stat.color} />
               <span className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
                 {stat.value}
               </span>
@@ -136,6 +128,15 @@ export default async function ProgressPage() {
             </p>
           </div>
         ))}
+        <BeltStatCard
+          currentLevel={profile?.current_level ?? 1}
+          totalXp={profile?.total_xp ?? 0}
+        />
+        <FocusStatCard
+          currentStreak={streak?.current_streak ?? 0}
+          longestStreak={streak?.longest_streak ?? 0}
+          freezeAvailable={streak?.freeze_available ?? 0}
+        />
       </div>
 
       {/* Skills */}
