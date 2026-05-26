@@ -36,7 +36,7 @@ export function StreakDisplay({
             {freezeAvailable > 0 && (
               <div className="mt-1 flex items-center gap-1 text-xs text-blue-500 dark:text-blue-400">
                 <SnowflakeIcon size={12} />
-                <span>{freezeAvailable} freeze{freezeAvailable > 1 ? "s" : ""}</span>
+                <span>{freezeAvailable} save{freezeAvailable > 1 ? "s" : ""} remaining</span>
               </div>
             )}
           </div>

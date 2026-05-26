@@ -63,7 +63,7 @@ export function FocusModal({
 
           {freezeAvailable > 0 && (
             <div className="flex items-center justify-between rounded-xl bg-surface-muted dark:bg-dark-muted px-4 py-3">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Freezes Available</p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Saves Remaining</p>
               <p className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
                 {freezeAvailable}
               </p>
