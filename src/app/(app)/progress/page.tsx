@@ -85,7 +85,7 @@ export default async function ProgressPage() {
   const stats = [
     { label: "Total XP", value: String(profile?.total_xp ?? 0), Icon: BoltIcon, color: "text-xp" },
     { label: "Belt", value: currentBelt.name.replace(" Belt", ""), Icon: null, beltColor: currentBelt.color, color: "" },
-    { label: "Discipline", value: String(streak?.longest_streak ?? 0), Icon: HeadbandIcon, color: "text-streak" },
+    { label: "Best Focus", value: String(streak?.longest_streak ?? 0), Icon: HeadbandIcon, color: "text-streak" },
     { label: "Sessions", value: String(totalSessions ?? 0), Icon: CheckIcon, color: "text-success-600" },
   ];
 
