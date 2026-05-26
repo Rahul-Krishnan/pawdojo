@@ -60,7 +60,7 @@ export default async function ProfilePage() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
-                    <Image src="/images/logo.svg" alt="" width={48} height={48} className="rounded-full" />
+                    <Image src="/images/logo.svg" alt="" width={56} height={56} />
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-bold font-heading text-gray-900 dark:text-gray-50">{dog.name}</h3>

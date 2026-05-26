@@ -21,7 +21,7 @@ export default async function OnboardingPage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
-      <Image src="/images/logo.svg" alt="Paw Dojo" width={80} height={80} priority />
+      <Image src="/images/logo.svg" alt="Paw Dojo" width={100} height={100} priority />
       <h1 className="mt-4 text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
         {hasExistingDogs ? "Add another dog" : "Tell us about your dog"}
       </h1>

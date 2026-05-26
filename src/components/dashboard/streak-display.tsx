@@ -11,9 +11,9 @@ export function StreakDisplay({
   freezeAvailable: number;
 }) {
   return (
-    <div className="flex-1 rounded-2xl bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-950/40 dark:to-primary-900/30 p-4 border border-primary-100/50 dark:border-primary-900/30">
+    <div className="flex-1 rounded-2xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-4">
       <div className="flex items-center gap-2">
-        <Image src="/images/focus.svg" alt="" width={28} height={28} className="dark:brightness-75" />
+        <Image src="/images/focus.svg" alt="" width={32} height={32} className="dark:brightness-90" />
         <span className="text-3xl font-bold font-heading text-gray-900 dark:text-gray-50">
           {currentStreak}
         </span>

@@ -132,7 +132,7 @@ export default async function DashboardPage() {
           />
         </div>
         <Link href="/profile">
-          <Image src="/images/logo.svg" alt="Paw Dojo" width={44} height={44} className="rounded-full" />
+          <Image src="/images/logo.svg" alt="Paw Dojo" width={56} height={56} />
         </Link>
       </header>
 

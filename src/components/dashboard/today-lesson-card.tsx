@@ -32,7 +32,7 @@ export function TodayLessonCard({
             </p>
             <h2 className="mt-2 text-lg font-bold">{title}</h2>
           </div>
-          <Image src="/images/logo.svg" alt="" width={40} height={40} className="opacity-30" />
+          <Image src="/images/logo.svg" alt="" width={48} height={48} className="opacity-30" />
         </div>
         <p className="mt-4 text-sm font-semibold text-primary-200">
           Start Training →
