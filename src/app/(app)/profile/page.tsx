@@ -60,12 +60,12 @@ export default async function ProfilePage() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-4">
-                    <Image src="/images/logo.png" alt="" width={48} height={48} className="rounded-full" />
+                    <Image src="/images/logo.svg" alt="" width={48} height={48} className="rounded-full" />
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-lg font-bold font-heading text-gray-900 dark:text-gray-50">{dog.name}</h3>
                         {isActive && (
-                          <span className="inline-flex items-center gap-0.5 rounded-full bg-primary-100 dark:bg-primary-900/40 px-2 py-0.5 text-[10px] font-semibold text-primary-700 dark:text-primary-300">
+                          <span className="inline-flex items-center gap-0.5 rounded-full bg-success-100 dark:bg-success-900/40 px-2 py-0.5 text-[10px] font-semibold text-success-700 dark:text-success-300">
                             <CheckIcon size={10} />
                             Active
                           </span>

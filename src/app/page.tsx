@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
       <Image
-        src="/images/logo-full.png"
+        src="/images/logo-with-title.svg"
         alt="Paw Dojo: Focus. Tricks. Treats."
         width={280}
         height={280}

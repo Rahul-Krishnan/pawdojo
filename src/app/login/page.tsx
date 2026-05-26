@@ -5,7 +5,7 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-6 py-12">
       <Image
-        src="/images/logo.png"
+        src="/images/logo.svg"
         alt="Paw Dojo logo"
         width={80}
         height={80}

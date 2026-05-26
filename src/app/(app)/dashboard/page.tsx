@@ -131,7 +131,9 @@ export default async function DashboardPage() {
             dogs={allDogs.map((d) => ({ id: d.id, name: d.name }))}
           />
         </div>
-        <Image src="/images/logo.png" alt="Paw Dojo" width={44} height={44} className="rounded-full" />
+        <Link href="/profile">
+          <Image src="/images/logo.svg" alt="Paw Dojo" width={44} height={44} className="rounded-full" />
+        </Link>
       </header>
 
       <div className="mb-5 flex gap-3">
