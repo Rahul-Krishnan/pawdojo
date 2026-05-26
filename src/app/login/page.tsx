@@ -7,12 +7,11 @@ export default function LoginPage() {
       <Image
         src="/images/logo-with-title.svg"
         alt="Paw Dojo"
-        width={200}
-        height={100}
+        width={280}
+        height={140}
         priority
       />
-      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Sign in to start training</p>
-      <div className="mt-8 w-full max-w-sm">
+      <div className="mt-6 w-full max-w-sm">
         <AuthForm />
       </div>
     </main>
