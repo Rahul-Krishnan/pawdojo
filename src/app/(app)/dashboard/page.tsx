@@ -238,8 +238,8 @@ export default async function DashboardPage() {
           </h2>
           <div className="space-y-2">
             {recentSessions.map((session) => {
-              const skillName = (session.skills as unknown as { name: string })?.name ?? "Training";
               const lessonForSkill = (lessons ?? []).find((lesson) => lesson.skill_id === session.skill_id);
+              const lessonTitle = lessonForSkill?.title ?? (session.skills as unknown as { name: string })?.name ?? "Training";
               return (
                 <Link
                   key={session.id}
@@ -248,7 +248,7 @@ export default async function DashboardPage() {
                 >
                   <div>
                     <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
-                      {skillName}
+                      {lessonTitle}
                     </p>
                     <div className="mt-0.5 flex gap-0.5">
                       {Array.from({ length: 5 }).map((_, index) => (
