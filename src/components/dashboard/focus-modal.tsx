@@ -72,7 +72,8 @@ export function FocusModal({
         </div>
 
         <p className="mt-4 text-xs text-gray-400 dark:text-gray-500 text-center">
-          Train daily to build your focus streak
+          Saves protect your streak if you miss a day.
+          Earn one back every 7 days of focus.
         </p>
       </motion.div>
     </motion.div>

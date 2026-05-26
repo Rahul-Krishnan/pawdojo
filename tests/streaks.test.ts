@@ -119,4 +119,32 @@ describe("calculateStreakUpdate", () => {
     expect(result.newState.currentStreak).toBe(1);
     expect(result.newState.longestStreak).toBe(15);
   });
+
+  it("earns a save back at 7-day streak", () => {
+    const result = calculateStreakUpdate(
+      freshState({
+        currentStreak: 6,
+        lastStreakDate: "2026-05-19",
+        freezeAvailable: 1,
+      }),
+      makeDate("2026-05-20"),
+      tz
+    );
+    expect(result.newState.currentStreak).toBe(7);
+    expect(result.newState.freezeAvailable).toBe(2);
+  });
+
+  it("does not exceed max saves of 2", () => {
+    const result = calculateStreakUpdate(
+      freshState({
+        currentStreak: 13,
+        lastStreakDate: "2026-05-19",
+        freezeAvailable: 2,
+      }),
+      makeDate("2026-05-20"),
+      tz
+    );
+    expect(result.newState.currentStreak).toBe(14);
+    expect(result.newState.freezeAvailable).toBe(2);
+  });
 });

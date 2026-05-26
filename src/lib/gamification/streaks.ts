@@ -73,14 +73,22 @@ export function calculateStreakUpdate(
   events.push({ eventType: "activity", streakValue: newStreak });
 
   const freezeUsed = events.some((event) => event.eventType === "freeze_used");
+  const MAX_FREEZES = 2;
+
+  let newFreezeCount = freezeUsed
+    ? current.freezeAvailable - 1
+    : current.freezeAvailable;
+
+  // Earn a save back every 7 consecutive days (cap at MAX_FREEZES)
+  if (newStreak > 0 && newStreak % 7 === 0 && newFreezeCount < MAX_FREEZES) {
+    newFreezeCount += 1;
+  }
 
   const newState: StreakState = {
     currentStreak: newStreak,
     longestStreak: Math.max(current.longestStreak, newStreak),
     lastStreakDate: todayLocal,
-    freezeAvailable: freezeUsed
-      ? current.freezeAvailable - 1
-      : current.freezeAvailable,
+    freezeAvailable: newFreezeCount,
   };
 
   return { newState, events };
