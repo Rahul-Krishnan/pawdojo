@@ -37,7 +37,7 @@ export function SkillRadar({ skills }: { skills: SkillData[] }) {
   const angleStep = (2 * Math.PI) / n;
   const rings = [0.25, 0.5, 0.75, 1.0];
 
-  const minR = chartR * 0.06; // small visible circle at zero
+  const minR = chartR * 0.12; // visible circle at zero
   const skillPoints = skills.map((skill, i) => {
     const angle = i * angleStep;
     const r = Math.max(skill.score * chartR, minR);
