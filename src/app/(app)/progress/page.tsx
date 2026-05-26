@@ -215,10 +215,10 @@ export default async function ProgressPage() {
         </div>
       </section>
 
-      {/* Honors */}
+      {/* Awards */}
       <section className="pb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-          Honors
+          Awards
         </h2>
         <div className="grid grid-cols-2 gap-2.5">
           {(allAchievementDefs ?? []).map((def) => {

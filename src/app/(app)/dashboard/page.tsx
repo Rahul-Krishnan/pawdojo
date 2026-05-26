@@ -195,7 +195,7 @@ export default async function DashboardPage() {
       {(allAchievementDefs ?? []).length > 0 && (
         <section className="mt-6">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-            Honors
+            Awards
           </h2>
           <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
             {[...(allAchievementDefs ?? [])].sort((a, b) => {

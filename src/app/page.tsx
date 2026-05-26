@@ -25,7 +25,7 @@ export default function Home() {
         </div>
         <div className="flex flex-col items-center gap-1">
           <TrophyIcon size={24} className="text-badge" />
-          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Honors</span>
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Awards</span>
         </div>
       </div>
 

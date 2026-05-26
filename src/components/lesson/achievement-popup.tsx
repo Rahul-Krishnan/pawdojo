@@ -43,7 +43,7 @@ export function AchievementPopup({
             transition={{ delay: 0.3 }}
             className="mt-4 text-xs font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400"
           >
-            Honor Earned!
+            Award Earned!
           </motion.p>
 
           {achievements.map((name, index) => (
