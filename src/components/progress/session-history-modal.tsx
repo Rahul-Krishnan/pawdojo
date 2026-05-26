@@ -89,7 +89,7 @@ export function SessionHistoryModal({
         }
         setLessonsMap(map);
       });
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchPage = useCallback(async (pageOffset: number) => {
     setLoading(true);
@@ -125,7 +125,7 @@ export function SessionHistoryModal({
     if (lessonsMap.size > 0) {
       fetchPage(0);
     }
-  }, [lessonsMap]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lessonsMap]);
 
   function handleScroll(event: React.UIEvent<HTMLDivElement>) {
     const target = event.currentTarget;
