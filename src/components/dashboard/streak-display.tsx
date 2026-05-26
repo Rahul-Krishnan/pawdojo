@@ -25,7 +25,7 @@ export function StreakDisplay({
         className="flex-1 rounded-2xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-4 text-left transition-colors hover:bg-surface-muted dark:hover:bg-dark-muted active:scale-[0.98]"
       >
         <div className="flex items-center gap-2">
-          <Image src="/images/focus.svg" alt="" width={36} height={36} className="dark:brightness-90" />
+          <Image src="/images/focus.svg" alt="" width={72} height={72} className="dark:brightness-90" />
           <span className="text-3xl font-bold font-heading text-gray-900 dark:text-gray-50">
             {currentStreak}
           </span>

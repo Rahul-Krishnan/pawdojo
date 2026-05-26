@@ -24,7 +24,7 @@ export function FocusStatCard({
         className="rounded-2xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-4 text-left transition-colors hover:bg-surface-muted dark:hover:bg-dark-muted active:scale-[0.98]"
       >
         <div className="flex items-center gap-2">
-          <Image src="/images/focus.svg" alt="" width={20} height={20} className="shrink-0 dark:brightness-90" />
+          <Image src="/images/focus.svg" alt="" width={40} height={40} className="shrink-0 dark:brightness-90" />
           <span className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
             {longestStreak}
           </span>

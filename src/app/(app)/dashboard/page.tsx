@@ -184,7 +184,11 @@ export default async function DashboardPage() {
             Honors
           </h2>
           <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
-            {(allAchievementDefs ?? []).map((def) => {
+            {[...(allAchievementDefs ?? [])].sort((a, b) => {
+              const aUnlocked = unlockedIds.has(a.id) ? 0 : 1;
+              const bUnlocked = unlockedIds.has(b.id) ? 0 : 1;
+              return aUnlocked - bUnlocked;
+            }).map((def) => {
               const isUnlocked = unlockedIds.has(def.id);
               return (
                 <div

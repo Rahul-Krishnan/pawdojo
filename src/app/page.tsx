@@ -16,7 +16,7 @@ export default function Home() {
 
       <div className="mt-6 flex gap-6 text-center">
         <div className="flex flex-col items-center gap-1">
-          <Image src="/images/focus.svg" alt="" width={24} height={24} />
+          <Image src="/images/focus.svg" alt="" width={48} height={48} />
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Focus</span>
         </div>
         <div className="flex flex-col items-center gap-1">

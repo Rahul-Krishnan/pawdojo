@@ -43,7 +43,7 @@ export function FocusModal({
         </div>
 
         <div className="flex items-center justify-center mb-6">
-          <Image src="/images/focus.svg" alt="" width={64} height={64} className="dark:brightness-90" />
+          <Image src="/images/focus.svg" alt="" width={128} height={128} className="dark:brightness-90" />
         </div>
 
         <div className="space-y-3">
