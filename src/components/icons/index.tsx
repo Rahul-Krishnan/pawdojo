@@ -1,20 +1,31 @@
 const defaultSize = 24;
 type IconProps = { size?: number; className?: string };
 
-export function FlameIcon({ size = defaultSize, className = "" }: IconProps) {
+export function HeadbandIcon({ size = defaultSize, className = "" }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      <path
-        d="M12 2C8.5 6 4 9.5 4 14a8 8 0 0016 0c0-4.5-4.5-8-8-12z"
-        fill="currentColor"
-        opacity="0.9"
-      />
-      <path
-        d="M12 9c-1.5 2-3 3.5-3 5.5a3 3 0 006 0c0-2-1.5-3.5-3-5.5z"
-        fill="#FDE68A"
-      />
+      <path d="M3 11c0-4 4-7 9-7s9 3 9 7" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M2 12.5h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+      <path d="M15 8.5l2.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M16.5 7l1.5 2.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   );
+}
+
+export function ScrollIcon({ size = defaultSize, className = "" }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M8 3a2 2 0 00-2 2v1H5a2 2 0 00-2 2v10a2 2 0 002 2h1v1a2 2 0 002 2h11a2 2 0 002-2V9a2 2 0 00-2-2h-1V5a2 2 0 00-2-2H8z" stroke="currentColor" strokeWidth="1.5"/>
+      <path d="M9 10h6M9 13h4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="6" cy="8" r="1.5" fill="currentColor" opacity="0.3"/>
+      <circle cx="18" cy="18" r="1.5" fill="currentColor" opacity="0.3"/>
+    </svg>
+  );
+}
+
+// Keep FlameIcon as an alias for backward compat in tests/etc
+export function FlameIcon({ size = defaultSize, className = "" }: IconProps) {
+  return <HeadbandIcon size={size} className={className} />;
 }
 
 export function BoltIcon({ size = defaultSize, className = "" }: IconProps) {

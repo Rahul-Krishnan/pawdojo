@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { BoltIcon, FlameIcon, StarIcon, TrophyIcon, LockIcon, CheckIcon, ChevronRightIcon } from "@/components/icons";
+import { BoltIcon, HeadbandIcon, StarIcon, ScrollIcon, LockIcon, CheckIcon, ChevronRightIcon } from "@/components/icons";
 import { getBelt } from "@/lib/gamification/xp";
 import { SkillRadar } from "@/components/practice/skill-radar";
 
@@ -85,7 +85,7 @@ export default async function ProgressPage() {
   const stats = [
     { label: "Total XP", value: String(profile?.total_xp ?? 0), Icon: BoltIcon, color: "text-xp" },
     { label: "Belt", value: currentBelt.name.replace(" Belt", ""), Icon: null, beltColor: currentBelt.color, color: "" },
-    { label: "Best Streak", value: String(streak?.longest_streak ?? 0), Icon: FlameIcon, color: "text-streak" },
+    { label: "Discipline", value: String(streak?.longest_streak ?? 0), Icon: HeadbandIcon, color: "text-streak" },
     { label: "Sessions", value: String(totalSessions ?? 0), Icon: CheckIcon, color: "text-success-600" },
   ];
 
@@ -210,10 +210,10 @@ export default async function ProgressPage() {
         </div>
       </section>
 
-      {/* Badges */}
+      {/* Scrolls */}
       <section className="pb-4">
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-          Badges
+          Scrolls
         </h2>
         <div className="grid grid-cols-2 gap-2.5">
           {(allAchievementDefs ?? []).map((def) => {
@@ -229,7 +229,7 @@ export default async function ProgressPage() {
               >
                 <div className="flex items-start gap-2.5">
                   {isUnlocked ? (
-                    <TrophyIcon size={22} className="mt-0.5 shrink-0 text-accent-500" />
+                    <ScrollIcon size={22} className="mt-0.5 shrink-0 text-accent-500" />
                   ) : (
                     <LockIcon size={22} className="mt-0.5 shrink-0 text-gray-300 dark:text-gray-500" />
                   )}

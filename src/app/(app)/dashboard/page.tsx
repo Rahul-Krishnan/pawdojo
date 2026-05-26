@@ -5,7 +5,7 @@ import { StreakDisplay } from "@/components/dashboard/streak-display";
 import { XpDisplay } from "@/components/dashboard/xp-display";
 import { TodayLessonCard } from "@/components/dashboard/today-lesson-card";
 import Image from "next/image";
-import { CheckIcon, TrophyIcon, LockIcon } from "@/components/icons";
+import { CheckIcon, ScrollIcon, LockIcon } from "@/components/icons";
 import { DogSwitcher } from "@/components/dashboard/dog-switcher";
 
 export default async function DashboardPage() {
@@ -180,7 +180,7 @@ export default async function DashboardPage() {
       {(allAchievementDefs ?? []).length > 0 && (
         <section className="mt-6">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500">
-            Badges
+            Scrolls
           </h2>
           <div className="flex gap-2.5 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
             {(allAchievementDefs ?? []).map((def) => {
@@ -195,7 +195,7 @@ export default async function DashboardPage() {
                   }`}
                 >
                   {isUnlocked ? (
-                    <TrophyIcon size={24} className="mx-auto text-accent-500" />
+                    <ScrollIcon size={24} className="mx-auto text-accent-500" />
                   ) : (
                     <LockIcon size={24} className="mx-auto text-gray-300 dark:text-gray-600" />
                   )}

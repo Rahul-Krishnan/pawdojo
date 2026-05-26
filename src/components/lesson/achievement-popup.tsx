@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "motion/react";
-import { TrophyIcon } from "@/components/icons";
+import { ScrollIcon } from "@/components/icons";
 
 export function AchievementPopup({
   achievements,
@@ -34,7 +34,7 @@ export function AchievementPopup({
             animate={{ scale: 1, rotate: 0 }}
             transition={{ delay: 0.15, type: "spring", stiffness: 400, damping: 12 }}
           >
-            <TrophyIcon size={64} className="mx-auto text-accent-500" />
+            <ScrollIcon size={64} className="mx-auto text-accent-500" />
           </motion.div>
 
           <motion.p
@@ -43,7 +43,7 @@ export function AchievementPopup({
             transition={{ delay: 0.3 }}
             className="mt-4 text-xs font-semibold uppercase tracking-widest text-accent-600 dark:text-accent-400"
           >
-            Achievement Unlocked!
+            Scroll Earned!
           </motion.p>
 
           {achievements.map((name, index) => (

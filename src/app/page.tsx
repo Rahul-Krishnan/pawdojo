@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { FlameIcon, BoltIcon, TrophyIcon } from "@/components/icons";
+import { HeadbandIcon, BoltIcon, ScrollIcon } from "@/components/icons";
 
 export default function Home() {
   return (
@@ -16,16 +16,16 @@ export default function Home() {
 
       <div className="mt-6 flex gap-6 text-center">
         <div className="flex flex-col items-center gap-1">
-          <FlameIcon size={24} className="text-streak" />
-          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Streaks</span>
+          <HeadbandIcon size={24} className="text-streak" />
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Discipline</span>
         </div>
         <div className="flex flex-col items-center gap-1">
           <BoltIcon size={24} className="text-xp" />
           <span className="text-xs font-medium text-gray-500 dark:text-gray-400">XP</span>
         </div>
         <div className="flex flex-col items-center gap-1">
-          <TrophyIcon size={24} className="text-badge" />
-          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Badges</span>
+          <ScrollIcon size={24} className="text-badge" />
+          <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Scrolls</span>
         </div>
       </div>
 
