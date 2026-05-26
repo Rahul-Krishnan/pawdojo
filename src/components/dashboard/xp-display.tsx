@@ -39,7 +39,7 @@ export function XpDisplay({
         </div>
         <div className="mt-2.5 h-1.5 overflow-hidden rounded-full bg-gray-200/60 dark:bg-gray-700/40">
           <div
-            className={`h-full rounded-full ${belt.color} transition-all duration-700 ease-out`}
+            className="h-full rounded-full bg-primary-500 transition-all duration-700 ease-out"
             style={{ width: `${progressPercent}%` }}
           />
         </div>

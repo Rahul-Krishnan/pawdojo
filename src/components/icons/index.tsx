@@ -28,12 +28,17 @@ export function FlameIcon({ size = defaultSize, className = "" }: IconProps) {
   return <HeadbandIcon size={size} className={className} />;
 }
 
-export function BoltIcon({ size = defaultSize, className = "" }: IconProps) {
+export function BoneIcon({ size = defaultSize, className = "" }: IconProps) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
-      <path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z" fill="currentColor" />
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M4.5 4a2.5 2.5 0 014.3 1.7l6.5 6.5A2.5 2.5 0 0120 11a2.5 2.5 0 01.5 5 2.5 2.5 0 01-4.3 1.3l-6.5-6.5A2.5 2.5 0 014 13a2.5 2.5 0 01-.5-5A2.5 2.5 0 014.5 4z" />
     </svg>
   );
+}
+
+// Keep BoltIcon as alias for backward compat
+export function BoltIcon({ size = defaultSize, className = "" }: IconProps) {
+  return <BoneIcon size={size} className={className} />;
 }
 
 export function HomeIcon({ size = defaultSize, className = "" }: IconProps) {
