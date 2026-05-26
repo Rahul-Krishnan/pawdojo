@@ -124,26 +124,25 @@ insert into public.lessons (id, skill_id, title, content_md, lesson_order, path_
 
 -- Separation lesson 3
 ('b1000000-0000-0000-0000-000000000050', 'a1000000-0000-0000-0000-000000000015',
- 'Separation: Tied in Public',
- '## Staying Calm When Tied Outside
+ 'Separation: Extended Calm at Home',
+ '## Building Longer Separations at Home
 
-**Prerequisites:** Comfortable with 1-minute out-of-sight separations at home.
+**Prerequisites:** Comfortable with 1-minute out-of-sight separations.
 
 ### Steps
 
-1. At a quiet outdoor location, tie your dog''s leash to a secure post
-2. Stand 3 feet away, facing them. Treat after 5 seconds
-3. Gradually increase distance: 5 feet, 10 feet
-4. Turn your back briefly, then return and treat
-5. Walk around a corner for 3 seconds, return, treat. Build to 30 seconds
+1. Leave the room for 2 minutes. Return calmly, treat if your dog stayed relaxed
+2. Build to 5 minutes, then 10, then 20
+3. Vary what you do while away: go to another room, step outside briefly, move around the house
+4. Add real-life cues: pick up your keys, put on shoes, then sit back down. Desensitize departure signals
+5. Practice leaving through the front door for 30 seconds, then 2 minutes, then 5
 
 ### Tips
-- Choose a low-traffic area for first attempts. A quiet park bench, not a busy cafe
-- Stay within earshot so you can return immediately if needed
-- A familiar mat or blanket at their spot helps them feel secure
-- Never leave your dog tied unattended for extended periods
-- This skill is useful for quick errands: tying up outside a shop while you grab something
-- If your dog barks or lunges at passersby while tied, work on the settle and focus skills first',
+- The goal is a dog who barely notices you left because they know you always come back
+- Departure cues (keys, shoes, coat) trigger anxiety in some dogs. Practice picking them up and NOT leaving dozens of times to break the association
+- A stuffed Kong or long-lasting chew given right before you leave creates a positive association with your departure
+- If your dog shows signs of true separation anxiety (destructive behavior, howling, house soiling), work with a veterinary behaviorist rather than pushing through alone
+- Keep a calm energy when you leave and return. No dramatic goodbyes or excited reunions',
  3, 50, 15)
 
 on conflict (id) do nothing;
