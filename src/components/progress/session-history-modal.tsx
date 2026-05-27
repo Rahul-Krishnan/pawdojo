@@ -140,7 +140,7 @@ export function SessionHistoryModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center"
       onClick={onClose}
     >
       <motion.div
@@ -148,7 +148,7 @@ export function SessionHistoryModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="w-full max-w-sm rounded-t-3xl sm:rounded-3xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border shadow-2xl max-h-[80vh] flex flex-col"
+        className="w-full max-w-sm rounded-t-3xl sm:rounded-3xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border shadow-2xl max-h-[80dvh] flex flex-col"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between p-5 pb-3 shrink-0">
@@ -164,7 +164,7 @@ export function SessionHistoryModal({
         </div>
 
         <div
-          className="overflow-y-auto px-5 pb-8 sm:pb-5"
+          className="overflow-y-auto px-5 pb-[calc(2rem+env(safe-area-inset-bottom))] sm:pb-5"
           onScroll={handleScroll}
         >
           {sessions.length === 0 && !loading && (

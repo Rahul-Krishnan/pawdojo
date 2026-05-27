@@ -20,7 +20,7 @@ export function BeltProgressionModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center"
+      className="fixed inset-0 z-[60] flex items-end justify-center bg-black/50 backdrop-blur-sm sm:items-center"
       onClick={onClose}
     >
       <motion.div
@@ -28,7 +28,7 @@ export function BeltProgressionModal({
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 100, opacity: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="w-full max-w-sm rounded-t-3xl sm:rounded-3xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-6 pb-10 sm:pb-6 shadow-2xl max-h-[85vh] overflow-y-auto"
+        className="w-full max-w-sm rounded-t-3xl sm:rounded-3xl bg-surface-elevated dark:bg-dark-elevated border border-gray-100 dark:border-dark-border p-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:pb-6 shadow-2xl max-h-[85dvh] overflow-y-auto"
         onClick={(event) => event.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-5">
