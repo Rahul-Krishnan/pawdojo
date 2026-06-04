@@ -98,13 +98,10 @@ test.describe("Auth flow", () => {
     await page.click('button[type="submit"]');
     await page.waitForURL("**/dashboard");
 
-    // Go back to login page, middleware should redirect to dashboard
-    const response = await page.goto("/login", { waitUntil: "networkidle" });
-    // Middleware sends a 307 redirect, which Playwright follows automatically
-    // The final URL should be /dashboard (or still /login if middleware didn't fire)
-    const finalUrl = page.url();
-    // Accept either outcome: redirect worked, or we're on login (middleware timing)
-    expect(finalUrl).toMatch(/\/(dashboard|login)/);
+    // Going back to /login while authenticated; middleware should 307 us to /dashboard.
+    await page.goto("/login");
+    await page.waitForURL("**/dashboard");
+    expect(page.url()).toContain("/dashboard");
   });
 
   test("reset password page is accessible", async ({ page }) => {
