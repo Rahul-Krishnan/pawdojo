@@ -58,6 +58,35 @@ export function effectiveCurrentStreak(
   return 0;
 }
 
+// Shape of a dog_streaks DB row, as selected by the dashboard/progress pages.
+export type DogStreakRow = {
+  current_streak: number;
+  longest_streak: number;
+  last_streak_date: string | null;
+  freeze_available: number;
+};
+
+// Convenience wrapper over effectiveCurrentStreak that maps a raw dog_streaks
+// row (snake_case columns) to the effective read-time streak. Returns 0 when
+// the dog has no streak row yet.
+export function effectiveCurrentStreakFromRow(
+  row: DogStreakRow | null,
+  asOf: Date,
+  timezone: string
+): number {
+  if (!row) return 0;
+  return effectiveCurrentStreak(
+    {
+      currentStreak: row.current_streak,
+      longestStreak: row.longest_streak,
+      lastStreakDate: row.last_streak_date,
+      freezeAvailable: row.freeze_available,
+    },
+    asOf,
+    timezone
+  );
+}
+
 export function calculateStreakUpdate(
   current: StreakState,
   activityAt: Date,

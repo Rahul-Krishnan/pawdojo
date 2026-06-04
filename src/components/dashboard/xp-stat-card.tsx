@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { getBelt, getNextBelt, xpForLevel } from "@/lib/gamification/xp";
+import { getBeltProgress } from "@/lib/gamification/xp";
 import { playTap } from "@/lib/sounds";
 
 export function XpStatCard({
@@ -54,14 +54,7 @@ function XpModal({
   currentLevel: number;
   onClose: () => void;
 }) {
-  const belt = getBelt(currentLevel);
-  const nextBelt = getNextBelt(currentLevel);
-
-  const currentBeltXp = xpForLevel(belt.minLevel);
-  const nextBeltXp = nextBelt ? xpForLevel(nextBelt.minLevel) : currentBeltXp;
-  const progressPercent = nextBelt
-    ? Math.min(((totalXp - currentBeltXp) / (nextBeltXp - currentBeltXp)) * 100, 100)
-    : 100;
+  const { belt, nextBelt, nextBeltXp, progressPercent } = getBeltProgress(currentLevel, totalXp);
 
   return (
     <motion.div

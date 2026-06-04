@@ -23,28 +23,16 @@ export function DogSwitcher({
   const [switching, setSwitching] = useState(false);
   const router = useRouter();
 
-  if (dogs.length <= 1 && !open) {
-    return (
-      <button
-        onClick={() => { setOpen(true); playTap(); }}
-        className="flex items-center gap-1 text-left"
-      >
-        <h1 className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
-          {dogs[0]?.name ?? "Your Dog"}
-        </h1>
-        <ChevronRightIcon size={18} className="text-gray-400 dark:text-gray-500 rotate-90" />
-      </button>
-    );
-  }
-
   if (!open) {
+    const activeName =
+      dogs.find((dog) => dog.id === activeDogId)?.name ?? dogs[0]?.name ?? "Your Dog";
     return (
       <button
         onClick={() => { setOpen(true); playTap(); }}
         className="flex items-center gap-1 text-left"
       >
         <h1 className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
-          {dogs.find((dog) => dog.id === activeDogId)?.name ?? "Your Dog"}
+          {activeName}
         </h1>
         <ChevronRightIcon size={18} className="text-gray-400 dark:text-gray-500 rotate-90" />
       </button>

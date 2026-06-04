@@ -99,4 +99,23 @@ export function getNextBelt(level: number): Belt | null {
   return null;
 }
 
+export type BeltProgress = {
+  belt: Belt;
+  nextBelt: Belt | null;
+  currentBeltXp: number;
+  nextBeltXp: number;
+  progressPercent: number;
+};
+
+export function getBeltProgress(currentLevel: number, totalXp: number): BeltProgress {
+  const belt = getBelt(currentLevel);
+  const nextBelt = getNextBelt(currentLevel);
+  const currentBeltXp = xpForLevel(belt.minLevel);
+  const nextBeltXp = nextBelt ? xpForLevel(nextBelt.minLevel) : currentBeltXp;
+  const progressPercent = nextBelt
+    ? Math.min(((totalXp - currentBeltXp) / (nextBeltXp - currentBeltXp)) * 100, 100)
+    : 100;
+  return { belt, nextBelt, currentBeltXp, nextBeltXp, progressPercent };
+}
+
 export { BELTS };

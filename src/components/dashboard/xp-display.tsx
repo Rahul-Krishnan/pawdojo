@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { getBelt, getNextBelt, xpForLevel } from "@/lib/gamification/xp";
+import { getBeltProgress } from "@/lib/gamification/xp";
 import { AnimatePresence } from "motion/react";
 import { BeltProgressionModal } from "./belt-modal";
 import { playTap } from "@/lib/sounds";
@@ -14,14 +14,7 @@ export function XpDisplay({
   currentLevel: number;
 }) {
   const [showModal, setShowModal] = useState(false);
-  const belt = getBelt(currentLevel);
-  const nextBelt = getNextBelt(currentLevel);
-
-  const currentBeltXp = xpForLevel(belt.minLevel);
-  const nextBeltXp = nextBelt ? xpForLevel(nextBelt.minLevel) : currentBeltXp;
-  const progressPercent = nextBelt
-    ? Math.min(((totalXp - currentBeltXp) / (nextBeltXp - currentBeltXp)) * 100, 100)
-    : 100;
+  const { belt, nextBelt, nextBeltXp, progressPercent } = getBeltProgress(currentLevel, totalXp);
 
   return (
     <>

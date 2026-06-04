@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
 
@@ -12,6 +12,13 @@ export function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+  const redirectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (redirectTimer.current) clearTimeout(redirectTimer.current);
+    };
+  }, []);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -39,7 +46,7 @@ export function ResetPasswordForm() {
     }
 
     setSuccess(true);
-    setTimeout(() => {
+    redirectTimer.current = setTimeout(() => {
       router.push("/dashboard");
       router.refresh();
     }, 2000);

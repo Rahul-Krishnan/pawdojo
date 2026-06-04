@@ -1,14 +1,12 @@
 import { test, expect } from "playwright/test";
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { TEST_EMAIL, TEST_PASSWORD } from "./helpers";
 
 // Visual regression test for RK-5: the streak must read as 0 once a day is
 // missed, even though the stored dog_streaks.current_streak value is stale
 // (it is only recomputed when a session is logged). This seeds the test
 // account's streak into a missed-day state, renders the real dashboard, and
 // asserts the displayed streak is 0. The original row is restored afterward.
-
-const TEST_EMAIL = "rk2211@gmail.com";
-const TEST_PASSWORD = "iamnotafool99";
 
 type StreakRow = {
   dog_id: string;
