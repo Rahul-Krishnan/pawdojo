@@ -73,18 +73,6 @@ export async function handleStreakUpdate(
     })
     .eq("dog_id", data.dogId);
 
-  // Also keep user_streaks updated (for achievements)
-  await admin
-    .from("user_streaks")
-    .update({
-      current_streak: newState.currentStreak,
-      longest_streak: newState.longestStreak,
-      last_streak_date: newState.lastStreakDate,
-      freeze_available: newState.freezeAvailable,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("user_id", data.userId);
-
   // Log streak events
   for (const event of events) {
     await admin.from("streak_events").insert({
