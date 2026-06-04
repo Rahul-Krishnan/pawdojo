@@ -1,4 +1,5 @@
 import { test, expect } from "playwright/test";
+import { login, TEST_EMAIL } from "./helpers";
 
 test.describe("Auth flow", () => {
   test("login form has email, password, submit, forgot password, and create account", async ({ page }) => {
@@ -66,7 +67,7 @@ test.describe("Auth flow", () => {
   test("login with wrong password shows error", async ({ page }) => {
     await page.goto("/login");
 
-    await page.fill('input[type="email"]', "rk2211@gmail.com");
+    await page.fill('input[type="email"]', TEST_EMAIL);
     await page.fill('input[type="password"]', "wrongpassword123");
     await page.click('button[type="submit"]');
 
@@ -74,26 +75,15 @@ test.describe("Auth flow", () => {
   });
 
   test("login with valid credentials redirects to dashboard", async ({ page }) => {
-    await page.goto("/login");
-
-    await page.fill('input[type="email"]', "rk2211@gmail.com");
-    await page.fill('input[type="password"]', "iamnotafool99");
-    await page.click('button[type="submit"]');
-
-    await page.waitForURL("**/dashboard", { timeout: 10000 });
+    await login(page);
     expect(page.url()).toContain("/dashboard");
   });
 
   test("authenticated user on /login is redirected to dashboard", async ({ page }) => {
-    await page.goto("/login");
-    await page.fill('input[type="email"]', "rk2211@gmail.com");
-    await page.fill('input[type="password"]', "iamnotafool99");
-    await page.click('button[type="submit"]');
-    await page.waitForURL("**/dashboard");
+    await login(page);
 
     // Going back to /login while authenticated; middleware should 307 us to /dashboard.
-    await page.goto("/login");
-    await page.waitForURL("**/dashboard");
+    await page.goto("/login", { waitUntil: "networkidle" });
     expect(page.url()).toContain("/dashboard");
   });
 
@@ -118,11 +108,7 @@ test.describe("Auth flow", () => {
   });
 
   test("sign out button works", async ({ page }) => {
-    await page.goto("/login");
-    await page.fill('input[type="email"]', "rk2211@gmail.com");
-    await page.fill('input[type="password"]', "iamnotafool99");
-    await page.click('button[type="submit"]');
-    await page.waitForURL("**/dashboard");
+    await login(page);
 
     await page.goto("/profile");
 
@@ -136,7 +122,7 @@ test.describe("Auth flow", () => {
     await page.goto("/login");
 
     await page.click('button:has-text("Forgot password?")');
-    await page.fill('input[type="email"]', "rk2211@gmail.com");
+    await page.fill('input[type="email"]', TEST_EMAIL);
     await page.click('button[type="submit"]');
 
     // Should show either success or rate limit message (Supabase rate limits in test)

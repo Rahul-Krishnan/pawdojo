@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { validateDogInput } from "@/lib/validation/dog";
 import { revalidatePath } from "next/cache";
 
 export async function updateDog(formData: {
@@ -19,14 +20,9 @@ export async function updateDog(formData: {
     return { error: "Not authenticated" };
   }
 
-  if (!formData.name || formData.name.trim().length === 0) {
-    return { error: "Dog name is required" };
-  }
-  if (formData.name.length > 50) {
-    return { error: "Dog name too long (max 50 characters)" };
-  }
-  if (formData.breed && formData.breed.length > 100) {
-    return { error: "Breed name too long" };
+  const validationError = validateDogInput(formData);
+  if (validationError) {
+    return { error: validationError };
   }
 
   const admin = createAdminClient();
