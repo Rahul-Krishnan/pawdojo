@@ -10,6 +10,7 @@ import { RecentSessions } from "@/components/dashboard/recent-sessions";
 import { DogSwitcher } from "@/components/dashboard/dog-switcher";
 import { SkipButton } from "@/components/dashboard/skip-button";
 import { getSkippedLessons } from "@/app/actions/skip-lesson";
+import { effectiveCurrentStreak } from "@/lib/gamification/streaks";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -51,6 +52,21 @@ export default async function DashboardPage() {
     supabase.from("dog_streaks").select("*").eq("dog_id", dog.id).limit(1),
   ]);
   const dogStreak = dogStreakRows?.[0] ?? null;
+
+  // The stored streak is only recomputed when a session is logged, so compute
+  // the streak as it should appear right now (a missed day reads as 0).
+  const currentStreak = dogStreak
+    ? effectiveCurrentStreak(
+        {
+          currentStreak: dogStreak.current_streak,
+          longestStreak: dogStreak.longest_streak,
+          lastStreakDate: dogStreak.last_streak_date,
+          freezeAvailable: dogStreak.freeze_available,
+        },
+        new Date(),
+        profile?.timezone ?? "UTC"
+      )
+    : 0;
 
   const completedLessonIds = new Set(
     completions?.map((completion) => completion.lesson_id) ?? []
@@ -150,7 +166,7 @@ export default async function DashboardPage() {
 
       <div className="mb-5 flex gap-3">
         <StreakDisplay
-          currentStreak={dogStreak?.current_streak ?? 0}
+          currentStreak={currentStreak}
           longestStreak={dogStreak?.longest_streak ?? 0}
           freezeAvailable={dogStreak?.freeze_available ?? 0}
         />

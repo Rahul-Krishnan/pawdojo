@@ -27,6 +27,37 @@ function daysBetween(dateA: string, dateB: string): number {
   return Math.round((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
 }
 
+// Read-time view of the streak. The stored `currentStreak` is only recomputed
+// when an activity is logged, so a missed day leaves a stale value in the DB.
+// This returns the streak as it should appear right now, given today's date:
+// once the streak can no longer be continued, it reads as 0. The stored value
+// is corrected on the next activity by calculateStreakUpdate.
+export function effectiveCurrentStreak(
+  state: StreakState,
+  asOf: Date,
+  timezone: string
+): number {
+  if (state.lastStreakDate === null) {
+    return 0;
+  }
+
+  const todayLocal = toLocalDate(asOf, timezone);
+  const gap = daysBetween(state.lastStreakDate, todayLocal);
+
+  // Logged today (gap 0) or yesterday (gap 1): streak is intact.
+  if (gap <= 1) {
+    return state.currentStreak;
+  }
+
+  // One missed day, but a freeze can still save it if they train today.
+  if (gap === 2 && state.freezeAvailable > 0) {
+    return state.currentStreak;
+  }
+
+  // Gap too large, or no freeze to cover the miss: streak is broken.
+  return 0;
+}
+
 export function calculateStreakUpdate(
   current: StreakState,
   activityAt: Date,
