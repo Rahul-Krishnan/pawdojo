@@ -9,6 +9,7 @@ import { SkillRadar } from "@/components/practice/skill-radar";
 import { BeltStatCard } from "@/components/dashboard/belt-stat-card";
 import { FocusStatCard } from "@/components/dashboard/focus-stat-card";
 import { XpStatCard } from "@/components/dashboard/xp-stat-card";
+import { effectiveCurrentStreak } from "@/lib/gamification/streaks";
 
 export default async function ProgressPage() {
   const supabase = await createClient();
@@ -57,6 +58,21 @@ export default async function ProgressPage() {
         supabase.from("dog_streaks").select("*").eq("dog_id", "none").limit(1),
       ]);
   const dogStreak = dogStreakRows?.[0] ?? null;
+
+  // The stored streak is only recomputed when a session is logged, so compute
+  // the streak as it should appear right now (a missed day reads as 0).
+  const currentStreak = dogStreak
+    ? effectiveCurrentStreak(
+        {
+          currentStreak: dogStreak.current_streak,
+          longestStreak: dogStreak.longest_streak,
+          lastStreakDate: dogStreak.last_streak_date,
+          freezeAvailable: dogStreak.freeze_available,
+        },
+        new Date(),
+        profile?.timezone ?? "UTC"
+      )
+    : 0;
 
   const completedIds = new Set(completions?.map((c) => c.lesson_id) ?? []);
 
@@ -123,7 +139,7 @@ export default async function ProgressPage() {
       {/* Stat cards */}
       <div className="mb-6 grid grid-cols-2 gap-3">
         <FocusStatCard
-          currentStreak={dogStreak?.current_streak ?? 0}
+          currentStreak={currentStreak}
           longestStreak={dogStreak?.longest_streak ?? 0}
           freezeAvailable={dogStreak?.freeze_available ?? 0}
         />

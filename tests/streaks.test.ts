@@ -1,5 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { calculateStreakUpdate, StreakState } from "@/lib/gamification/streaks";
+import {
+  calculateStreakUpdate,
+  effectiveCurrentStreak,
+  StreakState,
+} from "@/lib/gamification/streaks";
 
 const tz = "America/Los_Angeles";
 
@@ -146,5 +150,49 @@ describe("calculateStreakUpdate", () => {
     );
     expect(result.newState.currentStreak).toBe(14);
     expect(result.newState.freezeAvailable).toBe(2);
+  });
+});
+
+describe("effectiveCurrentStreak", () => {
+  it("is 0 when there has never been any activity", () => {
+    const state = freshState({ currentStreak: 0, lastStreakDate: null });
+    expect(effectiveCurrentStreak(state, makeDate("2026-05-20"), tz)).toBe(0);
+  });
+
+  it("shows the stored streak when activity was logged today", () => {
+    const state = freshState({ currentStreak: 5, lastStreakDate: "2026-05-20" });
+    expect(effectiveCurrentStreak(state, makeDate("2026-05-20"), tz)).toBe(5);
+  });
+
+  it("shows the stored streak when the last activity was yesterday", () => {
+    const state = freshState({ currentStreak: 5, lastStreakDate: "2026-05-19" });
+    expect(effectiveCurrentStreak(state, makeDate("2026-05-20"), tz)).toBe(5);
+  });
+
+  it("resets to 0 after a missed day with no freeze available", () => {
+    const state = freshState({
+      currentStreak: 5,
+      lastStreakDate: "2026-05-18",
+      freezeAvailable: 0,
+    });
+    expect(effectiveCurrentStreak(state, makeDate("2026-05-20"), tz)).toBe(0);
+  });
+
+  it("keeps the streak through a single missed day when a freeze is available", () => {
+    const state = freshState({
+      currentStreak: 5,
+      lastStreakDate: "2026-05-18",
+      freezeAvailable: 2,
+    });
+    expect(effectiveCurrentStreak(state, makeDate("2026-05-20"), tz)).toBe(5);
+  });
+
+  it("resets to 0 after a 3-day gap even with freezes available", () => {
+    const state = freshState({
+      currentStreak: 10,
+      lastStreakDate: "2026-05-17",
+      freezeAvailable: 2,
+    });
+    expect(effectiveCurrentStreak(state, makeDate("2026-05-20"), tz)).toBe(0);
   });
 });
