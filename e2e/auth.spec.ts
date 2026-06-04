@@ -1,5 +1,16 @@
 import { test, expect } from "playwright/test";
-import { login, TEST_EMAIL } from "./helpers";
+import { createClient } from "@supabase/supabase-js";
+import { login, TEST_EMAIL, TEST_PASSWORD } from "./helpers";
+
+const BASE_URL = "http://localhost:3000";
+
+function adminClient() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+}
 
 test.describe("Auth flow", () => {
   test("login form has email, password, submit, forgot password, and create account", async ({ page }) => {
@@ -117,6 +128,51 @@ test.describe("Auth flow", () => {
 
     // Should redirect to login
     await page.waitForURL("**/login", { timeout: 10000 });
+  });
+
+  test("landing on /reset-password with a recovery hash updates the password", async ({ page }) => {
+    const admin = adminClient();
+    const tempPassword = `Recovered-${Date.now()}`;
+
+    // Generate a genuine recovery link and verify it to obtain the real
+    // session tokens Supabase puts in the URL hash (implicit flow).
+    const { data, error } = await admin.auth.admin.generateLink({
+      type: "recovery",
+      email: TEST_EMAIL,
+      options: { redirectTo: `${BASE_URL}/reset-password` },
+    });
+    expect(error).toBeNull();
+    const userId = data!.user!.id;
+
+    const verifyRes = await fetch(data!.properties!.action_link, { redirect: "manual" });
+    const location = verifyRes.headers.get("location")!;
+    const hash = location.slice(location.indexOf("#") + 1);
+    const params = new URLSearchParams(hash);
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+    expect(accessToken).toBeTruthy();
+    expect(refreshToken).toBeTruthy();
+
+    try {
+      // Reproduce exactly what a user's browser receives after clicking the
+      // email link: /reset-password with the recovery tokens in the hash.
+      await page.goto(
+        `${BASE_URL}/reset-password#access_token=${accessToken}&refresh_token=${refreshToken}&type=recovery&token_type=bearer`
+      );
+      await expect(page.locator("h1")).toContainText("Set New Password");
+
+      await page.fill('input[placeholder="New password"]', tempPassword);
+      await page.fill('input[placeholder="Confirm new password"]', tempPassword);
+      await page.click('button[type="submit"]');
+
+      // Success proves the recovery session from the hash was established
+      // before updateUser ran. The bug surfaces here as "Auth session missing!".
+      await expect(page.locator("text=Password updated!")).toBeVisible({ timeout: 10000 });
+      await page.screenshot({ path: "e2e/screenshots/reset-password-success.png" });
+    } finally {
+      // Restore the known test password so other specs keep working.
+      await admin.auth.admin.updateUserById(userId, { password: TEST_PASSWORD });
+    }
   });
 
   test("forgot password submits and shows response", async ({ page }) => {

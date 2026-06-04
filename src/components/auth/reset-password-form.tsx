@@ -13,6 +13,24 @@ export function ResetPasswordForm() {
   const [success, setSuccess] = useState(false);
   const router = useRouter();
   const redirectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [supabase] = useState(() => createClient());
+  const sessionReady = useRef<Promise<unknown> | null>(null);
+
+  // The recovery link lands here with the session tokens in the URL hash
+  // (Supabase implicit flow). Establish the session from those tokens so
+  // updateUser runs authenticated; otherwise it throws "Auth session missing!".
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.hash.slice(1));
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+    if (accessToken && refreshToken) {
+      sessionReady.current = supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }, [supabase]);
 
   useEffect(() => {
     return () => {
@@ -36,7 +54,8 @@ export function ResetPasswordForm() {
 
     setLoading(true);
 
-    const supabase = createClient();
+    // Wait for the recovery session to be established before updating.
+    if (sessionReady.current) await sessionReady.current;
     const { error: updateError } = await supabase.auth.updateUser({ password });
 
     if (updateError) {
