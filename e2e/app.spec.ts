@@ -1,6 +1,5 @@
 import { test, expect } from "playwright/test";
 
-// Helper: login and navigate to dashboard
 async function login(page: import("playwright/test").Page) {
   await page.goto("/login");
   await page.fill('input[type="email"]', "rk2211@gmail.com");
@@ -37,21 +36,17 @@ test.describe("Pawdojo app", () => {
   test("login, view dashboard, and navigate all tabs", async ({ page }) => {
     await login(page);
 
-    // Dashboard should show dog name and nav
     await expect(page.locator("h1")).toBeVisible();
     await expect(page.locator("nav")).toBeVisible();
 
-    // Navigate to Progress (3 tabs: Home, Progress, Profile)
     await page.click('a[aria-label="Progress"]');
     await page.waitForURL("**/progress");
     await expect(page.locator("h1")).toContainText("Progress");
 
-    // Navigate to Profile
     await page.click('a[aria-label="Profile"]');
     await page.waitForURL("**/profile");
     await expect(page.locator("h1")).toContainText("Profile");
 
-    // Navigate back to Home
     await page.click('a[aria-label="Home"]');
     await page.waitForURL("**/dashboard");
   });
@@ -62,11 +57,9 @@ test.describe("Pawdojo app", () => {
     const nav = page.locator('nav[aria-label="Main navigation"]');
     await expect(nav).toBeVisible();
 
-    // Should have exactly 3 tabs
     const tabs = nav.locator("a");
     await expect(tabs).toHaveCount(3);
 
-    // Active tab should have aria-current
     const activeLink = nav.locator('[aria-current="page"]');
     await expect(activeLink).toBeVisible();
   });
@@ -91,7 +84,6 @@ test.describe("Pawdojo app", () => {
   test("lesson back button uses browser back navigation", async ({ page }) => {
     await login(page);
 
-    // Go to progress first
     await page.goto("/progress");
     await page.waitForURL("**/progress");
 
@@ -112,7 +104,6 @@ test.describe("Pawdojo app", () => {
 
     await expect(page.locator("h1")).toContainText("Progress");
 
-    // Should show overall score
     await expect(page.locator('text="Overall Score"').or(page.locator('text="OVERALL SCORE"'))).toBeVisible();
 
     // Should show skills section with lesson links

@@ -7,14 +7,12 @@ export async function handleStreakUpdate(
 ): Promise<{ streakUpdated: boolean }> {
   const admin = createAdminClient();
 
-  // Fetch current dog streak state (per-dog streaks)
   let { data: streakRow } = await admin
     .from("dog_streaks")
     .select("*")
     .eq("dog_id", data.dogId)
     .single();
 
-  // If no dog streak row exists yet, create one
   if (!streakRow) {
     const { data: newRow } = await admin
       .from("dog_streaks")
@@ -61,7 +59,6 @@ export async function handleStreakUpdate(
     return { streakUpdated: false };
   }
 
-  // Update dog streak record
   await admin
     .from("dog_streaks")
     .update({
@@ -73,7 +70,6 @@ export async function handleStreakUpdate(
     })
     .eq("dog_id", data.dogId);
 
-  // Log streak events
   for (const event of events) {
     await admin.from("streak_events").insert({
       user_id: data.userId,

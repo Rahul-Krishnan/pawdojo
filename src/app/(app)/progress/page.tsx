@@ -19,7 +19,6 @@ export default async function ProgressPage() {
 
   if (!user) redirect("/login");
 
-  // Fetch profile to get active_dog_id, plus dog-independent data
   const [
     { data: profile },
     { data: skills },
@@ -38,12 +37,10 @@ export default async function ProgressPage() {
 
   const activeDogId = profile?.active_dog_id ?? activeDogRow?.[0]?.id;
 
-  // Fetch the active dog's full row for XP/level
   const activeDog = activeDogId
     ? (await supabase.from("dogs").select("*").eq("id", activeDogId).single()).data
     : activeDogRow?.[0] ?? null;
 
-  // Fetch dog-scoped data using explicit dog_id filter
   const [{ data: completions }, { count: totalSessions }, { data: sessionRatings }, { data: dogStreakRows }] = activeDogId
     ? await Promise.all([
         supabase.from("lesson_completions").select("lesson_id").eq("dog_id", activeDogId),
@@ -76,7 +73,6 @@ export default async function ProgressPage() {
 
   const completedIds = new Set(completions?.map((c) => c.lesson_id) ?? []);
 
-  // Build avg rating per skill
   const ratingsBySkill = new Map<string, number[]>();
   for (const session of sessionRatings ?? []) {
     if (!session.skill_id || !session.rating) continue;

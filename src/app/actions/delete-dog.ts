@@ -14,7 +14,6 @@ export async function deleteDog(dogId: string) {
     return { error: "Not authenticated" };
   }
 
-  // Verify the user owns this dog
   const { data: userDogs } = await supabase
     .from("dogs")
     .select("id")
@@ -24,19 +23,16 @@ export async function deleteDog(dogId: string) {
     return { error: "No dogs found" };
   }
 
-  // Don't allow deleting the last dog
   if (userDogs.length <= 1) {
     return { error: "You can't delete your only dog" };
   }
 
-  // Verify this dog belongs to the user
   if (!userDogs.some((dog) => dog.id === dogId)) {
     return { error: "Dog not found" };
   }
 
   const admin = createAdminClient();
 
-  // If deleting the active dog, switch to another one first
   const { data: profile } = await admin
     .from("user_profiles")
     .select("active_dog_id")

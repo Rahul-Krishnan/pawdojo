@@ -68,8 +68,6 @@ export function LessonContent({
 
       <article
         className="prose prose-sm mt-6 max-w-none prose-headings:font-heading prose-headings:text-gray-900 dark:prose-headings:text-gray-100 prose-h2:text-lg prose-h3:text-base prose-p:text-gray-700 dark:prose-p:text-gray-300 prose-strong:text-gray-900 dark:prose-strong:text-gray-100 prose-li:text-gray-700 dark:prose-li:text-gray-300"
-        role="article"
-        aria-label={`Lesson: ${title}`}
       >
         <Markdown remarkPlugins={[remarkGfm]}>{contentMd}</Markdown>
       </article>

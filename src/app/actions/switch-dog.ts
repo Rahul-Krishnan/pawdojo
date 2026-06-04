@@ -14,7 +14,6 @@ export async function switchDog(dogId: string) {
     return { error: "Not authenticated" };
   }
 
-  // Verify the user owns this dog
   const { data: dog } = await supabase
     .from("dogs")
     .select("id")
