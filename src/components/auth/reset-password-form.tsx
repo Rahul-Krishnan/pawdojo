@@ -14,11 +14,16 @@ export function ResetPasswordForm() {
   const router = useRouter();
   const redirectTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [supabase] = useState(() => createClient());
-  const sessionReady = useRef<Promise<unknown> | null>(null);
+  const sessionReady = useRef<ReturnType<
+    typeof supabase.auth.setSession
+  > | null>(null);
 
   // The recovery link lands here with the session tokens in the URL hash
   // (Supabase implicit flow). Establish the session from those tokens so
   // updateUser runs authenticated; otherwise it throws "Auth session missing!".
+  // This is deliberately NOT routed through /api/auth/callback (PKCE): the PKCE
+  // code verifier lives only in the originating browser, so routing recovery
+  // through it would break cross-device reset (clicking the link on a new device).
   useEffect(() => {
     const params = new URLSearchParams(window.location.hash.slice(1));
     const accessToken = params.get("access_token");
@@ -54,8 +59,23 @@ export function ResetPasswordForm() {
 
     setLoading(true);
 
-    // Wait for the recovery session to be established before updating.
-    if (sessionReady.current) await sessionReady.current;
+    // Wait for the recovery session (from the URL hash) to be established before
+    // updating. If the link was expired or already used, setSession fails here;
+    // surface a clear message instead of the cryptic "Auth session missing!".
+    if (sessionReady.current) {
+      try {
+        const { error: sessionError } = await sessionReady.current;
+        if (sessionError) {
+          setError("This reset link is invalid or has expired. Request a new one.");
+          setLoading(false);
+          return;
+        }
+      } catch {
+        setError("This reset link is invalid or has expired. Request a new one.");
+        setLoading(false);
+        return;
+      }
+    }
     const { error: updateError } = await supabase.auth.updateUser({ password });
 
     if (updateError) {

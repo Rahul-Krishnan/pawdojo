@@ -169,6 +169,11 @@ test.describe("Auth flow", () => {
       // before updateUser ran. The bug surfaces here as "Auth session missing!".
       await expect(page.locator("text=Password updated!")).toBeVisible({ timeout: 10000 });
       await page.screenshot({ path: "e2e/screenshots/reset-password-success.png" });
+
+      // The recovery session must persist as a cookie so the server recognizes
+      // the user: the post-success redirect only reaches /dashboard (instead of
+      // bouncing back to /login via middleware) if setSession wrote real cookies.
+      await page.waitForURL("**/dashboard", { timeout: 10000 });
     } finally {
       // Restore the known test password so other specs keep working.
       await admin.auth.admin.updateUserById(userId, { password: TEST_PASSWORD });
