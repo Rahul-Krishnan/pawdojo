@@ -27,7 +27,6 @@ export default async function LessonPage({
     notFound();
   }
 
-  // Get active dog ID
   const { data: profile } = await supabase
     .from("user_profiles")
     .select("active_dog_id")
@@ -38,7 +37,6 @@ export default async function LessonPage({
 
   const skillId = (lesson.skills as { id: string }).id;
 
-  // Filter by active dog for per-dog completion and session history
   const completionQuery = supabase
     .from("lesson_completions")
     .select("id")

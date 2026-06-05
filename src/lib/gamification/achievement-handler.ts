@@ -12,7 +12,6 @@ export async function handleAchievementCheck(
 ): Promise<{ achievementsUnlocked: string[] }> {
   const admin = createAdminClient();
 
-  // Fetch all achievement definitions
   const { data: defs } = await admin
     .from("achievement_definitions")
     .select("*");
@@ -21,7 +20,6 @@ export async function handleAchievementCheck(
     return { achievementsUnlocked: [] };
   }
 
-  // Fetch current user achievement state
   const { data: userAchievements } = await admin
     .from("user_achievements")
     .select("*")
@@ -47,7 +45,6 @@ export async function handleAchievementCheck(
     .select("id", { count: "exact", head: true })
     .eq("dog_id", data.dogId);
 
-  // Count completed lessons by skill key, scoped to this dog
   const { data: completions } = await admin
     .from("lesson_completions")
     .select("lesson_id, lessons(skill_id, skills(key))")
@@ -64,7 +61,6 @@ export async function handleAchievementCheck(
     }
   }
 
-  // Count total lessons per skill key
   const { data: allLessons } = await admin
     .from("lessons")
     .select("skill_id, skills(key)");
@@ -77,14 +73,12 @@ export async function handleAchievementCheck(
     }
   }
 
-  // Check if any session has a 5-star rating (per dog)
   const { count: perfectCount } = await admin
     .from("training_sessions")
     .select("id", { count: "exact", head: true })
     .eq("dog_id", data.dogId)
     .eq("rating", 5);
 
-  // Fetch basic skill keys
   const { data: basicSkills } = await admin
     .from("skills")
     .select("key")
@@ -120,7 +114,6 @@ export async function handleAchievementCheck(
 
   const result = evaluateAchievements(achievementDefs, stats, currentState);
 
-  // Write progress updates
   for (const update of result.progressUpdates) {
     await admin.from("user_achievements").upsert(
       {
@@ -136,7 +129,6 @@ export async function handleAchievementCheck(
     );
   }
 
-  // Award XP for newly unlocked achievements
   const unlockedNames: string[] = [];
   for (const defId of result.newlyUnlocked) {
     const def = achievementDefs.find((d) => d.id === defId);

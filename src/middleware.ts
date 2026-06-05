@@ -44,14 +44,12 @@ export async function middleware(request: NextRequest) {
     (path) => pathname === path || pathname.startsWith("/api/auth/")
   );
 
-  // Unauthenticated users on protected routes go to login
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
 
-  // Authenticated users on login page go to dashboard
   if (user && pathname === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";

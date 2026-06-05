@@ -1,17 +1,9 @@
-// Haptic feedback system
-// Android: Vibration API (navigator.vibrate)
-// iOS: AudioContext-based sub-perceptual pulse that triggers Taptic Engine
-// Falls back silently on unsupported platforms
+// Haptic feedback via the Vibration API (navigator.vibrate). Unsupported on iOS Safari, where these calls no-op.
 
 let hapticEnabled = true;
 
 export function setHapticEnabled(value: boolean) {
   hapticEnabled = value;
-}
-
-function isIOS(): boolean {
-  if (typeof navigator === "undefined") return false;
-  return /iPhone|iPad|iPod/.test(navigator.userAgent);
 }
 
 function supportsVibration(): boolean {

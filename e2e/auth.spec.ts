@@ -16,24 +16,19 @@ test.describe("Auth flow", () => {
 
     await page.click('button:has-text("Create an account")');
 
-    // Submit button should now say "Sign Up"
     await expect(page.locator('button[type="submit"]')).toContainText("Sign Up");
 
-    // Should show "Already have an account?" to go back
     await expect(page.locator('button:has-text("Already have an account?")')).toBeVisible();
 
-    // "Forgot password?" should not be visible in signup mode
     await expect(page.locator('button:has-text("Forgot password?")')).not.toBeVisible();
   });
 
   test("clicking 'Already have an account?' switches back to login mode", async ({ page }) => {
     await page.goto("/login");
 
-    // Switch to signup
     await page.click('button:has-text("Create an account")');
     await expect(page.locator('button[type="submit"]')).toContainText("Sign Up");
 
-    // Switch back to login
     await page.click('button:has-text("Already have an account?")');
     await expect(page.locator('button[type="submit"]')).toContainText("Log In");
     await expect(page.locator('button:has-text("Forgot password?")')).toBeVisible();
@@ -75,7 +70,6 @@ test.describe("Auth flow", () => {
     await page.fill('input[type="password"]', "wrongpassword123");
     await page.click('button[type="submit"]');
 
-    // Should show an error message
     await expect(page.locator("text=Invalid login credentials")).toBeVisible({ timeout: 10000 });
   });
 
@@ -91,7 +85,6 @@ test.describe("Auth flow", () => {
   });
 
   test("authenticated user on /login is redirected to dashboard", async ({ page }) => {
-    // Login first
     await page.goto("/login");
     await page.fill('input[type="email"]', "rk2211@gmail.com");
     await page.fill('input[type="password"]', "iamnotafool99");
@@ -125,17 +118,14 @@ test.describe("Auth flow", () => {
   });
 
   test("sign out button works", async ({ page }) => {
-    // Login
     await page.goto("/login");
     await page.fill('input[type="email"]', "rk2211@gmail.com");
     await page.fill('input[type="password"]', "iamnotafool99");
     await page.click('button[type="submit"]');
     await page.waitForURL("**/dashboard");
 
-    // Go to profile
     await page.goto("/profile");
 
-    // Click sign out
     await page.click('button:has-text("Sign Out")');
 
     // Should redirect to login

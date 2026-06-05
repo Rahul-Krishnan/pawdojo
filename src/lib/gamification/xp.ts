@@ -66,8 +66,8 @@ export function xpForLevel(level: number): number {
 
 export type Belt = {
   name: string;
-  color: string;       // tailwind bg class
-  textColor: string;   // tailwind text class
+  color: string;
+  textColor: string;
   minLevel: number;
 };
 

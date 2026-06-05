@@ -46,7 +46,6 @@ export async function createDog(formData: {
     return { error: "Something went wrong. Please try again." };
   }
 
-  // Set the new dog as the active dog
   await admin
     .from("user_profiles")
     .update({ active_dog_id: newDog.id, updated_at: new Date().toISOString() })

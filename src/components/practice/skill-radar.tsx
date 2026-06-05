@@ -2,10 +2,9 @@
 
 type SkillData = {
   name: string;
-  score: number; // 0-1, combined from avg rating + completion %
+  score: number; // combined from avg rating + completion %
 };
 
-// Abbreviate long skill names for the radar
 function abbreviate(name: string): string {
   const map: Record<string, string> = {
     "Loose Leash Walking": "Leash",
@@ -20,9 +19,8 @@ export function SkillRadar({ skills }: { skills: SkillData[] }) {
   const n = skills.length;
   if (n < 3) return null;
 
-  // Use a large internal viewBox with generous padding for labels
   const padding = 60;
-  const chartR = 100; // radius of the chart area
+  const chartR = 100;
   const viewSize = (chartR + padding) * 2;
   const cx = viewSize / 2;
   const cy = viewSize / 2;
@@ -37,7 +35,7 @@ export function SkillRadar({ skills }: { skills: SkillData[] }) {
   const angleStep = (2 * Math.PI) / n;
   const rings = [0.25, 0.5, 0.75, 1.0];
 
-  const minR = chartR * 0.12; // visible circle at zero
+  const minR = chartR * 0.12;
   const skillPoints = skills.map((skill, i) => {
     const angle = i * angleStep;
     const r = Math.max(skill.score * chartR, minR);

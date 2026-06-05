@@ -74,7 +74,6 @@ export function SessionHistoryModal({
   const [lessonsMap, setLessonsMap] = useState<Map<string, LessonInfo>>(new Map());
   const supabase = createClient();
 
-  // Load lessons once to resolve skill_id -> lesson name/href
   useEffect(() => {
     supabase
       .from("lessons")

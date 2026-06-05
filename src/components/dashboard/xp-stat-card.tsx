@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import { AnimatePresence, motion } from "motion/react";
-import { getBelt, getNextBelt, xpForLevel, BELTS } from "@/lib/gamification/xp";
+import { getBelt, getNextBelt, xpForLevel } from "@/lib/gamification/xp";
 import { playTap } from "@/lib/sounds";
 
 export function XpStatCard({

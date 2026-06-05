@@ -40,11 +40,9 @@ export default async function DashboardPage() {
     redirect("/onboarding");
   }
 
-  // Resolve active dog
   const activeDogId = profile?.active_dog_id ?? allDogs[0].id;
   const dog = allDogs.find((d) => d.id === activeDogId) ?? allDogs[0];
 
-  // Fetch dog-scoped data: completions, sessions, and dog streak
   const [{ data: completions }, { data: sessionRatings }, { data: recentSessions }, { data: dogStreakRows }] = await Promise.all([
     supabase.from("lesson_completions").select("lesson_id").eq("dog_id", dog.id),
     supabase.from("training_sessions").select("skill_id, rating, logged_at").eq("dog_id", dog.id).not("skill_id", "is", null).not("rating", "is", null).order("logged_at", { ascending: false }),
@@ -74,7 +72,6 @@ export default async function DashboardPage() {
 
   const skippedLessonIds = await getSkippedLessons(dog.id);
 
-  // Build avg rating per skill from sessions
   const ratingsBySkill = new Map<string, { total: number; count: number; lastDate: string }>();
   for (const session of sessionRatings ?? []) {
     if (!session.skill_id || !session.rating) continue;
@@ -91,7 +88,6 @@ export default async function DashboardPage() {
     }
   }
 
-  // Find weak skills: avg rating 3 or below, sorted by worst first
   const weakSkills: { skillId: string; avg: number; lastDate: string }[] = [];
   for (const [skillId, data] of ratingsBySkill) {
     const avg = data.total / data.count;
@@ -101,7 +97,6 @@ export default async function DashboardPage() {
   }
   weakSkills.sort((a, b) => a.avg - b.avg);
 
-  // Find the weakest skill's first completed lesson (for review)
   let reviewLesson = null;
   for (const weak of weakSkills) {
     const found = (lessons ?? []).find(
@@ -113,22 +108,18 @@ export default async function DashboardPage() {
     }
   }
 
-  // Find next uncompleted lesson in the linear path, skipping skipped ones
   const nextNewLesson = (lessons ?? []).find(
     (lesson) => !completedLessonIds.has(lesson.id) && !skippedLessonIds.has(lesson.id)
   );
 
-  // If all uncompleted lessons are skipped, show the first skipped one (they come back)
+  // Skipped lessons aren't permanent: if nothing new remains, resurface the first skipped one.
   const nextSkippedLesson = !nextNewLesson
     ? (lessons ?? []).find(
         (lesson) => !completedLessonIds.has(lesson.id) && skippedLessonIds.has(lesson.id)
       )
     : null;
 
-  // Decision: alternate between new lessons and reviews.
-  // Show a review if there's a weak skill AND the user has completed
-  // at least 2 lessons since their last review would have appeared.
-  // Simple heuristic: show review when completedCount is odd and there's a weak skill.
+  // Surface a review every third completed lesson, when a weak skill exists.
   const completedCount = completedLessonIds.size;
   const showReview = reviewLesson && completedCount > 0 && completedCount % 3 === 0;
 

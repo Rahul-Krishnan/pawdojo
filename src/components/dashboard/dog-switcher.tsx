@@ -24,7 +24,6 @@ export function DogSwitcher({
   const router = useRouter();
 
   if (dogs.length <= 1 && !open) {
-    // Single dog, just show name as tappable to open menu (for add dog)
     return (
       <button
         onClick={() => { setOpen(true); playTap(); }}

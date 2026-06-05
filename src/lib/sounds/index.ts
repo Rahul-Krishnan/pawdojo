@@ -1,6 +1,3 @@
-// Lightweight sound system using Web Audio API
-// Generates sounds procedurally, no audio files needed
-
 import { hapticTap, hapticSuccess, hapticHeavy, hapticError } from "@/lib/haptics";
 
 let audioContext: AudioContext | null = null;
@@ -55,7 +52,7 @@ export function playTap() {
   hapticTap();
 }
 
-// Success: ascending two-note chime (like Duolingo's correct answer)
+// Success: ascending two-note chime
 export function playSuccess() {
   playTone(523, 0.15, "sine", 0.12); // C5
   playTone(659, 0.2, "sine", 0.12, 0.1); // E5

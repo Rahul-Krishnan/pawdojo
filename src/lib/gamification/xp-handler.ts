@@ -15,7 +15,6 @@ export async function handleXPAward(
     .single();
   const timezone = profileRow?.timezone ?? "UTC";
 
-  // Compute UTC timestamp of midnight in the user's local timezone
   // eg for America/Los_Angeles (UTC-7), local midnight = 07:00 UTC
   const utcNow = new Date();
   const localNow = new Date(utcNow.toLocaleString("en-US", { timeZone: timezone }));
@@ -37,7 +36,6 @@ export async function handleXPAward(
     0
   );
 
-  // Check if this is the first activity today
   const { count: todayCount } = await admin
     .from("xp_transactions")
     .select("id", { count: "exact", head: true })
@@ -46,10 +44,8 @@ export async function handleXPAward(
 
   const isFirstOfDay = (todayCount ?? 0) === 0;
 
-  // Calculate XP for both session_log and lesson_complete
   let totalXpAwarded = 0;
 
-  // Award XP for session log
   const sessionResult = calculateXPAward(
     { action: "session_log", dailySessionXpSoFar, isFirstOfDay },
     data.userId,
@@ -69,7 +65,6 @@ export async function handleXPAward(
     }
   }
 
-  // Award XP for lesson completion (if a lesson was completed)
   if (data.lessonId) {
     const lessonResult = calculateXPAward(
       {

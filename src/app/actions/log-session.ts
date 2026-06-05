@@ -23,12 +23,10 @@ export async function logSession(formData: {
     return { error: "Not authenticated" };
   }
 
-  // Validate inputs
   if (!formData.lessonId || !formData.skillId) {
     return { error: "Missing lesson or skill" };
   }
 
-  // Verify lesson exists and belongs to the submitted skill
   const { data: lessonCheck } = await supabase
     .from("lessons")
     .select("id, skill_id")
@@ -54,7 +52,6 @@ export async function logSession(formData: {
     return { error: "Notes too long (max 1000 characters)" };
   }
 
-  // Get active dog from user profile
   const { data: profileData } = await supabase
     .from("user_profiles")
     .select("active_dog_id")
@@ -63,7 +60,6 @@ export async function logSession(formData: {
 
   let dogId = profileData?.active_dog_id;
 
-  // Fallback: if no active dog set, use first dog
   if (!dogId) {
     const { data: firstDog } = await supabase
       .from("dogs")
@@ -115,7 +111,6 @@ export async function logSession(formData: {
     }, { onConflict: "dog_id,lesson_id", ignoreDuplicates: true });
   }
 
-  // Update dog skill progress
   const { data: existingProgress } = await admin
     .from("dog_skill_progress")
     .select("*")
@@ -143,7 +138,6 @@ export async function logSession(formData: {
     });
   }
 
-  // Run gamification pipeline (streak, XP, achievements)
   const pipelineResult = await runGamificationPipeline({
     userId: user.id,
     dogId: dog.id,
