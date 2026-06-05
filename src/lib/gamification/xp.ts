@@ -8,7 +8,7 @@ const XP_VALUES: Record<XPAction, number> = {
   rating_submit: 5,
 };
 
-const DAILY_SESSION_XP_CAP = 200;
+export const DAILY_SESSION_XP_CAP = 200;
 const FIRST_OF_DAY_BONUS = 5;
 
 export type XPAwardInput = {

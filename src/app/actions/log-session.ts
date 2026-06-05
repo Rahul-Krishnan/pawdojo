@@ -79,6 +79,25 @@ export async function logSession(formData: {
 
   const admin = createAdminClient();
 
+  // Soft rate limit (L2): reject session logs fired faster than one per 2s.
+  // This guards against accidental double-submits and trivial scripted spam.
+  // It is a UX/abuse guard, not a hard security control; the authoritative
+  // daily XP cap is enforced atomically in award_session_xp.
+  const { data: recentSession } = await admin
+    .from("training_sessions")
+    .select("logged_at")
+    .eq("user_id", user.id)
+    .order("logged_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (recentSession?.logged_at) {
+    const sinceMs = Date.now() - new Date(recentSession.logged_at).getTime();
+    if (sinceMs < 2000) {
+      return { error: "You're logging sessions too quickly. Please wait a moment." };
+    }
+  }
+
   // Create training session (always, even on retake)
   const { data: session, error: sessionError } = await admin
     .from("training_sessions")

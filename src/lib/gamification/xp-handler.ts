@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import { calculateXPAward, calculateLevel } from "./xp";
+import { calculateXPAward, DAILY_SESSION_XP_CAP } from "./xp";
 import type { SessionData } from "./pipeline";
 
 export async function handleXPAward(
@@ -24,18 +24,6 @@ export async function handleXPAward(
   const midnightUtcRaw = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
   const todayStartUtc = new Date(midnightUtcRaw.getTime() - tzOffsetMs);
 
-  const { data: todayXpRows } = await admin
-    .from("xp_transactions")
-    .select("xp_amount")
-    .eq("user_id", data.userId)
-    .eq("action_type", "session_log")
-    .gte("awarded_at", todayStartUtc.toISOString());
-
-  const dailySessionXpSoFar = (todayXpRows ?? []).reduce(
-    (sum, row) => sum + row.xp_amount,
-    0
-  );
-
   const { count: todayCount } = await admin
     .from("xp_transactions")
     .select("id", { count: "exact", head: true })
@@ -46,30 +34,44 @@ export async function handleXPAward(
 
   let totalXpAwarded = 0;
 
+  // Session XP is awarded by award_session_xp (migration 009), which sums the
+  // day's prior session XP, applies the cap, and inserts inside a single
+  // advisory-locked transaction. This closes the race where two concurrent
+  // session logs each read the same sum and both insert past the daily cap.
+  // dailySessionXpSoFar is 0 here only to obtain the uncapped amount and the
+  // idempotency key; the authoritative cap lives in the RPC.
   const sessionResult = calculateXPAward(
-    { action: "session_log", dailySessionXpSoFar, isFirstOfDay },
+    { action: "session_log", dailySessionXpSoFar: 0, isFirstOfDay },
     data.userId,
     data.sessionId
   );
 
-  if (sessionResult.cappedAmount > 0) {
-    const { error } = await admin.from("xp_transactions").insert({
-      user_id: data.userId,
-      action_type: "session_log",
-      action_ref: data.sessionId,
-      xp_amount: sessionResult.cappedAmount,
-      idempotency_key: sessionResult.idempotencyKey,
-    });
-    if (!error) {
-      totalXpAwarded += sessionResult.cappedAmount;
+  const { data: awardedSessionXp, error: sessionXpError } = await admin.rpc(
+    "award_session_xp",
+    {
+      p_user_id: data.userId,
+      p_action_ref: data.sessionId,
+      p_idempotency_key: sessionResult.idempotencyKey,
+      p_amount: sessionResult.totalAwarded,
+      p_day_start: todayStartUtc.toISOString(),
+      p_cap: DAILY_SESSION_XP_CAP,
     }
+  );
+  // Mirror the lesson-insert error handling below: only credit the award when
+  // the RPC succeeded. A returned 0 is NOT an error: award_session_xp returns 0
+  // by design on idempotent replay (migration 009, ON CONFLICT DO NOTHING), so
+  // we key off the error field, never off the value.
+  if (sessionXpError) {
+    console.error("award_session_xp failed", sessionXpError);
+  } else {
+    totalXpAwarded += awardedSessionXp ?? 0;
   }
 
   if (data.lessonId) {
     const lessonResult = calculateXPAward(
       {
         action: "lesson_complete",
-        dailySessionXpSoFar: dailySessionXpSoFar + sessionResult.cappedAmount,
+        dailySessionXpSoFar: 0,
         isFirstOfDay: false,
       },
       data.userId,
@@ -88,10 +90,24 @@ export async function handleXPAward(
     }
   }
 
-  // Atomic XP increment (prevents lost updates under concurrent writes)
+  // Atomic XP increment (prevents lost updates under concurrent writes). Check
+  // each RPC's error like the award above: a silent failure here would drop the
+  // dog/user XP totals out of sync with the recorded transactions.
   if (totalXpAwarded > 0) {
-    await admin.rpc("increment_dog_xp", { dog_id_param: data.dogId, xp_amount: totalXpAwarded });
-    await admin.rpc("increment_user_xp", { user_id_param: data.userId, xp_amount: totalXpAwarded });
+    const { error: dogXpError } = await admin.rpc("increment_dog_xp", {
+      dog_id_param: data.dogId,
+      xp_amount: totalXpAwarded,
+    });
+    if (dogXpError) {
+      console.error("increment_dog_xp failed", dogXpError);
+    }
+    const { error: userXpError } = await admin.rpc("increment_user_xp", {
+      user_id_param: data.userId,
+      xp_amount: totalXpAwarded,
+    });
+    if (userXpError) {
+      console.error("increment_user_xp failed", userXpError);
+    }
   }
 
   return { xpAwarded: totalXpAwarded };
