@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AnimatePresence } from "motion/react";
 import { detectFreezeUsed } from "@/lib/gamification/streaks";
 import { FreezeUsedNotification } from "./freeze-used-notification";
 
@@ -68,13 +69,15 @@ export function FreezeUsedGate({
     }
   }, [userId, freezeUsedTotal]);
 
-  if (!show) return null;
-
   return (
-    <FreezeUsedNotification
-      count={count}
-      freezeRemaining={freezeRemaining}
-      onClose={() => setShow(false)}
-    />
+    <AnimatePresence>
+      {show && (
+        <FreezeUsedNotification
+          count={count}
+          freezeRemaining={freezeRemaining}
+          onClose={() => setShow(false)}
+        />
+      )}
+    </AnimatePresence>
   );
 }

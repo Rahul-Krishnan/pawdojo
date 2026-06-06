@@ -178,7 +178,7 @@ export default async function DashboardPage() {
       <FreezeUsedGate
         userId={user.id}
         freezeUsedTotal={freezeUsedCount ?? 0}
-        freezeRemaining={dogStreak?.freeze_available ?? 0}
+        freezeRemaining={freezeAvailable}
       />
 
       {nextLesson && (
