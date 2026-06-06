@@ -170,6 +170,57 @@ export function effectiveFreezesRemainingFromRow(
   );
 }
 
+// "Streak freeze used" notification detection.
+//
+// A freeze (save) is consumed inside calculateStreakUpdate when training
+// resumes after a single missed day, which decrements the stored
+// `freeze_available` and appends a `freeze_used` row to streak_events. From the
+// user's perspective the "Saves Remaining" count silently drops between two
+// dashboard views, which feels like an ambush. This helper detects whether a
+// freeze was consumed since the user last acknowledged the count, so a
+// one-time notification can explain the depletion.
+//
+// The signal is the running total of `freeze_used` events. `lastSeenCount` is
+// the total the user has already been notified about (persisted client-side per
+// user). When the live total exceeds it, at least one new freeze was consumed.
+export type FreezeUsedDetection = {
+  // Whether a "Streak freeze used" notification should be shown now.
+  shouldNotify: boolean;
+  // How many freezes were consumed since the last acknowledged view (>= 0).
+  newlyConsumed: number;
+  // The count to persist as acknowledged once the notification is shown.
+  // Always equals the live total, so re-renders before the user dismisses the
+  // notification don't double-count.
+  acknowledgedCount: number;
+};
+
+export function detectFreezeUsed(
+  freezeUsedTotal: number,
+  lastSeenCount: number | null
+): FreezeUsedDetection {
+  // Guard against malformed inputs (NaN, negatives, undefined from storage).
+  const total =
+    Number.isFinite(freezeUsedTotal) && freezeUsedTotal > 0
+      ? Math.floor(freezeUsedTotal)
+      : 0;
+
+  // A missing marker means the user has never been tracked. Treat the current
+  // total as already-seen so we never replay historical freezes as if they
+  // just happened on first ever load.
+  if (lastSeenCount === null || !Number.isFinite(lastSeenCount)) {
+    return { shouldNotify: false, newlyConsumed: 0, acknowledgedCount: total };
+  }
+
+  const seen = Math.max(0, Math.floor(lastSeenCount));
+  const newlyConsumed = Math.max(0, total - seen);
+
+  return {
+    shouldNotify: newlyConsumed > 0,
+    newlyConsumed,
+    acknowledgedCount: total,
+  };
+}
+
 export function calculateStreakUpdate(
   current: StreakState,
   activityAt: Date,
