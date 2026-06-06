@@ -405,15 +405,17 @@ describe.skipIf(!hasStack)("RK-10 server-action integration", () => {
         .eq("key", "perfect_rating")
         .single();
 
-      if (def) {
-        const { data: ua } = await admin
-          .from("user_achievements")
-          .select("unlocked_at")
-          .eq("user_id", userId)
-          .eq("achievement_def_id", def.id)
-          .maybeSingle();
-        expect(ua?.unlocked_at).toBeTruthy();
-      }
+      // Fail loudly if the def is missing/renamed (seed.sql is a documented
+      // precondition for this suite) instead of silently skipping assertions.
+      expect(def).toBeTruthy();
+
+      const { data: ua } = await admin
+        .from("user_achievements")
+        .select("unlocked_at")
+        .eq("user_id", userId)
+        .eq("achievement_def_id", def!.id)
+        .maybeSingle();
+      expect(ua?.unlocked_at).toBeTruthy();
     });
   });
 
