@@ -32,7 +32,6 @@ export async function handleStreakUpdate(
     return { streakUpdated: false };
   }
 
-  // Fetch user timezone from profile
   const { data: profile } = await admin
     .from("user_profiles")
     .select("timezone")
