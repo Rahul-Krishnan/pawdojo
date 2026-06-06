@@ -1,6 +1,6 @@
 # Pawdojo
 
-Gamified dog training for the web — a Duolingo-style training loop for dog owners. Live at **[pawdojo.app](https://pawdojo.app)**.
+Gamified dog training for the web, a Duolingo-style training loop for dog owners. Live at **[pawdojo.app](https://pawdojo.app)**.
 
 > The package name and codebase are `pawdojo`; "Goodboy" was an earlier codename and may still appear in history or notes.
 
@@ -11,9 +11,9 @@ Pawdojo turns dog training into a daily habit by borrowing the mechanics that ma
 The core loop:
 
 1. **Pick a lesson** from the dashboard (each targets a specific skill or behavior).
-2. **Run a practice session** — short, guided steps you do with your dog.
+2. **Run a practice session**: short, guided steps you do with your dog.
 3. **Log the session** to award XP and update progress.
-4. **Keep the streak alive** — daily activity builds a streak; missed days break it.
+4. **Keep the streak alive**: daily activity builds a streak, and missed days break it.
 5. **Unlock achievements** as XP, streaks, and completed lessons accumulate.
 
 Progress is tracked per dog, so owners with multiple dogs maintain separate XP, streaks, and lesson history. The UI is mobile-first (the Playwright suite drives a 390×844 viewport).
@@ -27,8 +27,8 @@ Versions are the declared ranges from `package.json`.
 | Framework | [Next.js](https://nextjs.org) (App Router) | ^16.2.6 |
 | UI | React / React DOM | ^19.2.6 |
 | Styling | Tailwind CSS (`@tailwindcss/postcss`, `@tailwindcss/typography`) | ^4.3.0 |
-| Backend | Supabase — `@supabase/ssr` | ^0.10.3 |
-| Backend | Supabase — `@supabase/supabase-js` | ^2.106.1 |
+| Backend | Supabase (`@supabase/ssr`) | ^0.10.3 |
+| Backend | Supabase (`@supabase/supabase-js`) | ^2.106.1 |
 | Client state | Zustand | ^5.0.13 |
 | Server state | TanStack Query (`@tanstack/react-query`) | ^5.100.13 |
 | Markdown | `react-markdown` / `remark-gfm` | ^10.1.0 / ^4.0.1 |
@@ -42,10 +42,10 @@ Versions are the declared ranges from `package.json`.
 ```
 src/
   app/            Next.js App Router pages and layouts
-    actions/      Server actions (create-dog, log-session, switch-dog, ...)
-    api/          Route handlers (auth callback, CSP report)
-    (app)/        Authenticated app routes (dashboard, lesson, practice, profile, progress)
-  components/      Reusable UI components (auth, dashboard, lesson, practice, ...)
+    actions/      Server actions
+    api/          Route handlers
+    (app)/        Authenticated app routes
+  components/     Reusable UI components, grouped by feature
   lib/            Library code: supabase clients, gamification, sounds, haptics, validation
   stores/         Zustand state management
 supabase/         SQL migrations and seed data
