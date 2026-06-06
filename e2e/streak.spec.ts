@@ -114,8 +114,8 @@ test.describe("streak resets visually after a missed day (RK-5)", () => {
     const streakCard = page.locator('button:has-text("day focus")');
     await expect(streakCard).toBeVisible();
     await expect(streakCard.locator("span").first()).toHaveText("0");
-    // No saves were available, so the "saves remaining" line must be absent.
-    await expect(streakCard).not.toContainText("save");
+    // No saves were available, so the line shows the zero state.
+    await expect(streakCard).toContainText("No saves remaining");
 
     await page.screenshot({
       path: "e2e/screenshots/streak-reset-dashboard.png",

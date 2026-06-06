@@ -19,7 +19,7 @@ describe("FocusModal", () => {
     expect(screen.getByText("12")).toBeInTheDocument();
   });
 
-  it("hides the saves row when no freezes are available", () => {
+  it("shows the saves row with zero when no freezes are available", () => {
     render(
       <FocusModal
         currentStreak={5}
@@ -28,7 +28,8 @@ describe("FocusModal", () => {
         onClose={vi.fn()}
       />
     );
-    expect(screen.queryByText("Saves Remaining")).not.toBeInTheDocument();
+    expect(screen.getByText("Saves Remaining")).toBeInTheDocument();
+    expect(screen.getByText("0")).toBeInTheDocument();
   });
 
   it("shows the saves row when freezes are available", () => {

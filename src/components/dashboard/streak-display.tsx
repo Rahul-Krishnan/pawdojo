@@ -32,11 +32,17 @@ export function StreakDisplay({
             <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
               day focus
             </p>
-            {freezeAvailable > 0 && (
-              <p className="mt-1 text-xs text-primary-500 dark:text-primary-400">
-                {freezeAvailable} save{freezeAvailable > 1 ? "s" : ""} remaining
-              </p>
-            )}
+            <p
+              className={`mt-1 text-xs ${
+                freezeAvailable === 0
+                  ? "text-gray-500 dark:text-gray-400"
+                  : "text-primary-500 dark:text-primary-400"
+              }`}
+            >
+              {freezeAvailable === 0
+                ? "No saves remaining"
+                : `${freezeAvailable} save${freezeAvailable > 1 ? "s" : ""} remaining`}
+            </p>
           </div>
         </div>
       </button>
