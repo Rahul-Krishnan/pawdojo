@@ -44,7 +44,7 @@ export function evaluateAchievements(
   const progressUpdates: { achievementDefId: string; progress: number }[] = [];
 
   for (const def of definitions) {
-    if (unlockedSet.has(def.id)) continue; // already unlocked
+    if (unlockedSet.has(def.id)) continue;
 
     const { progress, met } = checkCondition(def, stats);
 
