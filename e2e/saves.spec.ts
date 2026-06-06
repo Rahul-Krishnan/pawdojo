@@ -12,6 +12,13 @@ import { TEST_EMAIL, TEST_PASSWORD } from "./helpers";
 // "2 saves remaining"; rewound two days (one missed day) the SAME stored 2 must
 // render "1 save remaining". That difference proves the count is computed at
 // read time, not read raw. The original row is restored afterward.
+//
+// RK-9 (#2) reuses the same seed/restore discipline to cover the saves /
+// streak-freeze lifecycle from the user's side: with a save in hand and exactly
+// one missed day the streak SURVIVES (renders its stored value, not 0) and the
+// dashboard shows the depleted save count. Its seed holds freeze_available at 2
+// precisely because RK-6's read-time depletion consumes one save for the missed
+// day, leaving "1 save remaining".
 
 type StreakRow = {
   dog_id: string;
@@ -41,6 +48,21 @@ function seedRow(lastStreakDate: string): StreakRow {
     current_streak: 5,
     longest_streak: Math.max(originalRow?.longest_streak ?? 0, 5),
     last_streak_date: lastStreakDate,
+    freeze_available: 2,
+  };
+}
+
+// RK-9: a 6-day streak whose last activity was one missed day ago (gap === 2),
+// with two stored saves. Under RK-6's read-time depletion one save is consumed
+// to cover the missed day, so the dashboard renders "1 save remaining" while the
+// streak (6) survives because a save was available. Seeded per-test for order
+// independence; the original row is restored in afterAll.
+function seedMissedDayWithSave(): StreakRow {
+  return {
+    dog_id: dogId,
+    current_streak: 6,
+    longest_streak: Math.max(originalRow?.longest_streak ?? 0, 6),
+    last_streak_date: daysAgoFor(timezone, 2),
     freeze_available: 2,
   };
 }
@@ -137,5 +159,47 @@ test.describe("saves deplete visually across a missed day (RK-6)", () => {
     await page.screenshot({
       path: "e2e/screenshots/saves-decrement-dashboard.png",
     });
+  });
+});
+
+test.describe("saves / streak-freeze lifecycle (RK-9)", () => {
+  test("a save protects the streak across a missed day and the count is shown", async ({
+    page,
+  }) => {
+    // Seed the missed-day-with-save state before login so the dashboard reads it.
+    await admin.from("dog_streaks").upsert(seedMissedDayWithSave());
+    await login(page);
+
+    // The streak card is the button labelled "day focus". With one missed day
+    // but a save available, the stored streak (6) must still render (not 0).
+    const streakCard = page.locator('button:has-text("day focus")');
+    await expect(streakCard).toBeVisible();
+    await expect(streakCard.locator("span").first()).toHaveText("6");
+
+    // Read-time depletion consumes one of the two saves for the missed day, so
+    // the dashboard surfaces "1 save remaining" inline.
+    await expect(streakCard).toContainText("save");
+    await expect(streakCard).toContainText("1 save remaining");
+
+    // Capture the dashboard for the issue's referenced artifact and assert on it.
+    await page.screenshot({
+      path: "e2e/screenshots/saves-lifecycle-dashboard.png",
+    });
+  });
+
+  test("focus modal shows the surviving streak and the saves-remaining row", async ({
+    page,
+  }) => {
+    await admin.from("dog_streaks").upsert(seedMissedDayWithSave());
+    await login(page);
+
+    // Open the focus modal from the streak card and confirm both the surviving
+    // current focus (6 days) and the Saves Remaining row (1) are present.
+    await page.locator('button:has-text("day focus")').click();
+    const currentFocusRow = page.locator('div:has(> p:text("Current Focus"))');
+    await expect(currentFocusRow).toContainText("6");
+
+    const savesRow = page.locator('div:has(> p:text("Saves Remaining"))');
+    await expect(savesRow).toContainText("1");
   });
 });
