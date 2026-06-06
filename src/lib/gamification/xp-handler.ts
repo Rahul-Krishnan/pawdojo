@@ -13,21 +13,43 @@ export async function handleXPAward(
     .select("timezone")
     .eq("id", data.userId)
     .single();
-  const timezone = profileRow?.timezone ?? "UTC";
+  const storedTimezone = profileRow?.timezone ?? "UTC";
 
-  // eg for America/Los_Angeles (UTC-7), local midnight = 07:00 UTC
+  // eg for America/Los_Angeles (UTC-7), local midnight = 07:00 UTC. The write
+  // side validates the timezone, but a value that predates that guard could
+  // still throw a RangeError here. Fall back to UTC rather than break XP
+  // awarding for that user on every session log (B1).
   const utcNow = new Date();
-  const localNow = new Date(utcNow.toLocaleString("en-US", { timeZone: timezone }));
-  const tzOffsetMs = localNow.getTime() - utcNow.getTime();
-  const todayLocal = utcNow.toLocaleDateString("en-CA", { timeZone: timezone });
-  const dateParts = todayLocal.split("-").map(Number);
-  const midnightUtcRaw = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
-  const todayStartUtc = new Date(midnightUtcRaw.getTime() - tzOffsetMs);
+  let todayStartUtc: Date;
+  try {
+    const localNow = new Date(
+      utcNow.toLocaleString("en-US", { timeZone: storedTimezone })
+    );
+    const tzOffsetMs = localNow.getTime() - utcNow.getTime();
+    const todayLocal = utcNow.toLocaleDateString("en-CA", {
+      timeZone: storedTimezone,
+    });
+    const dateParts = todayLocal.split("-").map(Number);
+    const midnightUtcRaw = new Date(
+      Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])
+    );
+    todayStartUtc = new Date(midnightUtcRaw.getTime() - tzOffsetMs);
+  } catch {
+    const todayLocal = utcNow.toISOString().slice(0, 10);
+    const dateParts = todayLocal.split("-").map(Number);
+    todayStartUtc = new Date(
+      Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2])
+    );
+  }
 
+  // Scope the first-of-day check to session logs (S1). Counting all
+  // xp_transactions let a lesson_complete earlier in the day suppress the
+  // first-of-day session bonus.
   const { count: todayCount } = await admin
     .from("xp_transactions")
     .select("id", { count: "exact", head: true })
     .eq("user_id", data.userId)
+    .eq("action_type", "session_log")
     .gte("awarded_at", todayStartUtc.toISOString());
 
   const isFirstOfDay = (todayCount ?? 0) === 0;

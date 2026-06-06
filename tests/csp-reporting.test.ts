@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { vi, describe, it, expect } from "vitest";
 import nextConfig from "../next.config";
 
 /**
@@ -65,5 +65,28 @@ describe("CSP report sink route (S4)", () => {
       new Request("https://pawdojo.app/api/csp-report", { method: "POST" })
     );
     expect(res.status).toBe(204);
+  });
+
+  /**
+   * S2: the sink parses request.json() with no body-size cap. An
+   * unauthenticated POST can stream an arbitrarily large body that gets
+   * fully buffered, parsed, and re-stringified into the logs. The handler
+   * must reject oversized bodies before parsing them, while still acking
+   * with 204 so the browser does not retry.
+   */
+  it("skips oversized bodies without parsing but still returns 204 (S2)", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const huge = JSON.stringify({ "csp-report": { blob: "x".repeat(200_000) } });
+    const { POST } = await import("@/app/api/csp-report/route");
+    const res = await POST(
+      new Request("https://pawdojo.app/api/csp-report", {
+        method: "POST",
+        body: huge,
+        headers: { "content-type": "application/csp-report" },
+      })
+    );
+    expect(res.status).toBe(204);
+    expect(warnSpy).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
   });
 });

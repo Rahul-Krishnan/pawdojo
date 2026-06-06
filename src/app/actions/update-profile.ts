@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { validateDogInput } from "@/lib/validation/dog";
+import { isValidTimeZone } from "@/lib/validation/timezone";
 import { revalidatePath } from "next/cache";
 
 export async function updateDog(formData: {
@@ -56,6 +57,12 @@ export async function updateTimezone(timezone: string) {
 
   if (!user) {
     return { error: "Not authenticated" };
+  }
+
+  // Reject malformed IANA zones on write so xp-handler's toLocaleString never
+  // throws a RangeError on read (B1).
+  if (!isValidTimeZone(timezone)) {
+    return { error: "Invalid timezone" };
   }
 
   const admin = createAdminClient();

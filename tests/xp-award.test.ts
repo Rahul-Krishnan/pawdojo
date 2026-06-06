@@ -73,6 +73,7 @@ describe("migration 009 award_session_xp hardening (L1)", () => {
 // --- Handler wiring: cap is delegated to the RPC, not computed in JS. ---
 
 type RpcCall = { fn: string; args: Record<string, unknown> };
+type EqCall = { table: string; col: string; val: unknown };
 
 function makeFakeAdmin(config: {
   timezone: string | null;
@@ -82,9 +83,11 @@ function makeFakeAdmin(config: {
   incrementError?: { message: string } | null;
 }) {
   const rpcCalls: RpcCall[] = [];
+  const eqCalls: EqCall[] = [];
 
   const admin = {
     rpcCalls,
+    eqCalls,
     from(table: string) {
       const q = {
         _count: false,
@@ -92,7 +95,8 @@ function makeFakeAdmin(config: {
           if (opts?.count) q._count = true;
           return q;
         },
-        eq() {
+        eq(col?: string, val?: unknown) {
+          if (col !== undefined) eqCalls.push({ table, col, val });
           return q;
         },
         gte() {
@@ -196,6 +200,56 @@ describe("handleXPAward delegates the session cap to award_session_xp", () => {
     expect(
       fake.current.rpcCalls.some((c) => c.fn === "increment_user_xp")
     ).toBe(false);
+  });
+});
+
+/**
+ * B1 (read-side guard): the stored timezone flows into
+ * toLocaleString({ timeZone }) / toLocaleDateString({ timeZone }) with no
+ * try/catch. A malformed IANA name (eg one that slipped in before the
+ * write-side guard existed) throws a RangeError and breaks XP awarding for that
+ * user on every session log. The handler must tolerate a bad stored value and
+ * fall back to UTC rather than throw.
+ */
+describe("handleXPAward tolerates a malformed stored timezone (B1)", () => {
+  it("does not throw a RangeError when the profile timezone is invalid", async () => {
+    fake.current = makeFakeAdmin({
+      timezone: "Not/AReal_Zone",
+      todayCount: 0,
+      awardedSessionXp: 25,
+    });
+
+    await expect(handleXPAward(session)).resolves.toEqual({ xpAwarded: 25 });
+  });
+});
+
+/**
+ * S1: isFirstOfDay was computed from a COUNT of ALL xp_transactions since the
+ * local day start, not just session_log rows. A lesson_complete earlier in the
+ * day made the count non-zero, so isFirstOfDay was false and the 5 XP
+ * first-of-day session bonus was suppressed. The count must be scoped to
+ * action_type = 'session_log'.
+ */
+describe("isFirstOfDay counts only session_log transactions (S1)", () => {
+  it("filters the first-of-day count query by action_type=session_log", async () => {
+    fake.current = makeFakeAdmin({
+      timezone: "UTC",
+      todayCount: 0,
+      awardedSessionXp: 25,
+    });
+
+    await handleXPAward(session);
+
+    const filtered = fake.current.eqCalls.some(
+      (c) =>
+        c.table === "xp_transactions" &&
+        c.col === "action_type" &&
+        c.val === "session_log"
+    );
+    expect(
+      filtered,
+      "the first-of-day count must be scoped to session_log so a prior lesson_complete does not suppress the bonus"
+    ).toBe(true);
   });
 });
 
