@@ -29,6 +29,17 @@ export type StreakUpdate = {
   events: StreakEvent[];
 };
 
+// The most saves a dog can ever bank. Enforced in code, not by a DB CHECK
+// constraint, so every read and write path clamps against it.
+const MAX_FREEZES = 2;
+
+// freeze_available is an int column with no range constraint, so a corrupt or
+// legacy row could fall outside [0, MAX_FREEZES]. Clamp before any display or
+// arithmetic so an out-of-range stored value is never rendered or propagated.
+function clampFreezes(freezeAvailable: number): number {
+  return Math.max(0, Math.min(freezeAvailable, MAX_FREEZES));
+}
+
 function toLocalDate(timestamp: Date, timezone: string): string {
   return timestamp.toLocaleDateString("en-CA", { timeZone: timezone });
 }
@@ -71,7 +82,7 @@ export function effectiveCurrentStreak(
 
   // Each missed day costs one save. The streak survives as long as the
   // available saves cover every missed day; otherwise it is broken.
-  if (missed <= state.freezeAvailable) {
+  if (missed <= clampFreezes(state.freezeAvailable)) {
     return state.currentStreak;
   }
 
@@ -118,18 +129,20 @@ export function effectiveFreezesRemaining(
   asOf: Date,
   timezone: string
 ): number {
+  const freeze = clampFreezes(state.freezeAvailable);
+
   if (state.lastStreakDate === null) {
-    return state.freezeAvailable;
+    return freeze;
   }
 
   const missed = missedDays(state.lastStreakDate, asOf, timezone);
 
   if (missed === 0) {
-    return state.freezeAvailable;
+    return freeze;
   }
 
-  if (missed <= state.freezeAvailable) {
-    return state.freezeAvailable - missed;
+  if (missed <= freeze) {
+    return freeze - missed;
   }
 
   // Missed days exceed saves: the streak is broken, nothing left to show.
@@ -169,8 +182,6 @@ export function calculateStreakUpdate(
   if (current.lastStreakDate === todayLocal) {
     return { newState: current, events: [] };
   }
-
-  const MAX_FREEZES = 2;
 
   let newStreak: number;
   let newFreezeCount: number;

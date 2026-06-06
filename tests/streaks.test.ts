@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import {
   calculateStreakUpdate,
   effectiveCurrentStreak,
+  effectiveCurrentStreakFromRow,
   effectiveFreezesRemaining,
   effectiveFreezesRemainingFromRow,
   StreakState,
@@ -323,6 +324,52 @@ describe("effectiveFreezesRemaining", () => {
   });
 });
 
+describe("effectiveFreezesRemaining clamps out-of-range stored values", () => {
+  // freeze_available is an int column with no CHECK constraint, so a corrupt or
+  // legacy row could hold a value outside [0, MAX_FREEZES]. The read path must
+  // never render such a value verbatim; it clamps to the valid display range.
+  it("caps a stored count above the max at the max", () => {
+    const state = freshState({
+      currentStreak: 5,
+      lastStreakDate: "2026-05-20",
+      freezeAvailable: 5,
+    });
+    expect(
+      effectiveFreezesRemaining(state, makeDate("2026-05-20"), tz)
+    ).toBe(2);
+  });
+
+  it("caps an over-max stored count even when there has never been activity", () => {
+    const state = freshState({ lastStreakDate: null, freezeAvailable: 9 });
+    expect(
+      effectiveFreezesRemaining(state, makeDate("2026-05-20"), tz)
+    ).toBe(2);
+  });
+
+  it("floors a negative stored count at 0", () => {
+    const state = freshState({
+      currentStreak: 5,
+      lastStreakDate: "2026-05-20",
+      freezeAvailable: -1,
+    });
+    expect(
+      effectiveFreezesRemaining(state, makeDate("2026-05-20"), tz)
+    ).toBe(0);
+  });
+
+  it("clamps the over-max value before deducting missed days", () => {
+    // Stored 5 clamps to 2, then a single missed day deducts one => 1 remaining.
+    const state = freshState({
+      currentStreak: 5,
+      lastStreakDate: "2026-05-18",
+      freezeAvailable: 5,
+    });
+    expect(
+      effectiveFreezesRemaining(state, makeDate("2026-05-20"), tz)
+    ).toBe(1);
+  });
+});
+
 describe("read/write divergence (RK-6 contract)", () => {
   it("shows 0 saves before a milestone session that then earns one back", () => {
     // currentStreak 6, last activity three days ago: 2 missed days, 2 saves.
@@ -369,6 +416,46 @@ describe("FromRow wrappers", () => {
         tz
       )
     ).toBe(1);
+  });
+
+  it("respects the timezone when mapping a row's missed days", () => {
+    // Same instant and row, different timezone => different missed-day verdict,
+    // proving the wrapper forwards the timezone through to the pure function.
+    const instant = new Date("2026-05-22T05:00:00Z");
+    const row = {
+      current_streak: 5,
+      longest_streak: 10,
+      last_streak_date: "2026-05-20",
+      freeze_available: 2,
+    };
+    // UTC: 2026-05-22, gap 2 => 1 missed day => 1 save remaining.
+    expect(effectiveFreezesRemainingFromRow(row, instant, "UTC")).toBe(1);
+    // LA: still 2026-05-21 22:00, gap 1 => no missed day => 2 saves remaining.
+    expect(
+      effectiveFreezesRemainingFromRow(row, instant, "America/Los_Angeles")
+    ).toBe(2);
+  });
+
+  it("treats a missing row as zero for the streak wrapper", () => {
+    expect(
+      effectiveCurrentStreakFromRow(null, makeDate("2026-05-20"), tz)
+    ).toBe(0);
+  });
+
+  it("maps a real row's columns for the effective streak", () => {
+    // gap 3 => 2 missed days, 1 save => streak broken, reads as 0.
+    expect(
+      effectiveCurrentStreakFromRow(
+        {
+          current_streak: 10,
+          longest_streak: 12,
+          last_streak_date: "2026-05-17",
+          freeze_available: 1,
+        },
+        makeDate("2026-05-20"),
+        tz
+      )
+    ).toBe(0);
   });
 });
 
