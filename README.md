@@ -1,12 +1,12 @@
 # Pawdojo
 
-Gamified dog training for the web, a Duolingo-style training loop for dog owners. Live at **[pawdojo.app](https://pawdojo.app)**.
+Gamified dog training for the web, a habit-forming training loop for dog owners. Live at **[pawdojo.app](https://pawdojo.app)**.
 
 > The package name and codebase are `pawdojo`; "Goodboy" was an earlier codename and may still appear in history or notes.
 
 ## What it is
 
-Pawdojo turns dog training into a daily habit by borrowing the mechanics that make language apps sticky. Owners pick lessons, run short hands-on practice sessions with their dog, and earn XP for completing them.
+Pawdojo turns dog training into a daily habit by borrowing the mechanics that make habit-building apps sticky: streaks, XP, levels, and achievements. Owners pick lessons, run short hands-on practice sessions with their dog, and earn XP for completing them.
 
 The core loop:
 
