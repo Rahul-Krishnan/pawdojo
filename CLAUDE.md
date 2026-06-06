@@ -1,6 +1,6 @@
 # Pawdojo
 
-Gamified dog training app (mobile-first web). Duolingo model applied to dog training.
+Gamified dog training app (mobile-first web). Habit-forming game mechanics (streaks, XP, levels) applied to obedience training.
 Domain: pawdojo.app
 
 ## Project Structure
