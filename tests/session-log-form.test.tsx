@@ -126,16 +126,25 @@ describe("SessionLogForm", () => {
       xpAwarded: 10,
       achievementsUnlocked: ["First Steps"],
     });
-    renderForm();
-    fireEvent.click(screen.getByRole("button", { name: /I trained my dog/ }));
+    // Use fake timers so the ~1.2s reveal delay is deterministic instead of a
+    // real wall-clock wait (which is flaky on a loaded CI box).
+    vi.useFakeTimers();
+    try {
+      renderForm();
+      fireEvent.click(screen.getByRole("button", { name: /I trained my dog/ }));
 
-    // The component reveals the popup ~1.2s after a successful submit.
-    await waitFor(
-      () => expect(screen.getByText("Award Earned!")).toBeInTheDocument(),
-      { timeout: 3000 }
-    );
-    expect(screen.getByText("First Steps")).toBeInTheDocument();
-    // With achievements unlocked it should NOT auto-navigate to the dashboard.
-    expect(push).not.toHaveBeenCalled();
+      // Flush the awaited logSession resolution before the popup timer fires.
+      await vi.advanceTimersByTimeAsync(0);
+      expect(screen.queryByText("Award Earned!")).not.toBeInTheDocument();
+
+      // The component reveals the popup 1.2s after a successful submit.
+      await vi.advanceTimersByTimeAsync(1200);
+      expect(screen.getByText("Award Earned!")).toBeInTheDocument();
+      expect(screen.getByText("First Steps")).toBeInTheDocument();
+      // With achievements unlocked it should NOT auto-navigate to the dashboard.
+      expect(push).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

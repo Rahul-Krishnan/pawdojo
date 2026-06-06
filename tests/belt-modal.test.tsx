@@ -30,9 +30,16 @@ describe("BeltProgressionModal", () => {
 
   it("calls onClose when the backdrop is clicked but not the panel", () => {
     const onClose = vi.fn();
-    render(<BeltProgressionModal currentLevel={0} totalXp={0} onClose={onClose} />);
-    // clicking inside the panel content should not close
+    const { container } = render(
+      <BeltProgressionModal currentLevel={0} totalXp={0} onClose={onClose} />
+    );
+    // clicking inside the panel content should not close (panel stops propagation)
     fireEvent.click(screen.getByText("Belt Progression"));
     expect(onClose).not.toHaveBeenCalled();
+
+    // clicking the backdrop (the outermost overlay wrapper) should close
+    const backdrop = container.firstChild as HTMLElement;
+    fireEvent.click(backdrop);
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 });
