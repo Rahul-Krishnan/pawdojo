@@ -14,6 +14,7 @@ import {
   effectiveCurrentStreakFromRow,
   effectiveFreezesRemainingFromRow,
 } from "@/lib/gamification/streaks";
+import { FreezeUsedGate } from "@/components/dashboard/freeze-used-gate";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -46,11 +47,14 @@ export default async function DashboardPage() {
   const activeDogId = profile?.active_dog_id ?? allDogs[0].id;
   const dog = allDogs.find((d) => d.id === activeDogId) ?? allDogs[0];
 
-  const [{ data: completions }, { data: sessionRatings }, { data: recentSessions }, { data: dogStreakRows }] = await Promise.all([
+  const [{ data: completions }, { data: sessionRatings }, { data: recentSessions }, { data: dogStreakRows }, { count: freezeUsedCount }] = await Promise.all([
     supabase.from("lesson_completions").select("lesson_id").eq("dog_id", dog.id),
     supabase.from("training_sessions").select("skill_id, rating, logged_at").eq("dog_id", dog.id).not("skill_id", "is", null).not("rating", "is", null).order("logged_at", { ascending: false }),
     supabase.from("training_sessions").select("id, skill_id, rating, reps, duration_min, notes, logged_at, skills(name)").eq("dog_id", dog.id).not("skill_id", "is", null).order("logged_at", { ascending: false }).limit(5),
     supabase.from("dog_streaks").select("*").eq("dog_id", dog.id).limit(1),
+    // Running total of consumed streak saves. streak_events is user-scoped (no
+    // dog_id column), so this counts across all of the user's dogs.
+    supabase.from("streak_events").select("id", { count: "exact", head: true }).eq("user_id", user.id).eq("event_type", "freeze_used"),
   ]);
   const dogStreak = dogStreakRows?.[0] ?? null;
 
@@ -170,6 +174,12 @@ export default async function DashboardPage() {
           currentLevel={dog.current_level ?? 1}
         />
       </div>
+
+      <FreezeUsedGate
+        userId={user.id}
+        freezeUsedTotal={freezeUsedCount ?? 0}
+        freezeRemaining={dogStreak?.freeze_available ?? 0}
+      />
 
       {nextLesson && (
         <section>
