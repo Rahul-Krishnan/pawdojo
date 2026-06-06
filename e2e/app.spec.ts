@@ -1,12 +1,5 @@
 import { test, expect } from "playwright/test";
-
-async function login(page: import("playwright/test").Page) {
-  await page.goto("/login");
-  await page.fill('input[type="email"]', "rk2211@gmail.com");
-  await page.fill('input[type="password"]', "iamnotafool99");
-  await page.click('button[type="submit"]');
-  await page.waitForURL("**/dashboard");
-}
+import { login } from "./helpers";
 
 test.describe("Pawdojo app", () => {
   test("landing page shows logo and get started button", async ({ page }) => {

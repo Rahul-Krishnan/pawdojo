@@ -8,7 +8,7 @@ const XP_VALUES: Record<XPAction, number> = {
   rating_submit: 5,
 };
 
-const DAILY_SESSION_XP_CAP = 200;
+export const DAILY_SESSION_XP_CAP = 200;
 const FIRST_OF_DAY_BONUS = 5;
 
 export type XPAwardInput = {
@@ -97,6 +97,25 @@ export function getNextBelt(level: number): Belt | null {
     if (belt.minLevel > level) return belt;
   }
   return null;
+}
+
+export type BeltProgress = {
+  belt: Belt;
+  nextBelt: Belt | null;
+  currentBeltXp: number;
+  nextBeltXp: number;
+  progressPercent: number;
+};
+
+export function getBeltProgress(currentLevel: number, totalXp: number): BeltProgress {
+  const belt = getBelt(currentLevel);
+  const nextBelt = getNextBelt(currentLevel);
+  const currentBeltXp = xpForLevel(belt.minLevel);
+  const nextBeltXp = nextBelt ? xpForLevel(nextBelt.minLevel) : currentBeltXp;
+  const progressPercent = nextBelt
+    ? Math.min(((totalXp - currentBeltXp) / (nextBeltXp - currentBeltXp)) * 100, 100)
+    : 100;
+  return { belt, nextBelt, currentBeltXp, nextBeltXp, progressPercent };
 }
 
 export { BELTS };
