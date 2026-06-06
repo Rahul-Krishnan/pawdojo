@@ -195,11 +195,14 @@ test.describe("core training loop (RK-9)", () => {
     await page.waitForURL("**/lesson/**");
 
     // Fill the session-log form: pick a rating ("Nailed it" = 5) and reps (10+).
-    // The rating buttons are the star buttons; reps buttons read "<n>+".
-    const ratingButtons = page.locator('form button[type="button"]');
-    // Reps option "10+" is a distinct button label.
-    await page.locator('button:has-text("10+")').click();
-    await ratingButtons.nth(4).click(); // 5th rating button -> rating 5
+    // The rating buttons render the bare numeral 1-5; reps buttons read "<n>+".
+    // Reps option "10+" must be matched exactly: a substring match on "10+"
+    // also hits the "Long / 10+ min" duration button, which is a strict-mode
+    // violation. Match the reps button by its exact accessible name.
+    await page.getByRole("button", { name: "10+", exact: true }).click();
+    // Rating 5 ("Nailed it") is the only button whose accessible name is exactly
+    // "5" (the reps options render "5+", not "5"), so this is DOM-order-independent.
+    await page.getByRole("button", { name: "5", exact: true }).click();
 
     // Submit. The button label is "I trained my dog! (+N XP)".
     await page.locator('button[type="submit"]').click();

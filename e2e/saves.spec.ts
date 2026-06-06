@@ -183,7 +183,7 @@ test.describe("saves / streak-freeze lifecycle (RK-9)", () => {
 
     // Capture the dashboard for the issue's referenced artifact and assert on it.
     await page.screenshot({
-      path: "e2e/screenshots/saves-decrement-dashboard.png",
+      path: "e2e/screenshots/saves-lifecycle-dashboard.png",
     });
   });
 
