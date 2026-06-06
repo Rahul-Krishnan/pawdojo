@@ -73,11 +73,14 @@ describe("StreakDisplay", () => {
     expect(screen.getByText("day focus")).toBeInTheDocument();
   });
 
-  it("shows pluralized saves remaining only when freezes exist", () => {
+  it("shows the saves remaining line including the zero state", () => {
     const { rerender } = render(
       <StreakDisplay currentStreak={7} longestStreak={10} freezeAvailable={0} />
     );
-    expect(screen.queryByText(/save/)).not.toBeInTheDocument();
+    expect(screen.getByText("No saves remaining")).toBeInTheDocument();
+
+    rerender(<StreakDisplay currentStreak={7} longestStreak={10} freezeAvailable={1} />);
+    expect(screen.getByText("1 save remaining")).toBeInTheDocument();
 
     rerender(<StreakDisplay currentStreak={7} longestStreak={10} freezeAvailable={2} />);
     expect(screen.getByText("2 saves remaining")).toBeInTheDocument();
