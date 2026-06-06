@@ -187,5 +187,17 @@ describe("handleXPAward orchestration", () => {
 
     // The try/catch around toLocaleString must not break XP awarding.
     expect(result.xpAwarded).toBe(25);
+
+    // Discriminating assertion: prove the UTC fallback branch actually engaged
+    // rather than just relying on the mocked award amount (which is independent
+    // of the timezone branch). The catch block computes the day boundary from
+    // the current UTC date via Date.UTC(...), i.e. UTC midnight. A real non-UTC
+    // zone would offset this by its tzOffset, so equality to UTC midnight is
+    // what distinguishes the fallback. Compute the same value the SUT does.
+    const [y, m, d] = new Date().toISOString().slice(0, 10).split("-").map(Number);
+    const expectedDayStart = new Date(Date.UTC(y, m - 1, d)).toISOString();
+    const awardCall = fake.current.rpcCalls.find((c) => c.fn === "award_session_xp");
+    expect(awardCall).toBeDefined();
+    expect(awardCall!.args.p_day_start).toBe(expectedDayStart);
   });
 });

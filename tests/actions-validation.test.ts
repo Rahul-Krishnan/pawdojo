@@ -466,4 +466,60 @@ describe("logSession validation/branching", () => {
     // No write path reached, so the pipeline must not have run.
     expect(runGamificationPipeline).not.toHaveBeenCalled();
   });
+
+  // Soft 2s rate-limit guard (log-session.ts:86-99): reads the most recent
+  // training_sessions.logged_at via .maybeSingle() and rejects a second log
+  // fired within 2s BEFORE any write. Validation passes; the guard is the
+  // only branch under test.
+  const rateLimitForm = { ...validForm, isRetake: true };
+
+  function rateLimitServer() {
+    serverFake.current = makeServerClient({
+      user: USER,
+      tables: {
+        lessons: { single: { id: "lesson-1", skill_id: "skill-1" } },
+        user_profiles: { single: { active_dog_id: "dog-1" } },
+      },
+    });
+  }
+
+  it("rejects a session logged within 2s of the previous one (rate limit)", async () => {
+    rateLimitServer();
+    // adminFake's training_sessions.maybeSingle returns a recent logged_at.
+    adminFake.current = makeServerClient({
+      user: USER,
+      tables: {
+        training_sessions: { single: { logged_at: new Date().toISOString() } },
+      },
+    });
+    expect(await logSession(rateLimitForm)).toEqual({
+      error: "You're logging sessions too quickly. Please wait a moment.",
+    });
+    // Guard returns before any write, so the pipeline must not have run.
+    expect(runGamificationPipeline).not.toHaveBeenCalled();
+  });
+
+  it("proceeds past the 2s guard when the last session is well outside the window", async () => {
+    rateLimitServer();
+    runGamificationPipeline.mockResolvedValue({
+      xpAwarded: 0,
+      achievementsUnlocked: [],
+      streakUpdated: false,
+    });
+    // Last logged_at is an hour ago -> guard does not trip.
+    adminFake.current = makeServerClient({
+      user: USER,
+      tables: {
+        training_sessions: {
+          single: { id: "sess-1", logged_at: new Date(Date.now() - 3_600_000).toISOString() },
+        },
+      },
+    });
+    const result = await logSession(rateLimitForm);
+    // It got past the guard: not the rate-limit error.
+    expect(result).not.toEqual({
+      error: "You're logging sessions too quickly. Please wait a moment.",
+    });
+    expect(runGamificationPipeline).toHaveBeenCalled();
+  });
 });
