@@ -135,7 +135,7 @@ test.describe("saves deplete visually across a missed day (RK-6)", () => {
     await login(page);
 
     // The streak card is the button labelled "day focus".
-    const streakCard = page.locator('button:has-text("day focus")');
+    const streakCard = page.locator('button:has-text(/days? focus/)');
     await expect(streakCard).toBeVisible();
 
     // Phase 1 - activity today, zero missed days. Stored freeze_available is 2,
@@ -172,7 +172,7 @@ test.describe("saves / streak-freeze lifecycle (RK-9)", () => {
 
     // The streak card is the button labelled "day focus". With one missed day
     // but a save available, the stored streak (6) must still render (not 0).
-    const streakCard = page.locator('button:has-text("day focus")');
+    const streakCard = page.locator('button:has-text(/days? focus/)');
     await expect(streakCard).toBeVisible();
     await expect(streakCard.locator("span").first()).toHaveText("6");
 
@@ -195,7 +195,7 @@ test.describe("saves / streak-freeze lifecycle (RK-9)", () => {
 
     // Open the focus modal from the streak card and confirm both the surviving
     // current focus (6 days) and the Saves Remaining row (1) are present.
-    await page.locator('button:has-text("day focus")').click();
+    await page.locator('button:has-text(/days? focus/)').click();
     const currentFocusRow = page.locator('div:has(> p:text("Current Focus"))');
     await expect(currentFocusRow).toContainText("6");
 

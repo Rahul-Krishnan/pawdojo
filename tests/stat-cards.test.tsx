@@ -9,6 +9,7 @@ import { BeltStatCard } from "@/components/dashboard/belt-stat-card";
 import { XpStatCard } from "@/components/dashboard/xp-stat-card";
 import { FocusStatCard } from "@/components/dashboard/focus-stat-card";
 import { StreakDisplay } from "@/components/dashboard/streak-display";
+import { FocusModal } from "@/components/dashboard/focus-modal";
 import { XpDisplay } from "@/components/dashboard/xp-display";
 import { getBelt } from "@/lib/gamification/xp";
 
@@ -67,9 +68,14 @@ describe("FocusStatCard", () => {
 describe("StreakDisplay", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("renders the current streak and 'day focus' label", () => {
+  it("renders the current streak and pluralized focus label", () => {
     render(<StreakDisplay currentStreak={7} longestStreak={10} freezeAvailable={0} />);
     expect(screen.getByText("7")).toBeInTheDocument();
+    expect(screen.getByText("days focus")).toBeInTheDocument();
+  });
+
+  it("uses the singular focus label when the streak is one day", () => {
+    render(<StreakDisplay currentStreak={1} longestStreak={10} freezeAvailable={0} />);
     expect(screen.getByText("day focus")).toBeInTheDocument();
   });
 
@@ -90,6 +96,27 @@ describe("StreakDisplay", () => {
     render(<StreakDisplay currentStreak={7} longestStreak={10} freezeAvailable={0} />);
     fireEvent.click(screen.getByRole("button"));
     expect(screen.getByText("Best Focus")).toBeInTheDocument();
+  });
+});
+
+describe("FocusModal", () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it("pluralizes the day units independently for current and best focus", () => {
+    render(
+      <FocusModal currentStreak={1} longestStreak={5} freezeAvailable={0} onClose={() => {}} />
+    );
+    // Current Focus is 1 -> singular, Best Focus is 5 -> plural.
+    expect(screen.getByText("day")).toBeInTheDocument();
+    expect(screen.getByText("days")).toBeInTheDocument();
+  });
+
+  it("uses the plural unit for a zero streak", () => {
+    render(
+      <FocusModal currentStreak={0} longestStreak={0} freezeAvailable={0} onClose={() => {}} />
+    );
+    expect(screen.getAllByText("days")).toHaveLength(2);
+    expect(screen.queryByText("day")).not.toBeInTheDocument();
   });
 });
 

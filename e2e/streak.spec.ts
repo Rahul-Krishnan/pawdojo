@@ -111,7 +111,7 @@ test.describe("streak resets visually after a missed day (RK-5)", () => {
 
     // The streak card is the button labelled "day focus". Its big number is
     // the current streak. Stored value is a stale 7; it must render as 0.
-    const streakCard = page.locator('button:has-text("day focus")');
+    const streakCard = page.locator('button:has-text(/days? focus/)');
     await expect(streakCard).toBeVisible();
     await expect(streakCard.locator("span").first()).toHaveText("0");
     // No saves were available, so the line shows the zero state.
