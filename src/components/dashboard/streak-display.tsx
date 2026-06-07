@@ -30,7 +30,7 @@ export function StreakDisplay({
               {currentStreak}
             </span>
             <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-              day focus
+              {currentStreak === 1 ? "day" : "days"} focus
             </p>
             <p
               className={`mt-1 text-xs ${

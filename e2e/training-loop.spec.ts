@@ -156,7 +156,7 @@ async function resetActiveDogForLoop(dogId: string, timezone: string) {
 }
 
 async function readStreakNumber(page: Page): Promise<number> {
-  const streakCard = page.locator('button:has-text("day focus")');
+  const streakCard = page.locator('button:has-text(/days? focus/)');
   await expect(streakCard).toBeVisible();
   const text = (await streakCard.locator("span").first().innerText()).trim();
   return Number.parseInt(text, 10);

@@ -7,12 +7,12 @@ import {
 } from "@/lib/gamification/achievements";
 
 const defs: AchievementDef[] = [
-  { id: "a1", key: "streak_3", conditionType: "streak_days", conditionValue: { threshold: 3 }, xpReward: 50 },
-  { id: "a2", key: "sessions_10", conditionType: "total_sessions", conditionValue: { threshold: 10 }, xpReward: 100 },
-  { id: "a3", key: "xp_100", conditionType: "xp_total", conditionValue: { threshold: 100 }, xpReward: 25 },
-  { id: "a4", key: "skill_sit", conditionType: "skill_complete", conditionValue: { skill_key: "sit" }, xpReward: 100 },
-  { id: "a5", key: "perfect", conditionType: "perfect_session", conditionValue: {}, xpReward: 50 },
-  { id: "a6", key: "first_lesson", conditionType: "total_completions", conditionValue: { threshold: 1 }, xpReward: 25 },
+  { id: "a1", key: "streak_3", name: "Three-Day Focus", description: "Reach a 3-day streak", conditionType: "streak_days", conditionValue: { threshold: 3 }, xpReward: 50 },
+  { id: "a2", key: "sessions_10", name: "Ten Sessions", description: "Complete 10 training sessions", conditionType: "total_sessions", conditionValue: { threshold: 10 }, xpReward: 100 },
+  { id: "a3", key: "xp_100", name: "Century", description: "Earn 100 total XP", conditionType: "xp_total", conditionValue: { threshold: 100 }, xpReward: 25 },
+  { id: "a4", key: "skill_sit", name: "Sit Master", description: "Complete every Sit lesson", conditionType: "skill_complete", conditionValue: { skill_key: "sit" }, xpReward: 100 },
+  { id: "a5", key: "perfect", name: "Perfect Session", description: "Finish a session with a 5-star rating", conditionType: "perfect_session", conditionValue: {}, xpReward: 50 },
+  { id: "a6", key: "first_lesson", name: "First Steps", description: "Complete your first lesson", conditionType: "total_completions", conditionValue: { threshold: 1 }, xpReward: 25 },
 ];
 
 function baseStats(overrides: Partial<UserStats> = {}): UserStats {

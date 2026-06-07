@@ -50,14 +50,14 @@ export function FocusModal({
           <div className="flex items-center justify-between rounded-xl bg-surface-muted dark:bg-dark-muted px-4 py-3">
             <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Current Focus</p>
             <p className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
-              {currentStreak} <span className="text-sm font-normal text-gray-400">days</span>
+              {currentStreak} <span className="text-sm font-normal text-gray-400">{currentStreak === 1 ? "day" : "days"}</span>
             </p>
           </div>
 
           <div className="flex items-center justify-between rounded-xl bg-surface-muted dark:bg-dark-muted px-4 py-3">
             <p className="text-sm font-medium text-gray-600 dark:text-gray-300">Best Focus</p>
             <p className="text-2xl font-bold font-heading text-gray-900 dark:text-gray-50">
-              {longestStreak} <span className="text-sm font-normal text-gray-400">days</span>
+              {longestStreak} <span className="text-sm font-normal text-gray-400">{longestStreak === 1 ? "day" : "days"}</span>
             </p>
           </div>
 
