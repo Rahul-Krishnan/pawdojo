@@ -1,4 +1,4 @@
--- Handling and Separation skills for Goodboy
+-- Handling and Separation skills for Pawdojo
 -- Safe to re-run: uses ON CONFLICT DO NOTHING
 
 insert into public.skills (id, key, name, description, category, sort_order) values
