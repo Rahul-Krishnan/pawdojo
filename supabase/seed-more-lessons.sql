@@ -1,4 +1,4 @@
--- Additional Goodboy lessons - run against production Supabase
+-- Additional Pawdojo lessons - run against production Supabase
 -- Safe to re-run: uses ON CONFLICT DO NOTHING
 
 -- Ensure extra skills exist

@@ -1,4 +1,4 @@
--- Goodboy v0 curriculum seed data
+-- Pawdojo v0 curriculum seed data
 -- Re-apply with: supabase db reset
 
 -- Skills (6 core obedience skills)

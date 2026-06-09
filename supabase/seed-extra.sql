@@ -1,4 +1,4 @@
--- Additional skills and lessons for Goodboy v0
+-- Additional skills and lessons for Pawdojo v0
 -- Run after seed.sql
 
 -- New skills

@@ -1,4 +1,4 @@
--- Goodboy v0 initial schema
+-- Pawdojo v0 initial schema
 -- All timestamps stored as UTC. Day boundaries computed using user timezone.
 
 -- User profiles (extends auth.users)
