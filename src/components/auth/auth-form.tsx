@@ -25,8 +25,18 @@ export function AuthForm() {
     const supabase = createClient();
 
     if (mode === "forgot") {
+      // Pin the reset-link redirect to the canonical origin, mirroring the
+      // trusted-base pattern in the auth callback route. Supabase's redirect-URL
+      // allowlist is the primary control here; this is defense-in-depth so the
+      // emailed link never depends on whatever origin the form happened to be
+      // served from. NEXT_PUBLIC_SITE_URL is inlined at build time in client
+      // components, so the base is fixed per deploy; fall back to
+      // window.location.origin only in local dev where the env is unset.
+      // new URL(...).origin canonically strips any path/query/fragment from a
+      // misconfigured env value.
+      const base = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? window.location.origin).origin;
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${base}/reset-password`,
       });
       if (resetError) {
         setError(resetError.message);
