@@ -3,6 +3,15 @@ import { Providers } from "./providers";
 import { ThemeInit } from "@/components/theme-init";
 import "./globals.css";
 
+// The enforcing CSP minted in src/proxy.ts stamps a per-request nonce onto
+// the inline scripts Next.js injects during rendering. A statically
+// prerendered page ships bootstrap scripts baked at build time — with no
+// nonce — so the enforcing policy would block the app's own hydration.
+// Force per-request rendering for every route under this layout (including
+// the not-found page) so the document always carries the nonce its policy
+// demands.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Paw Dojo",
   description: "Focus. Tricks. Treats.",

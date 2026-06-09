@@ -1,19 +1,33 @@
-import { vi, describe, it, expect } from "vitest";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import { NextRequest } from "next/server";
 import nextConfig from "../next.config";
 
 /**
- * S4 regression guard: report-only CSP must actually collect telemetry.
+ * CSP enforcement guards (M3 flip, follows the S4 reporting wiring).
  *
- * The policy was sent as Content-Security-Policy-Report-Only with no report-to
- * or report-uri directive and no Reporting-Endpoints header, so violations were
- * computed and then dropped. The "observe, then enforce" rollout can only work
- * if reports are delivered somewhere. This wires a same-origin reporting
- * endpoint (/api/csp-report) via the Reporting-Endpoints header plus a report-to
- * directive (and a report-uri fallback for older browsers), while keeping the
- * policy in report-only mode.
+ * The rollout went report-only first (observe violations via
+ * /api/csp-report), then flipped to an enforcing nonce-based policy. The
+ * enforcing policy is minted per request in src/proxy.ts because script-src
+ * carries a fresh nonce; next.config.ts keeps only the static headers. These
+ * tests pin both halves of that split:
+ *
+ * - next.config.ts must emit NO CSP header of either kind. A stale static
+ *   policy alongside the proxy's would make the browser enforce the
+ *   intersection of two policies, turning config drift into breakage.
+ * - The proxy's policy must be nonce-based with 'strict-dynamic' and must
+ *   keep delivering violations to the same sink (report-to + report-uri), so
+ *   enforcement regressions stay observable.
  */
 
-describe("CSP reporting endpoint wiring (S4)", () => {
+vi.mock("@supabase/ssr", () => ({
+  createServerClient: () => ({
+    auth: { getUser: vi.fn().mockResolvedValue({ data: { user: null } }) },
+  }),
+}));
+
+const { proxy } = await import("../src/proxy");
+
+describe("static security headers (next.config.ts)", () => {
   it("emits a Reporting-Endpoints header pointing at the report sink", async () => {
     const groups = await nextConfig.headers!();
     const group = groups.find((g) => g.source === "/(.*)");
@@ -26,23 +40,89 @@ describe("CSP reporting endpoint wiring (S4)", () => {
     expect(reporting!.value).toContain("/api/csp-report");
   });
 
-  it("adds a report-to directive to the report-only policy", async () => {
+  it("emits no static CSP header (the enforcing policy comes from the proxy)", async () => {
     const groups = await nextConfig.headers!();
     const group = groups.find((g) => g.source === "/(.*)");
-    const csp = group!.headers.find(
-      (h) => h.key === "Content-Security-Policy-Report-Only"
+    const staticCsp = group!.headers.find(
+      (h) =>
+        h.key === "Content-Security-Policy" ||
+        h.key === "Content-Security-Policy-Report-Only"
     );
-    expect(csp, "report-only CSP must still be present").toBeTruthy();
-    expect(csp!.value).toContain("report-to");
+    expect(
+      staticCsp,
+      "static CSP would conflict with the per-request policy in src/proxy.ts"
+    ).toBeFalsy();
+  });
+});
+
+describe("enforcing CSP minted per request (src/proxy.ts)", () => {
+  let savedUrl: string | undefined;
+  let savedKey: string | undefined;
+
+  beforeEach(() => {
+    savedUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    savedKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_URL = "https://project.supabase.co";
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = "anon-key";
   });
 
-  it("keeps the policy in report-only mode (no enforcing CSP header)", async () => {
-    const groups = await nextConfig.headers!();
-    const group = groups.find((g) => g.source === "/(.*)");
-    const enforcing = group!.headers.find(
-      (h) => h.key === "Content-Security-Policy"
+  afterEach(() => {
+    if (savedUrl === undefined) delete process.env.NEXT_PUBLIC_SUPABASE_URL;
+    else process.env.NEXT_PUBLIC_SUPABASE_URL = savedUrl;
+    if (savedKey === undefined)
+      delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    else process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = savedKey;
+  });
+
+  it("sets an enforcing nonce-based policy on the response", async () => {
+    const res = await proxy(new NextRequest("https://app.example.com/login"));
+    const csp = res.headers.get("content-security-policy");
+    expect(csp, "enforcing CSP header must be present").toBeTruthy();
+    // NODE_ENV is not "development" under vitest, so the production shape
+    // (nonce + strict-dynamic, no unsafe-inline/unsafe-eval in script-src)
+    // is what gets pinned here.
+    expect(csp).toMatch(/script-src 'self' 'nonce-[A-Za-z0-9+/=]+' 'strict-dynamic'/);
+    expect(csp).not.toContain("script-src 'self' 'unsafe-inline'");
+    expect(res.headers.get("content-security-policy-report-only")).toBeNull();
+  });
+
+  it("keeps violation reporting wired to the sink", async () => {
+    const res = await proxy(new NextRequest("https://app.example.com/login"));
+    const csp = res.headers.get("content-security-policy")!;
+    expect(csp).toContain("report-uri /api/csp-report");
+    expect(csp).toContain("report-to csp-endpoint");
+  });
+
+  it("mints a fresh nonce per request (no replayable allowlist entry)", async () => {
+    const first = await proxy(new NextRequest("https://app.example.com/login"));
+    const second = await proxy(
+      new NextRequest("https://app.example.com/login")
     );
-    expect(enforcing, "must not flip to enforcing in this change").toBeFalsy();
+    const nonceOf = (res: Response) =>
+      res.headers.get("content-security-policy")!.match(/'nonce-([^']+)'/)![1];
+    expect(nonceOf(first)).not.toBe(nonceOf(second));
+  });
+
+  it("forwards the nonce on the request headers so Next.js can stamp inline scripts", async () => {
+    const res = await proxy(new NextRequest("https://app.example.com/login"));
+    // NextResponse.next({ request }) surfaces forwarded request headers as
+    // x-middleware-request-* on the proxy response; without x-nonce there,
+    // the rendered document's bootstrap scripts carry no nonce and the
+    // enforcing policy blocks the app's own hydration.
+    const forwardedNonce = res.headers.get("x-middleware-request-x-nonce");
+    expect(forwardedNonce, "x-nonce must reach the render").toBeTruthy();
+    const csp = res.headers.get("content-security-policy")!;
+    expect(csp).toContain(`'nonce-${forwardedNonce}'`);
+  });
+
+  it("stamps the policy on redirect responses too", async () => {
+    const res = await proxy(
+      new NextRequest("https://app.example.com/dashboard")
+    );
+    expect(res.status).toBe(307);
+    expect(res.headers.get("content-security-policy")).toContain(
+      "'strict-dynamic'"
+    );
   });
 });
 
