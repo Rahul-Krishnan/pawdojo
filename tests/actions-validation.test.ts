@@ -99,12 +99,15 @@ function makeQuery(tableData: TableData | undefined) {
 function makeServerClient(config: {
   user: Row | null;
   tables?: Record<string, TableData>;
+  rpcs?: Record<string, { data?: unknown; error?: unknown }>;
 }) {
   return {
     auth: {
       getUser: async () => ({ data: { user: config.user }, error: null }),
     },
     from: (table: string) => makeQuery(config.tables?.[table]),
+    rpc: async (name: string) =>
+      config.rpcs?.[name] ?? { data: null, error: null },
   };
 }
 
@@ -467,10 +470,10 @@ describe("logSession validation/branching", () => {
     expect(runGamificationPipeline).not.toHaveBeenCalled();
   });
 
-  // Soft 2s rate-limit guard (log-session.ts:86-99): reads the most recent
-  // training_sessions.logged_at via .maybeSingle() and rejects a second log
-  // fired within 2s BEFORE any write. Validation passes; the guard is the
-  // only branch under test.
+  // Rate-limit guard (log-session.ts): delegates to the check_session_rate RPC
+  // (migration 012), which does the check-and-record atomically. logSession
+  // rejects BEFORE any write when the RPC returns false, and fails open when the
+  // RPC errors. Validation passes; the guard is the only branch under test.
   const rateLimitForm = { ...validForm, isRetake: true };
 
   function rateLimitServer() {
@@ -483,14 +486,11 @@ describe("logSession validation/branching", () => {
     });
   }
 
-  it("rejects a session logged within 2s of the previous one (rate limit)", async () => {
+  it("rejects a session when check_session_rate returns false", async () => {
     rateLimitServer();
-    // adminFake's training_sessions.maybeSingle returns a recent logged_at.
     adminFake.current = makeServerClient({
       user: USER,
-      tables: {
-        training_sessions: { single: { logged_at: new Date().toISOString() } },
-      },
+      rpcs: { check_session_rate: { data: false } },
     });
     expect(await logSession(rateLimitForm)).toEqual({
       error: "You're logging sessions too quickly. Please wait a moment.",
@@ -499,24 +499,42 @@ describe("logSession validation/branching", () => {
     expect(runGamificationPipeline).not.toHaveBeenCalled();
   });
 
-  it("proceeds past the 2s guard when the last session is well outside the window", async () => {
+  it("proceeds when check_session_rate returns true", async () => {
     rateLimitServer();
     runGamificationPipeline.mockResolvedValue({
       xpAwarded: 0,
       achievementsUnlocked: [],
       streakUpdated: false,
     });
-    // Last logged_at is an hour ago -> guard does not trip.
     adminFake.current = makeServerClient({
       user: USER,
+      rpcs: { check_session_rate: { data: true } },
       tables: {
-        training_sessions: {
-          single: { id: "sess-1", logged_at: new Date(Date.now() - 3_600_000).toISOString() },
-        },
+        training_sessions: { single: { id: "sess-1" } },
       },
     });
     const result = await logSession(rateLimitForm);
-    // It got past the guard: not the rate-limit error.
+    expect(result).not.toEqual({
+      error: "You're logging sessions too quickly. Please wait a moment.",
+    });
+    expect(runGamificationPipeline).toHaveBeenCalled();
+  });
+
+  it("fails open and proceeds when check_session_rate errors", async () => {
+    rateLimitServer();
+    runGamificationPipeline.mockResolvedValue({
+      xpAwarded: 0,
+      achievementsUnlocked: [],
+      streakUpdated: false,
+    });
+    adminFake.current = makeServerClient({
+      user: USER,
+      rpcs: { check_session_rate: { data: null, error: { message: "rpc down" } } },
+      tables: {
+        training_sessions: { single: { id: "sess-1" } },
+      },
+    });
+    const result = await logSession(rateLimitForm);
     expect(result).not.toEqual({
       error: "You're logging sessions too quickly. Please wait a moment.",
     });
