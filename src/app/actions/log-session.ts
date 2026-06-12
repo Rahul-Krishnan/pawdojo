@@ -79,23 +79,22 @@ export async function logSession(formData: {
 
   const admin = createAdminClient();
 
-  // Soft rate limit (L2): reject session logs fired faster than one per 2s.
-  // This guards against accidental double-submits and trivial scripted spam.
-  // It is a UX/abuse guard, not a hard security control; the authoritative
-  // daily XP cap is enforced atomically in award_session_xp.
-  const { data: recentSession } = await admin
-    .from("training_sessions")
-    .select("logged_at")
-    .eq("user_id", user.id)
-    .order("logged_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  // Rate limit (L2): at most one session log per RATE_LIMIT_MS per user.
+  // check_session_rate (migration 012) takes a per-user advisory lock and does
+  // the check-and-record atomically, so concurrent logs cannot both pass the
+  // way the old read-then-insert soft check could. This bounds row-flooding of
+  // training_sessions; the authoritative daily XP cap stays in award_session_xp.
+  // Fail open: a transient rate-limiter error must not block a legitimate log.
+  const RATE_LIMIT_MS = 2000;
+  const { data: rateAllowed, error: rateError } = await admin.rpc("check_session_rate", {
+    p_user_id: user.id,
+    p_min_interval_ms: RATE_LIMIT_MS,
+  });
 
-  if (recentSession?.logged_at) {
-    const sinceMs = Date.now() - new Date(recentSession.logged_at).getTime();
-    if (sinceMs < 2000) {
-      return { error: "You're logging sessions too quickly. Please wait a moment." };
-    }
+  if (rateError) {
+    console.error("check_session_rate failed:", rateError.message);
+  } else if (rateAllowed === false) {
+    return { error: "You're logging sessions too quickly. Please wait a moment." };
   }
 
   // Create training session (always, even on retake)
