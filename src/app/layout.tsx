@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Providers } from "./providers";
 import { ThemeInit } from "@/components/theme-init";
 import "./globals.css";
@@ -44,6 +45,7 @@ export default function RootLayout({
           <ThemeInit />
           <main id="main-content">{children}</main>
         </Providers>
+        <Analytics />
       </body>
     </html>
   );
